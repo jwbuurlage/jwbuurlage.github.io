@@ -6,10 +6,10 @@ description = "Personal page"
   name = "Jan-Willem Buurlage"
   title = "PhD Candidate"
   organization = "Centrum Wiskunde & Informatica (CWI)"
+  email = "j.buurlage <at> cwi.nl"
 
   [papers]
   item = "test"
-
 +++
 
 
@@ -17,8 +17,8 @@ description = "Personal page"
     <h1>Software</h1>
     <ul>
         <li><a href="http://www.github.com/jwbuurlage/Bulk">Bulk</a>. Modern interface for writing parallel programs in C++ in bulk-synchronous style. </li>
-        <li><a href="http://www.github.com/jwbuurlage/Tomos">Tomos</a>. A library for distributed tomographic reconstruction.</li>
         <li><a href="http://www.github.com/cicwi/RECAST3D">RECAST3D</a>. Real-time visualization tool for on-demand reconstruction of tomographic data. </li>
+        <li><a href="http://www.github.com/jwbuurlage/Tomos">Tomos</a>. A library for distributed tomographic reconstruction.</li>
         <li><a href="http://www.codu.in/ebsp">Epiphany BSP</a>. The Epiphany BSP library (EBSP) provides an implementation of the BSP model for the Epiphany coprocessor.
         </li>
         <li><a href="http://www.github.com/jwbuurlage/Zee">Zee</a>. Framework for partitioning and using sparse matrices.</li>
