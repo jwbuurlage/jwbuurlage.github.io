@@ -1,0 +1,41 @@
+.container-fluid {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 900px;
+}
+
+article p {
+    font-size: 18px;
+    line-height: 1.8em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+article pre {
+    padding: 20px;
+    font-size: 16px;
+}
+
+article h2 {
+    padding-top: 2em;
+}
+
+article h3 {
+    padding-top: 1.5em;
+}
+
+blockquote {
+    padding-left: 20px;
+    font-style: italic;
+    font-size: 20px;
+    color: grey;
+    font-family: serif;
+}
+
+article, main {
+    padding-bottom: 50px;
+}
+
+main h1 {
+    padding-top: 30px;
+}
