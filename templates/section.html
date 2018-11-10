@@ -1,19 +1,24 @@
 {% extends "index.html" %}
 
+{% block nav %}
+<li class="nav-item"><a class="navbar-brand nav-link" href="/">Home</a></li>
+<li class="nav-item"><a class="navbar-brand nav-link active" href="/blog/">Blog</a></li>
+{% endblock %}
+
 {% block content %}
 <main role="main">
 <div class ="container py-5" >
 <div class="row py-1">
-<h2>Posts</h2>
+<h1>Posts</h1>
 </div>
 {% for page in section.pages %}
 <div class="row py-2">
-    <h4>
+    <h3>
         <small class="text-muted">{{ page.date }}</small> <br />
     <a class='header-link' href="{{ page.permalink }}">
         {{ page.title }}
     </a>
-    </h4>
+    </h3>
 </div>
 {% endfor %}
 </div>
