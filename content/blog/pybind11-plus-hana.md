@@ -193,3 +193,31 @@ hana::for_each(hana::cartesian_product(hana::make_tuple(ds, ts)),
       py::class_<Tensor<d, T>>(m, name.c_str());
     });
 ```
+
+### Adding named arguments to `init` functions
+
+We can also add named arguments to the constructors. For this, we use
+`hana::keys` to access the field names. The `pybind11` syntax for adding named arguments is:
+
+```cpp
+py::class_<Class>(m, "class")
+   .def(py::init<T, S, ...>, py::arg("arg1"), py::arg("arg2"), ...);
+```
+
+We therefore need to wrap our field names using `py::arg`, and then apply them
+as additional arguments to the `def` method. This can be done as follows:
+
+```cpp
+auto names = hana::transform(
+    hana::keys(P{}), [](auto key) { return py::arg(key.c_str()); });
+auto indirection = [&](auto... args) {
+    auto pack = py::class_<P, tomop::Packet>(m, x[0_c].c_str())
+                    .def(Init(), args...);
+    return pack;
+};
+auto pack = hana::unpack(names, indirection);
+```
+
+## Example code
+
+Example source code can be found [on GitHub](https://github.com/jwbuurlage/pybind11_plus_hana).

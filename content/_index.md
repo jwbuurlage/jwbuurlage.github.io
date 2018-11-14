@@ -16,8 +16,12 @@ description = "Personal page"
 <section id="software">
     <h1>Software</h1>
     <ul>
-        <li><a href="http://www.github.com/jwbuurlage/Bulk">Bulk</a>. Modern interface for writing parallel programs in C++ in bulk-synchronous style. </li>
-        <li><a href="http://www.github.com/cicwi/RECAST3D">RECAST3D</a>. Real-time visualization tool for on-demand reconstruction of tomographic data. </li>
+        <li><a href="https://jwbuurlage.github.io/Bulk">Bulk</a>. Modern interface for writing parallel programs in C++ in bulk-synchronous style. </li>
+        <li><em>Real-time reconstructions for tomography:</em><ul>
+        <li><a href="https://cicwi.github.io/RECAST3D">RECAST3D</a>. Real-time visualization tool for on-demand reconstruction of tomographic data. </li>
+        <li><a href="https://cicwi.github.io/TomoPackets">TomoPackets</a>. A library for real-time tomography pipelines based on ZeroMQ. </li>
+        <li><a href="https://cicwi.github.io/SliceRecon">SliceRecon</a>. A library for on-demand tomographic reconstructions of arbitrary slices.. </li>
+        </ul></li>
         <li><a href="http://www.github.com/jwbuurlage/Tomos">Tomos</a>. A library for distributed tomographic reconstruction.</li>
         <li><a href="http://www.codu.in/ebsp">Epiphany BSP</a>. The Epiphany BSP library (EBSP) provides an implementation of the BSP model for the Epiphany coprocessor.
         </li>
