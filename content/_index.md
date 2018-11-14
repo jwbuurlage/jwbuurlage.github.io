@@ -60,6 +60,8 @@ description = "Personal page"
 <section id="talks">
   <h1>Talks</h1>
     <ul>
+      <li><em>2018-10-31</em>: <a href="2018-10-31-guest-lecture-parco.pdf">Slides on SpMV, Tomography and Bulk</a>. <br>
+          Guest lecture in the course <em>Parallel algorithms</em>. UU, Utrecht, The Netherlands.</li>
       <li><em>2018-08-29</em>: <a href="2018-08-29-euro-par-bulk.pdf">Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs</a>. <br>
           Euro-Par 2018. Turin, Italy.</li>
       <li><em>2018-06-08</em>: <a href="2018-06-08-siam-is-presentation.pdf">Quasi-3D  iterative reconstruction</a>. <br>
