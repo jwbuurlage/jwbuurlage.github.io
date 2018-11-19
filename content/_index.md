@@ -64,7 +64,6 @@ description = "Personal page"
 #### Active projects
 - [Bulk](https://jwbuurlage.github.io/Bulk). Modern interface for writing
   parallel programs in C++ in bulk-synchronous style.
-
 - _Real-time reconstructions for tomography_:
   - [RECAST3D](https://cicwi.github.io/RECAST3D). Real-time visualization tool
     for on-demand reconstruction of tomographic data.
@@ -72,7 +71,6 @@ description = "Personal page"
     tomography pipelines based on ZeroMQ.
   - [SliceRecon](https://cicwi.github.io/). A library for on-demand tomographic
     reconstructions of arbitrary slices.
-
 - [Tomos](http://www.github.com/jwbuurlage/Tomos). A library for distributed tomographic reconstruction.
 
 #### Archive
