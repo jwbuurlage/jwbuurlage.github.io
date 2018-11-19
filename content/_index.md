@@ -59,7 +59,7 @@ description = "Personal page"
 
 # Software
 
-<img src="https://raw.githubusercontent.com/cicwi/RECAST3D/develop/docs/preview_usage.gif" class="float-right" />
+<img src="https://cicwi.github.io/RECAST3D/images/rotate_slice.gif" class="float-right" width="400px" />
 
 #### Active projects
 - [Bulk](https://jwbuurlage.github.io/Bulk). Modern interface for writing
@@ -74,7 +74,7 @@ description = "Personal page"
 - [Tomos](http://www.github.com/jwbuurlage/Tomos). A library for distributed tomographic reconstruction.
 
 #### Archive
-- [Epiphany BSP](https://jwbuurlage.github.io/epiphany-bsp/). An BSPlib implementation for the Epiphany coprocessor.
+- [Epiphany BSP](https://jwbuurlage.github.io/epiphany-bsp/). A BSPlib implementation for the Epiphany coprocessor.
 - [Zee](http://www.github.com/jwbuurlage/Zee). Framework for partitioning and using sparse matrices.
 
 # Teaching
