@@ -34,7 +34,7 @@ description = "Personal page"
 # Talks
 
 #### 2018
-- _2018-10-31_: [Slides on SpMV, Tomography and Bulk](2018-10-31-guest-lecture-parco.pdf).
+- _2018-10-31_: [SpMV, Tomography and Bulk](2018-10-31-guest-lecture-parco.pdf).
       Guest lecture in the course _Parallel algorithms_. UU, Utrecht, The Netherlands.
 - _2018-08-29_: [Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs](2018-08-29-euro-par-bulk.pdf).
       Euro-Par 2018. Turin, Italy.
