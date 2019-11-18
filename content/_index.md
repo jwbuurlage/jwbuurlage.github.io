@@ -14,10 +14,21 @@ description = "Personal page"
 
 # Articles
 
-#### 2018
+#### 2020
+
+- <em>A projection-based partitioning method for distributed tomographic reconstruction</em>.
+        Jan-Willem Buurlage, Christian Schleputz et al. SIAM Conference on Parallel Processing for Scientific Computing (2020, Accepted for publication)
+
+#### 2019
+
+- <em>Real-time reconstruction and visualisation towards dynamic feedback control during time-resolved tomography experiments at TOMCAT</em>.
+        Jan-Willem Buurlage, Christian Schleputz et al. Scientific Reports (2019, Accepted for publication)
 
 - [A geometric partitioning method for distributed tomographic reconstruction.](https://doi.org/10.1016/j.parco.2018.12.007)
-        Jan-Willem Buurlage, Rob Bisseling, Joost Batenburg. Parallel Computing (2018)
+        Jan-Willem Buurlage, Rob Bisseling, Joost Batenburg. Parallel Computing (2019)
+
+#### 2018
+
 - [Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs.](https://doi.org/10.1007/978-3-319-96983-1_37)
         Jan-Willem Buurlage, Tom Bannink, Rob Bisseling. Euro-Par 2018: Parallel Processing (2018)
 - [Real-time quasi-3D tomographic reconstruction.](http://iopscience.iop.org/article/10.1088/1361-6501/aab754/meta)
@@ -29,11 +40,14 @@ description = "Personal page"
 - [Bulk-synchronous pseudo-streaming algorithms for many-core accelerators](https://arxiv.org/abs/1608.07200). Jan-Willem Buurlage, Tom Bannink, Abe Wits. _Preprint_ (2017).
 
 #### 2016
-- [Self-Improving Sparse Matrix Partitioning and Bulk-Synchronous Pseudostreaming.](https://scholar.google.nl/scholar?cluster=18383112231106166666&hl=nl&as_sdt=0,5&sciodt=0,5). Jan-Willem Buurlage. Master's thesis, Utrecht University (2016).
+- [Self-Improving Sparse Matrix Partitioning and Bulk-Synchronous Pseudostreaming](https://scholar.google.nl/scholar?cluster=18383112231106166666&hl=nl&as_sdt=0,5&sciodt=0,5). Jan-Willem Buurlage. Master's thesis, Utrecht University (2016).
 
 # Talks
 
 #### 2019
+
+- 2019-07-12: Partitioning strategies for large-scale tomographic inversion. _Applied Inverse Problems_. Grenoble, France.
+
 - _2019-01-22_: [Data partitioning strategies for 3D tomographic imaging](20190122-this-weeks-discoveries.pdf).
       _This week's discoveries_. Leiden University, The Netherlands.
  
