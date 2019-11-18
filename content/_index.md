@@ -16,13 +16,13 @@ description = "Personal page"
 
 #### 2018
 
-- _A geometric partitioning method for distributed tomographic reconstruction_.
-        Jan-Willem Buurlage, Rob Bisseling, Joost Batenburg (Submitted)
+- [A geometric partitioning method for distributed tomographic reconstruction.](https://doi.org/10.1016/j.parco.2018.12.007)
+        Jan-Willem Buurlage, Rob Bisseling, Joost Batenburg. Parallel Computing (2018)
 - [Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs.](https://doi.org/10.1007/978-3-319-96983-1_37)
         Jan-Willem Buurlage, Tom Bannink, Rob Bisseling. Euro-Par 2018: Parallel Processing (2018)
 - [Real-time quasi-3D tomographic reconstruction.](http://iopscience.iop.org/article/10.1088/1361-6501/aab754/meta)
         Jan-Willem Buurlage, Holger Kohr, Willem Jan Palenstijn, Joost Batenburg.
-        Measurement Science and Technology (2018).
+        Measurement Science and Technology (2018)
 
 #### 2017
 
@@ -33,6 +33,10 @@ description = "Personal page"
 
 # Talks
 
+#### 2019
+- _2019-01-22_: [Data partitioning strategies for 3D tomographic imaging](20190122-this-weeks-discoveries.pdf).
+      _This week's discoveries_. Leiden University, The Netherlands.
+ 
 #### 2018
 - _2018-10-31_: [SpMV, Tomography and Bulk](2018-10-31-guest-lecture-parco.pdf).
       Guest lecture in the course _Parallel algorithms_. UU, Utrecht, The Netherlands.
@@ -78,6 +82,7 @@ description = "Personal page"
 - [Zee](http://www.github.com/jwbuurlage/Zee). Framework for partitioning and using sparse matrices.
 
 # Teaching
+- [Laboratory Class Scientific Computing 2019](/lcsc2019/) (Utrecht University).
 - [Laboratory Class Scientific Computing 2018](https://homepages.cwi.nl/~buurlage/lcsc/) (Utrecht University).
 - [Lecture Notes for Category Theory seminar](https://github.com/jwbuurlage/category-theory-programmers). Last updated: _2017-08-01_.
 
