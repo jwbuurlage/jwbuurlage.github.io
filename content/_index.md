@@ -87,16 +87,16 @@ JWB. Master's thesis, Utrecht University (2016).
 #### Active projects
 - [Bulk](https://jwbuurlage.github.io/Bulk). Modern interface for writing
   parallel programs in C++ in bulk-synchronous style.
-- [RECAST3D](https://cicwi.github.io/RECAST3D). Real-time visualization tool
-    for on-demand reconstruction of tomographic data.
-- [TPT](http://www.github.com/jwbuurlage/TPT). A library for distributed tomographic reconstruction.
 
 #### Archive
 - [Epiphany BSP](https://jwbuurlage.github.io/epiphany-bsp/). A BSPlib implementation for the Epiphany coprocessor.
 - [Zee](http://www.github.com/jwbuurlage/Zee). Framework for partitioning and using sparse matrices.
+- [RECAST3D](https://cicwi.github.io/RECAST3D). Real-time visualization tool
+    for on-demand reconstruction of tomographic data.
+- [TPT](http://www.github.com/jwbuurlage/TPT). A library for distributed tomographic reconstruction.
 
 # Teaching
-- [Laboratory Class Scientific Computing 2019](/lcsc2019/) (Utrecht University).
-- [Laboratory Class Scientific Computing 2018](https://homepages.cwi.nl/~buurlage/lcsc/) (Utrecht University).
+- Laboratory Class Scientific Computing 2019 (Utrecht University).
+- Laboratory Class Scientific Computing 2018 (Utrecht University).
 - [Lecture Notes for Category Theory seminar](https://github.com/jwbuurlage/category-theory-programmers). Last updated: _2017-08-01_.
 
