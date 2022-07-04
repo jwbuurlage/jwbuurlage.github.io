@@ -1,22 +1,21 @@
 <!DOCTYPE html
 <html lang="en">
+
 <head>
 <title>Personal webpage and blog of Jan-Willem Buurlage</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <link rel="stylesheet" href="/custom.css">
 </head>
 
 <body>
     <header>
-        <div class="navbar navbar-dark bg-dark shadow-sm">
-            <div class="container d-flex justify-content-between">
-                <ul class="nav nav-pills">
+        <div>
+            <div>
+                <ul>
                     {% block nav %}
-                    <li class="nav-item"><a class="navbar-brand nav-link active" href="/">Home</a></li>
-                    <li class="nav-item"><a class="navbar-brand nav-link" href="/blog/">Blog</a></li>
-                    {% endblock %}
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/blog/">Blog</a></li>
+                    <li><a href="/academic/">Academic</a></li>
+                    {% endblock nav %}
                 </ul>
             </div>
         </div>
@@ -25,44 +24,15 @@
     </header>
 
     <div class="container">
-
     {% block content %}
-    <div class="row py-5">
-    <div class="col-sm">
-
-        <h1>About</h1>
-        <p>My research focuses on parallel algorithms and distributed-memory methods in inverse problems. I am part of the computational imaging group at CWI, where I work on various topics in real-time 3D tomography.</p>
-    </div>
-    <div class="col-sm-6">
-        <div class="card">
-            <div class="card-body">
-                <img width="100px" class="rounded float-right mr-3" src="/jw.jpg" />
-                <h4 class="card-title">{{ section.extra.name }}</h4>
-                <h5 class="card-subtitle mb-2 text-muted">{{ section.extra.title }}</h5>
-                <h5 class="card-subtitle mb-2 text-muted">{{ section.extra.organization }}</h5>
-                <h5 class="card-subtitle mb-2 text-muted">{{ section.extra.email }}</h5>
-            </div>
-            <div class="card-header">
-            <ul class="nav nav-pills card-header-pills">
-                <li class="nav-item"><a class="nav-link" href="https://github.com/jwbuurlage">GitHub</a></li>
-                <li class="nav-item"><a class="nav-link" href="https://www.twitter.com/jwbuurlage">Twitter</a></li>
-                <li class="nav-item"><a class="nav-link" href="https://www.linkedin.com/in/jwbuurlage">LinkedIn</a></li>
-            </ul>
-            </div>
-
-            </div>
-        </div>
-
-    </div>
 
     <main>
     {{ section.content | safe }}
     </main>
-    {% endblock %}
+
+    {% endblock content %}
+    </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
 </html>
