@@ -20,10 +20,10 @@ I was a PhD student at [CWI](https://www.cwi.nl) between 2016 and 2020. I worked
 
 - [Bulk](https://jwbuurlage.github.io/Bulk). Modern interface for writing
   parallel programs in C++ in bulk-synchronous style.
-- (Past) [TPT](http://www.github.com/jwbuurlage/TPT). A library for distributed tomographic reconstruction.
-- (Past) [RECAST3D](https://cicwi.github.io/RECAST3D). Real-time visualization tool for on-demand reconstruction of tomographic data.
-- (Past) [Epiphany BSP](https://jwbuurlage.github.io/epiphany-bsp/). A BSPlib implementation for the Epiphany coprocessor.
-- (Past) [Zee](http://www.github.com/jwbuurlage/Zee). Framework for partitioning and using sparse matrices.
+- [TPT](http://www.github.com/jwbuurlage/TPT). A library for distributed tomographic reconstruction.
+- [RECAST3D](https://cicwi.github.io/RECAST3D). Real-time visualization tool for on-demand reconstruction of tomographic data.
+- [Epiphany BSP](https://jwbuurlage.github.io/epiphany-bsp/). A BSPlib implementation for the Epiphany coprocessor.
+- [Zee](http://www.github.com/jwbuurlage/Zee). Framework for partitioning and using sparse matrices.
 
 ## Teaching
 - Laboratory Class Scientific Computing 2019 (Utrecht University).
