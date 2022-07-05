@@ -1,26 +1,19 @@
 <!DOCTYPE html
 <html lang="en">
-
 <head>
 <title>Personal webpage and blog of Jan-Willem Buurlage</title>
+<meta charset="UTF-8">
 <link rel="stylesheet" href="/custom.css">
 </head>
-
 <body>
     <header>
-        <div>
-            <div>
-                <ul>
-                    {% block nav %}
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/blog/">Blog</a></li>
-                    <li><a href="/academic/">Academic</a></li>
-                    {% endblock nav %}
-                </ul>
-            </div>
-        </div>
-    </div>
-    </div>
+    <nav>
+      {% block nav %}
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/academic/">Academic</a>
+      {% endblock nav %}
+    </nav>
     </header>
 
     <div class="container">

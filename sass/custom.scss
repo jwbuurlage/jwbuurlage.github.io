@@ -172,24 +172,3 @@ header nav {
 header a + a {
     margin-left: 1rem;
 }
-
-.posts {
-    margin: 0;
-    list-style: none;
-}
-.posts .post a {
-    display: flex;
-    padding: 0.5em 0;
-    color: black;
-}
-.posts .post a:hover, .posts .post a:focus, .posts .post a:active {
-    text-decoration: none;
-    background: rgba(200, 200, 200, 0.2);
-}
-.posts .post date {
-    font-family: monospace, monospace;
-    font-size: 0.8rem;
-    vertical-align: middle;
-    padding-right: 2rem;
-    color: grey;
-}
