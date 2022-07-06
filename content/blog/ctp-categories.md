@@ -107,7 +107,7 @@ From now on we will sometimes omit the identity arrows when drawing categories.
     A _monoid_ \\( (M, \cdot, e) \\) consists of:
     - a set \\( M \\)
     - an associative binary operation \\( (\cdot): M \times M \to M \\)
-    - a unit element w.r.t \\( (\cdot) \\), i.e. \\( \forall_m~e \cdot m = m \\)
+    - a unit element w.r.t. \\( (\cdot) \\), i.e. \\( \forall_m~e \cdot m = m \\)
 
     For those familiar with group theory, it is a group structure without requirement of inverse elements. It is also called a _semi-group with unit_)
 
@@ -159,7 +159,7 @@ $$T(\text{id}\_a) = \text{id}_{Ta},~T(g \circ f) = Tg \circ Tf.$$
 
 A functor is a very powerful concept, since it allows you to translate between different branches of mathematics! They also play an important role in functional programming where among many other things, they are useful for defining _container types_ or more generally _type constructors_.
 
-Functors can be composed, and this allows one to define a category of categories\footnote{Actually, there are some technicalities to be worked out and the resulting category consists of 'small categories' only.} **Cat**, where the arrows are functors.
+Functors can be composed, and this allows one to define a category of categories **Cat**, where the arrows are functors.
 
 ### Examples of functors
 
@@ -247,10 +247,10 @@ In set, **epi** and **mono** imply **iso**. This however does not hold for all c
 
 ### Special functors
 
-Lastly, we turn our attention to special kinds of functors. For this we first introduce the notion of a _hom-set_ of \\( a \\) and \\( b \\), the set\footnote{Here we assume that this collection is a set, or that the category is so-called _locally small_} of all arrows from \\( a \\) to \\( b \\):
+Lastly, we turn our attention to special kinds of functors. For this we first introduce the notion of a _hom-set_ of \\( a \\) and \\( b \\), the set of all arrows from \\( a \\) to \\( b \\):
 $$\text{Hom}_C(a, b) = \{ f \in C~|~f: a \to b \}.$$
 
-**Definition**. A functor \\( F: C \to D \\) is \textbf{full} if for all pairs \\( a, b \in C \\) the induced function:
+**Definition**. A functor \\( F: C \to D \\) is full if for all pairs \\( a, b \in C \\) the induced function:
 \begin{align*}
 F:~\text{Hom}_C(a, b) &\to \text{Hom}_D(Fa, Fb),\\
    f &\mapsto Ff
