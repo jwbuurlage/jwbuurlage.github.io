@@ -28,11 +28,11 @@ The composition operation and identity arrow should satisfy the following laws:
 1. _Composition_: If \\( f: a \to b \\) and \\( g: b \to c \\) then \\( g \circ f: a \to c \\).
 
     ```
-        f      g
-     a ───► b ───► c
-     │             ▲
-     └─────────────┘
-           g.f
+       f      g
+    a ───► b ───► c
+    │             ▲
+    └─────────────┘
+          g.f
     ```
 
 1. _Composition with identity arrows_:  If \\( f: x \to a \\) and \\( g: a \to x \\) where \\( x \\) is arbitrary, then:
@@ -40,10 +40,10 @@ The composition operation and identity arrow should satisfy the following laws:
 
 
     ```
-        id
-       ┌───┐
-       └─► a ───► x
-              g
+     id
+    ┌───┐
+    └─► a ───► x
+           g
     ```
 
 1. _Associativity_: If \\( f: a \to b \\), \\( g: b \to c \\) and \\( h: c \to d \\) then:
@@ -52,13 +52,13 @@ The composition operation and identity arrow should satisfy the following laws:
     
 
     ```
-           g.f
-     ┌─────────────┐
-     │  f      g   ▼  h
-     a ───► b ───► c ───► d
-            │             ▲
-            └─────────────┘
-                  h.g
+          g.f
+    ┌─────────────┐
+    │  f      g   ▼  h
+    a ───► b ───► c ───► d
+           │             ▲
+           └─────────────┘
+                 h.g
     ```
     
     Saying a diagram commutes means that for all pairs of vertices \\( a' \\) and \\( b' \\) all paths from between them are equivalent (i.e. correspond to the same arrow of the category).
@@ -80,23 +80,22 @@ A number of simple examples of categories:
 - **1**, the category with a single element and (identity) arrow:
 
     ```
-        id
-       ┌───┐
-       └─► a 
-             
+     id
+    ┌───┐
+    └─► a 
     ```
 - **2**, the category with a two elements and a single arrow between these elements
   ```
-      id          id
-     ┌───┐      ┌───┐
-     └─► a ───► b ◄─┘
+   id          id
+  ┌───┐      ┌───┐
+  └─► a ───► b ◄─┘
   ```
 - \\( \rightrightarrows \\): the category with two elements and two parallel arrows between these elements:
 
   ```
-      id          id
-     ┌───┐ ───► ┌───┐
-     └─► a ───► b ◄─┘
+   id          id
+  ┌───┐ ───► ┌───┐
+  └─► a ───► b ◄─┘
   ```
 
 From now on we will sometimes omit the identity arrows when drawing categories.
@@ -121,10 +120,10 @@ From now on we will sometimes omit the identity arrows when drawing categories.
 - We can also consider natural numbers \\( \mathbb{N}_{> 0} \\), with arrows going from each number to its multiples.
 
   ```
-   ┌───┬───┬───┬───┬───┐
-   1   2   3   4   5   6
-       └───┼───┴──────┘│
-           └───────────┘
+  ┌───┬───┬───┬───┬───┐
+  1   2   3   4   5   6
+      └───┼───┴──────┘│
+          └───────────┘
   ```
 
 - A partially ordered set (poset): a binary relation \\( \leq \\) over a set \\( S \\) s.t. for \\( a,b,c \in S \\):

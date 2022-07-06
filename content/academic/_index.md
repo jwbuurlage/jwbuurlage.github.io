@@ -16,7 +16,7 @@ I was a PhD student at [CWI](https://www.cwi.nl) between 2016 and 2020. I worked
 
 ## Software
 
-<img src="https://cicwi.github.io/RECAST3D/images/rotate_slice.gif" class="float-right" width="400px" />
+<img src="https://cicwi.github.io/RECAST3D/images/rotate_slice.gif" width="500px" />
 
 - [Bulk](https://jwbuurlage.github.io/Bulk). Modern interface for writing
   parallel programs in C++ in bulk-synchronous style.
