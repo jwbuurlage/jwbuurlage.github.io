@@ -224,14 +224,14 @@ There are a number of special kind of arrows:
 **Definition**. An arrow \\( f: a \to b \in C \\) is a **monomorphism** (or simply mono), if for all objects \\( x \\) and all arrows \\( g, h: x \to a \\) and \\( g \neq h \\) we have:
 $$f \circ g \neq f \circ h.$$
 
-To put this into perspective, we show that in the category \textbf{Set} monomorphisms correspond to injective functions;
+To put this into perspective, we show that in the category **Set** monomorphisms correspond to injective functions;
 
 
 **Theorem.** In \\( \textbf{Set} \\) a map \\( f \\) is mono if and only if it is an injection.
 
 _proof_. Let \\( f: A \to B \\). Suppose \\( f \\) is injective, and let \\( g, h: X \to A \\). If \\( g \neq h \\), then \\( g(x) \neq h(x) \\) for some \\( x \\). But since \\( f \\) is injective, we have \\( f(g(x)) \neq f(h(x)) \\), and hence \\( f \circ g \neq f \circ h \\), thus \\( f \\) is mono.
 
-For the contrary, suppose \\( f \\) is mono. Let \\( \{ * \} \\) be the set with a single element. Then for \\( x \in A \\) we have an arrow \\( \{ * \} \to A \\) corresponding to the constant function \\( \tilde{x}(\*) = x \\), then \\( f \circ \tilde{x}(\*) = f(x) \\). Let \\( x \neq y \\). Since \\( f \\) is mono, \\( (f \circ \tilde{x})(\*) \neq (f \circ \tilde{y})(\*) \\), and hence \\( f(x) \neq f(y) \\), thus \\( f \\) is an injection.
+For the contrary, suppose \\( f \\) is mono. Let \\( \\{ * \\} \\) be the set with a single element. Then for \\( x \in A \\) we have an arrow \\( \\{ * \\} \to A \\) corresponding to the constant function \\( \tilde{x}(\*) = x \\), then \\( f \circ \tilde{x}(\*) = f(x) \\). Let \\( x \neq y \\). Since \\( f \\) is mono, \\( (f \circ \tilde{x})(\*) \neq (f \circ \tilde{y})(\*) \\), and hence \\( f(x) \neq f(y) \\), thus \\( f \\) is an injection.
 
 There is also an generalization of the notion of _surjections_.
 
@@ -240,7 +240,7 @@ $$g \circ f = h \circ f \implies g = h.$$
 
 Finally, we introduce the notion of an 'invertible arrow'.
 
-**Definition**. An arrow \\( f: a \to b \in C \\) is an \textbf{isomorphism} if there exists an arrow \\( g: b \to a \\) so that:
+**Definition**. An arrow \\( f: a \to b \in C \\) is an **isomorphism** if there exists an arrow \\( g: b \to a \\) so that:
 $$g \circ f = \text{id}_a~\text{ and }~f \circ g = \text{id}_b.$$
 
 In set, **epi** and **mono** imply **iso**. This however does not hold for all categories!
@@ -248,7 +248,7 @@ In set, **epi** and **mono** imply **iso**. This however does not hold for all c
 ### Special functors
 
 Lastly, we turn our attention to special kinds of functors. For this we first introduce the notion of a _hom-set_ of \\( a \\) and \\( b \\), the set of all arrows from \\( a \\) to \\( b \\):
-$$\text{Hom}_C(a, b) = \{ f \in C~|~f: a \to b \}.$$
+$$\text{Hom}_C(a, b) = \\{ f \in C~|~f: a \to b \\}.$$
 
 **Definition**. A functor \\( F: C \to D \\) is full if for all pairs \\( a, b \in C \\) the induced function:
 \begin{align*}
@@ -281,8 +281,8 @@ Since \\( g \neq h \\) and \\( F \\) is faithful, we have \\( Fg \neq Fh \\). Th
 
 ## Natural transformations
 
-**Definition.** A \textbf{natural transformation} \\( \mu \\) between two functors \\( F, G: C \to D \\) is a family of morphisms:
-$$\mu = \{ \mu_a: Fa \to Ga~|~a \in C \},$$
+**Definition.** A **natural transformation** \\( \mu \\) between two functors \\( F, G: C \to D \\) is a family of morphisms:
+$$\mu = \\{ \mu_a: Fa \to Ga~|~a \in C \\},$$
 indexed by objects in \\( C \\), so that for all morphisms \\( f: a \to b \\) the diagram
 
 ```
