@@ -6,7 +6,7 @@ draft = false
 author = "Jan-Willem Buurlage"
 +++
 
-_In 2018, I hosted a seminar on functional programming with a focus on category theory. In this blog post series I revisit the notes I wrote back then, aiming to simplify where possible, and to extend and fix where needed._
+{{ ctptoc() }}
 
 ## Preface
 
