@@ -8,99 +8,86 @@ author = "Jan-Willem Buurlage"
 
 {{ ctptoc() }}
 
+## Sets and types
+
 To establish a link between functional programming and category theory, we need to find a category that is applicable. Observe that a _type_ in a programming language, corresponds to a _set_ in mathematics. Indeed, the type `int` in C based languages, corresponds to some finite set of numbers, the type `char` to a set of letters like `'a'`, `'z'` and `'$'`, and the type `bool` is a set of two elements (`true` and `false`). This category, the category of types, turns out to be a very fruitful way to look at programming.
 
-Why do we want to look at types? Programming safety and correctness. In this part we will hopefully give an idea of how category theory applies to programming, but we will not go into to much detail yet as this is saved for later parts.
+In this post we will hopefully give an idea of how category theory applies to programming, but we will not go into to much detail yet as this is saved for later post.
 
-We will take as our model for the category of Haskell types (**Hask**) the category **Set**. Recall that the elements of **Set** are sets, and the arrows correspond to maps. There is a major issue to address here: Mathematical maps and functions in a computer program are not identical (bottom value $\perp$). We may come back to this, but for now we consider **Set** and **Hask** as the same category.
+We will take as our model for the category of types the category **Set**. Recall that the elements of **Set** are sets, and the arrows correspond to maps. There is a major issue to address here. Mathematical maps and functions in a computer program are not identical, for example we are missing the bottom value \\( \perp \\), which for example indicates a program crash. 
 
-In Haskell, we can express that an object has a certain type:
+As we will need a language with higher-kinded types later on, we will use the Scala programming language for the examples here.
 
-```haskell
-    a :: Integer
+We can express that an object has a certain type:
+
+```scala
+a: Int
 ```
 
-In C++ we would write:
+To define a function \\( f: A \to B \\) from type \\( A \\) to type \\( B \\) in Haskell:
 
-```cpp
-    int a;
-```
-
-To define a function $f: A \to B$ from type $A$ to type $B$ in Haskell:
-
-```haskell
-    f :: A -> B
+```scala
+f: A => B
 ```
 
 To compose:
 
-```haskell
-    g :: B -> C
-    h = g . f
+```scala
+g: B => C
+h = g compose f
 ```
 
-This means that `h` is a function `h :: A -> C`! Note how easy it is to compose functions in Haskell. Compare how this would be in C++, if we were to take two polymorphic functions in C++ and compose them:
+This means that `h` is a function `h: A => C`. Note how easy it is to compose functions in Scala.
 
-```cpp
-    template <typename F, typename G>
-    auto operator*(G g, F f) {
-        return [&](auto x) { return g(f(x)); };
-    }
+We need some additional operations to truly turn it into a category. Scala has `identity` built in:
 
-
-    int main() {
-        auto f = [](int x) -> float { return ...; };
-        auto g = [](float y) -> int { return ...; };
-
-        std::cout << (g * f)(5) << "\n";
-    }
+```scala
+identity: Any -> Any
 ```
 
-We need some additional operations to truly turn it into a category. It is easy to define the identity arrow in Haskell (at once for all types):
+We can also define it ourselves as a generic lambda expression
 
-```haskell
-    id :: A -> A
-    id a = a
+```scala
+val id = [A] => (x: A) => x
+assert(id(3) == 3)
+assert(id("foo") == "foo")
 ```
 
-in fact, this is part of the core standard library of Haskell (the Prelude) that gets loaded by default. Ignoring reference types and e.g. `const` specifiers, we can write in C++:
+In mathematics all functions are *pure*: they will always give the same output for the same input. This is not always the case for computer programs. Using IO functions, returning the current date, using a global variable are all examples of impure operations that are common in programming. We will focus on `pure` functions here, and try to avoid any side effects.
 
-```cpp
-    template <typename T>
-    T id(T x) {
-        return x;
-    }
-```
-
-There is one issue we have glared over; in mathematics all functions are *pure*: they will always give the same output for the same input. This is not always the case for computer programs. Using IO functions, returning the current date, using a global variable are all examples of impure operations that are common in programming. In Haskell, *all functions are pure*, and this is a requirement that allows us to make the mapping to the category **Set**. The mechanism that allows Haskell programs to still do useful things is powered by *monads*, which we will discuss later.
-
-Although many of the things we will consider can apply to other languages (such as Python and C++), there is a strong reason why people often consider Haskell as an example in the context of category theory and programming; it originates in academia and therefore takes care to model the language more accurately. For example, since we take as our model the category **Set**, there should be a type that corresponds to the empty set $\emptyset$. In C / C++, the obvious candidate would be `void` for this set, but consider a function definition:
+We take as our model the category **Set**, so should be a type that corresponds to the empty set \\( \emptyset \\). In C / C++, the obvious candidate would be `void` for this set, but consider a function definition:
 ```cpp
 void f() { ... };
 ```
-This can be seen as a function from `void -> void`. We can call this function using `f()`, but what does it mean to call a function? We always invoke a function for an argument, so `void` actually corresponds to the set with a single element! Note that C functions that return void either do nothing useful (i.e. discard their arguments), or are impure. Indeed, even using a pointer argument to return a value indirectly modifies a 'global state'!  In Haskell, the type corresponding to the *singleton set* (and its single value) is denoted with `()`. Meaning that if we have a function:
-```haskell
-f :: () -> Int
+This can be seen as a function from `void -> void`. We can call this function using `f()`, but what does it mean to call a function? We always invoke a function for an argument, so `void` actually corresponds to the set with a single element! Note that C functions that return void either do nothing useful (i.e. discard their arguments), or are impure. Indeed, even using a pointer argument to return a value indirectly modifies a 'global state'.
+
+In Scala, the type corresponding to the *singleton set* is `()`and its single value is also denoted with `()`. Meaning that if we have a function:
+```scala
+val f = () => 3
 ```
-we can invoke it as `f()`! Instead, the type `Void` corresponds to the empty set, and there can never be a value of this type. There is even a (unique) polymorphic (in the return type!) function that takes `Void` added to the prelude:
-```haskell
-absurd :: Void -> a
+we can invoke it as `f ()`.
+
+Instead, the type `Nothing` corresponds to the empty set, and there can never be a value of this type. We can imagine the (unique) polymorphic (in the return type!) function that takes `Nothing`.
+```scala
+val absurd: [A] => Nothing => A = null
 ```
-You may be tempted to discard the type `Void` as something that is only used by academics to make the type system 'complete', but there are a number of legitimate uses for `Void`. An example is *Continuation passing style*, or CPS, where functions do not return a value, but pass control over to another function:
-```haskell
-type Continuation a = a -> Void
+Note that you can never call this function, as `Nothing` is uninhibited: there are no values that have that type.
+
+You may be tempted to discard the type `Nothing` as something that is only used by academics to make the type system 'complete', but there are a number of legitimate uses for `Nothing`. An example is *continuation passing style*, or CPS, where functions do not return a value, but pass control over to another function:
+```scala
+type Continuation[a] => a => Nothing
 ```
 In other words, a continuation is a function that *never returns*, which can be used to manipulate control flows (in a type-safe manner).
 
-Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In the category of types, they correspond to `Void` and `()` respectively.
+Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In the category of types `Nothing` is initial and `()` is terminal.
 
-To summarize this introduction, in the category of 'computer programs', types are objects, and *pure* functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this category.
+To summarize this introduction, in the category of 'computer programs', types are objects, and *pure* functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this (admittedly informally defined) category that we will call **Type**.
 
 ## Containers as functors
 
-When we consider functors in the category of types, the first question is 'to what category?'. Here, we will almost exclusively talk about functors from **Hask** to itself, i.e. _endofunctors_.
+When we consider functors in the category of types, the first question is 'to what category?'. Here, we will almost exclusively talk about functors from **Type** to itself. Functors from a category to itself are called _endofunctors_.
 
-Endofunctors in **Hask** map types to types, and functions to functions. There are many examples of functors in programming. Let us first consider the concept of _lists of objects_, i.e. arrays or vectors. In C++ a list would be written as:
+Endofunctors in **Type** map types to types, and functions to functions. There are many examples of functors in programming. Let us first consider the concept of _lists of objects_, i.e. arrays or vectors. In C++ a list would be written as:
 ```cpp
 std::vector<T> xs;
 ```
@@ -113,28 +100,33 @@ or in Python we would have;
 >>> a.dtype
 dtype('int64')
 ```
-Note here that the true type of the numpy array is hidden inside the object, meaning it's the responsiblity of the program to make sure that the types of operations match! The reason that we consider `numpy` arrays is that normal 'lists' in Python are actually _tuples_, which we will discuss when we talk about products and coproducts.
+Note that the true type of the `np.array` is hidden inside the object, meaning it's the responsiblity of the program to make sure that the types of operations match! (The reason that we consider NumPy arrays is that normal 'lists' in Python are actually _tuples_, which we will discuss when we talk about products and coproducts.)
 
-Let us consider the mathematical way of expressing this:
+Let us consider the mathematical way of expressing arrays of a certain type.
 
-\begin{example}
-Lists of some type are more generally called \textbf{words over some alphabet} (i.e. a set) $X$, and we denote the set of all finite words of elements\footnote{Also called the \emph{Kleene closure} of $X$} in $X$ as $X^*$. Elements in $X^*$ look like:
+### Kleen closures
+
+Lists of some fixed type are more generally called **words over some alphabet** (an _alphabet_ here is a set of letters) \\( X \\), and we denote the set of all finite words of elements in \\( X \\) as \\( X^* \\). This is also called the _Kleene closure_ of \\( X \\).
+
+Elements in \\( X^* \\) look like:
 $$(x_1, x_2, x_3)$$
 $$(x_1)$$
 $$()$$
-These are all examples of \emph{words} in $X$ (where the last example corresponds to the empty word). If we want to construct a \emph{word functor} $T$, then $T$ would then have the signature:
+These are all examples of _words_ in \\( X \\) (where the last example corresponds to the empty word). If we want to construct a _word functor_ \\( T \\), then \\( T \\) would then have the signature:
+
 \begin{align*}
-T&: X \to X^*\\
- &: (f: X \to Y) \mapsto (Tf: X^* \to Y^*)
+T&: X \to X^\* \\\\
+ &: (f: X \to Y) \mapsto (Tf: X^\* \to Y^\*)
 \end{align*}
-For this second option, we have an obvious candidate for the precise function. Let $f: X \to Y$ be some map, then $Tf$ maps a word in $X$ to a word in $Y$ in the following way:
+
+For this second option, we have an obvious candidate for the precise function. Let \\( f: X \to Y \\) be some map, then \\( Tf \\) maps a word in \\( X \\) to a word in \\( Y \\) in the following way:
 $$Tf(x_1, x_2, x_3, ... x_n) = (f(x_1), f(x_2), f(x_3), \ldots, f(x_n)).$$
-\label{exa:kleene-closure}
-\end{example}
 
 **Type classes and type constructors**
 
-We will express this idea in Haskell, but before we can do this we first have to consider type classes and -constructors. A _type constructor_ is a 'function' (on types, not an arrow) that creates a type out of a type. A _type constructor_ can have multiple _value constructors_, and these constructors can be differentiated between using something called _pattern matching_ which we will see later. As an example, consider `Bool`.
+We will express this idea in Scala, but before we can do this we first have to consider type classes and type constructors. A _type constructor_ is a 'function' that given a type, creates another type. A _type constructor_ can have multiple _value constructors_, and these constructors can be differentiated between using something called _pattern matching_ which we will see later.
+
+Let us defined our own `Boolean` type.
 ```haskell
 data Bool = True | False
 ```
@@ -156,7 +148,7 @@ class Functor F where
 ```
 This says that `F` is a functor, if there is a function `fmap` that takes a function `f :: a -> b` and maps it to a function `fmap f :: F a -> F b`. Note that we do not explicitly have to state that `F` sends types to types, because this can be induced from the fact that we use `F a` where the compiler expects a type.
 
-\subsection*{The List functor}
+## The List functor
 
 The _list functor_ in Haskell is denoted with `[]`, and a list of type `a` is denoted `[a]` (which is syntactic sugar, normally the type would be `[] a`).
 
@@ -179,7 +171,7 @@ As mentioned, `List` is implemented in the standard library as `[]`, and `Cons` 
 x = 1 : 2 : [] -- this results in `[1, 2] :: [Int]`!
 ```
 
-\subsection*{The Maybe functor}
+## The Maybe functor
 
 As a simpler example, consider a type that either has no value or it has a value corresponding to some type `a`. In Haskell, this is called `Maybe`, while in C++ this is called `std::optional`, in Python the same idea could be achieved using:
 ```python
@@ -213,7 +205,7 @@ head (x:xs) = Just x
 ```
 Here, we have a natural transformation between the `List` and the `Maybe` functor!
 
-\subsection*{Parametric polymorphism and ad-hoc polymorphism}
+## Parametric polymorphism and ad-hoc polymorphis
 
 In C++, a template does not have to be defined for all types, i.e. we can write:
 ```cpp
@@ -255,4 +247,4 @@ Let us revisit our `head :: [a] -> Maybe a` example, and consider the naturality
 ```haskell
 fmap f . head = head . fmap f
 ```
-Here, the fmap on the lhs corresonds to the `Maybe` functor, while on the rhs it corresponds to the `[]` functor. The lhs can b e read like this; take the first element of the list, then apply f on it. The rhs can be read as "apply the function f to the enitre list, then take the first element". The result is the same; the funtion f applied to the head of the list (if any). On the rhs we apply the function `f` for each element in the list, whereas on the lhs we only apply it to the head. Because of the constraint on polymorphic function, the compiler knows that the result is equal and can choose which one to use!
+Here, the fmap on the lhs corresonds to the `Maybe` functor, while on the rhs it corresponds to the `[]` functor. The lhs can b e read like this; take the first element of the list, then apply f on it. The rhs can be read as "apply the function f to the entire list, then take the first element". The result is the same; the funtion f applied to the head of the list (if any). On the rhs we apply the function `f` for each element in the list, whereas on the lhs we only apply it to the head. Because of the constraint on polymorphic function, the compiler knows that the result is equal and can choose which one to use!
