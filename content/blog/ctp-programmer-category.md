@@ -1,7 +1,7 @@
 +++
 title = "A category of types and functions"
 date = 2022-07-23
-draft = true
+draft = false
 [extra]
 author = "Jan-Willem Buurlage"
 +++
@@ -24,7 +24,7 @@ We can express that an object has a certain type:
 a: Int
 ```
 
-To define a function \\( f: A \to B \\) from type \\( A \\) to type \\( B \\) in Haskell:
+To define a function \\( f: A \to B \\) from type \\( A \\) to type \\( B \\) in Scala:
 
 ```scala
 f: A => B
