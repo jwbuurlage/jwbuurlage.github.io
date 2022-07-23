@@ -10,4 +10,3 @@
 > 1. Recursion and F-algebras
 > 1. Comonads
 > 1. Lenses and other optics
-

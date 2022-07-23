@@ -8,8 +8,6 @@ author = "Jan-Willem Buurlage"
 
 {{ ctptoc() }}
 
-# Products, coproducts and algebraic data types
-
 ## Duality and products of objects
 
 ### Products
@@ -45,7 +43,7 @@ and construct a concrete example with numbers:
 
 This seems to indicate that in 'some category related to numbers' (in fact, precisely the category of natural numbers with arrows to their multiples, that we gave as an example in [an ealier post](/blog/ctp-categories/)), the product would correspond to the gcd!
 
-**Example**. Let us consider the product of objects in \textbf{Set}. Consider two sets \\(A, B\\). We have a clear candidate for a product; the cartesian product \\(A \times B\\). Given any element (or _pair_) \\((a, b) \in A \times B\\), the projections \\(p_1, p_2\\) send it to \\(a\\) and \\(b\\) respectively. Is this indeed a product?
+**Example**. Let us consider the product of objects in **Set**. Consider two sets \\(A, B\\). We have a clear candidate for a product; the cartesian product \\(A \times B\\). Given any element (or _pair_) \\((a, b) \in A \times B\\), the projections \\(p_1, p_2\\) send it to \\(a\\) and \\(b\\) respectively. Is this indeed a product?
 
 Let \\(V\\) be any other set, with arrows (functions) \\(f\\) to \\(A\\) and \\(g\\) to \\(B\\). Can we construct a (unique) arrow \\(q\\) to \\(A \times B\\)?
 
@@ -60,7 +58,7 @@ A & & B
 
 Consider any element \\(v \in V\\). It gets mapped to \\(f(v) \in A\\), and \\(g(v) \in B\\). Let \\(q: v \mapsto (f(v), g(v))\\), then \\((p_1 \circ q)(v) = f(v)\\), and thus \\(p_1 \circ q = f\\). Similarly \\(p_2 \circ q = g\\).
 
-Indeed, we have constructed an arrow that makes the above diagram commute. It is also clear that this is the _only arrow_ that satisfies this, so we conclude that \\(A \times B\\) is the product of \\(A\\) and \\(B\\) in the category \textbf{Set}. Another example of a product of sets would be \\(B \times A\\), which is cannonically isomorphic to \\(A \times B\\) (the isomorphism corresponds to 'swapping' the elements, which is its own inverse).
+Indeed, we have constructed an arrow that makes the above diagram commute. It is also clear that this is the _only arrow_ that satisfies this, so we conclude that \\(A \times B\\) is the product of \\(A\\) and \\(B\\) in the category **Set**. Another example of a product of sets would be \\(B \times A\\), which is cannonically isomorphic to \\(A \times B\\) (the isomorphism corresponds to 'swapping' the elements, which is its own inverse).
 \end{example}
 
 For a completely different example, we consider the category corresponding to a poset.
@@ -135,7 +133,7 @@ A \arrow[uur, "f"] \arrow[ur, "i_1"'] & & B \arrow[uul, "g"']\arrow[ul, "i_2"]
 \end{tikzcd}
 \end{figure}
 
-Consider any element \\(a \in A\\). It gets mapped to \\(f(a) \in V\\), and to \\(i_1(a) = (a, 0)\\) in \\(A + B\\). Then we should set \\(q(a, 0) \equiv f(a)\\), and similarly we should set \\(q(b, 1) \equiv g(b)\\). This already defines \\(q\\) uniquely and completely, so we conclude that the disjoint union is indeed the coproduct in the category \textbf{Set}.
+Consider any element \\(a \in A\\). It gets mapped to \\(f(a) \in V\\), and to \\(i_1(a) = (a, 0)\\) in \\(A + B\\). Then we should set \\(q(a, 0) \equiv f(a)\\), and similarly we should set \\(q(b, 1) \equiv g(b)\\). This already defines \\(q\\) uniquely and completely, so we conclude that the disjoint union is indeed the coproduct in the category **Set**.
 \end{example}
 
 We note there that the coproduct (and product) of two objects, generalizes also to products of more than 2 objects (by simply adding more maps \\(i_1, i_2, i_3 \ldots\\)).
@@ -175,36 +173,47 @@ A sum type means choosing an alternative between types, while the product type i
 data Tree a = Leaf | Node (Tree a) a (Tree a)
 ```
 
-- Using the product and sum types, we can turn the type system into a semi-ring, where we define:
-    - \\(0\\) = `Void`
-    - \\(1\\) = `()`
-    - \\(a + b\\) = `Either a b = Left a | Right b`
-    - \\(a \times b\\) = `(a, b)`
+Using the product and sum types, we can turn the type system into a semi-ring, where we define:
 
-    Let us check that \\(0\\) really works as \\(0\\). What happens when we add `Void` to a type:
+- \\(0\\) = `Void`
+- \\(1\\) = `()`
+- \\(a + b\\) = `Either a b = Left a | Right b`
+- \\(a \times b\\) = `(a, b)`
+
+Let us check that \\(0\\) really works as \\(0\\). What happens when we add `Void` to a type:
+
 ```haskell
 Either a Void = Left a | Right Void
 ```
-    We can never get a value for void, so the only thing we can do is to construct `Either a Void` with a value of type `a`, which means:
-    \\(\\)a + 0 = a.\\(\\)
-    Similarly, if we have a product with `Void`, we can never instantiate a pair (because there is no value for `Void`), so the corresponding product type is again `Void`:
-    \\(\\)a \times 0 = 0.\\(\\)
-    Although this is all a bit of a stretch, this analogy has some interesting properties, and we can do some real algebra with our types and try to interpret the results. Consider again the list type:
+
+We can never get a value for void, so the only thing we can do is to construct `Either a Void` with a value of type `a`, which means:
+
+\\(a + 0 = a.\\)
+
+Similarly, if we have a product with `Void`, we can never instantiate a pair (because there is no value for `Void`), so the corresponding product type is again `Void`:
+
+\\(a \times 0 = 0.\\)
+
+Although this is all a bit of a stretch, this analogy has some interesting properties, and we can do some real algebra with our types and try to interpret the results. Consider again the list type:
+
 ```haskell
 List a = Empty | Cons a (List a)
 ```
-    In our 'semi-ring', writing \\(x\\) for `List a`, this would look like the expression:
-    \\(\\)x = 1 + a \times x\\(\\)
-    This is unsolvable, but we can try to iteratively substitute \\(x\\) into the right hand side:
-    \begin{align*}
-        x &= 1 + a \times (1 + a x)\\
-          &= 1 + a + a^2 x\\
-          &= 1 + a + a^2 (1 + a x)\\
-          &= 1 + a + a^2 + a^3 (1 + ax) \\
-          &= \ldots
-     \end{align*}
-     Which can be read as 'a list is either empty, or it has one element of type `a`, or it has two elements of type `a`, etc.
-     Although this is mostly an entertaining (and, depending on your view, an overly complicated) way of looking at types, a similar correspondence from types to logical operations forms the basis of the Curry-Howard isomorphism that connects type theory to logic in a very fundamental way.
+
+In our 'semi-ring', writing \\(x\\) for `List a`, this would look like the expression:
+\\(x = 1 + a \times x\\)
+This is unsolvable, but we can try to iteratively substitute \\(x\\) into the right hand side:
+
+\begin{align*}
+    x &= 1 + a \times (1 + a x)\\\\
+      &= 1 + a + a^2 x\\\\
+      &= 1 + a + a^2 (1 + a x)\\\\
+      &= 1 + a + a^2 + a^3 (1 + ax) \\\\
+      &= \ldots
+ \end{align*}
+
+ Which can be read as 'a list is either empty, or it has one element of type `a`, or it has two elements of type `a`, etc.
+ Although this is mostly an entertaining (and, depending on your view, an overly complicated) way of looking at types, a similar correspondence from types to logical operations forms the basis of the Curry-Howard isomorphism that connects type theory to logic in a very fundamental way.
 
 ## Bi-functors
 
@@ -219,7 +228,7 @@ Given two categories \\(\mathcal{C}, \mathcal{D}\\) their product category \\(\m
 \end{itemize}
 \end{definition}
 
-Note that alternatively we could define this as the product of objects in the category \textbf{Cat}.
+Note that alternatively we could define this as the product of objects in the category **Cat**.
 
 This brings us to the concept of a bifunctor, which can be seen as a 'functor of two arguments'.
 

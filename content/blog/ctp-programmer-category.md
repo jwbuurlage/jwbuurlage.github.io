@@ -233,7 +233,7 @@ def head[A](xs: Word[A]): Maybe[A] =
 ```
 Here, we have a natural transformation between the `Word` and the `Maybe` functor!
 
-## Parametric polymorphism and ad-hoc polymorphis
+## Parametric polymorphism and ad-hoc polymorphism
 
 In C++, a template does not have to be defined for all types, i.e. we can write:
 ```cpp
