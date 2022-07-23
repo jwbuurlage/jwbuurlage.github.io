@@ -127,12 +127,16 @@ $$Tf(x_1, x_2, x_3, ... x_n) = (f(x_1), f(x_2), f(x_3), \ldots, f(x_n)).$$
 We will express this idea in Scala, but before we can do this we first have to consider type classes and type constructors. A _type constructor_ is a 'function' that given a type, creates another type. A _type constructor_ can have multiple _value constructors_, and these constructors can be differentiated between using something called _pattern matching_ which we will see later.
 
 Let us defined our own `Boolean` type.
-```haskell
-data Bool = True | False
+```scala
+enum Bool:
+    case False
+    case True
 ```
-Here, we define the type constructor `Bool` as the resulting type corresponding to the _value_ given by the value constructors `True` and `False`, which both are nullary constructors (that take no argument as types!). Normally however, type constructors take one or multiple types for their value constructors:
-```haskell
-data Either a b = Left a | Right b
+Here, we define the type constructor `Bool` as the resulting type corresponding to the _value_ given by the value constructors `True` and `False`, which both are nullary constructors (that take no argument as types!). However, type constructors can take one or multiple types for their value constructors:
+```scala
+enum Either[A, B]:
+  case Left(a: A)
+  case Right(b: B)
 ```
 Here, the type constructor either hold either a value of type `a` or of type `b`, corresponding to the value constructors `Left` and `Right`. We will revisit this idea (and `Either`) when talk about products and coproducts.
 
