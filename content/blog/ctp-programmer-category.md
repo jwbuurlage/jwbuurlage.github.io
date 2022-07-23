@@ -151,7 +151,7 @@ If we want to express the concept of a _functor_ using a type class, we have to 
 trait Functor[F[_]]:
   def map[A, B](x: F[A], f: A => B): F[B]
 ```
-This says that `F` is a functor, if there is a function `map` that takes a value of type `F[A]`, a function `f :: A => B` and returns a value of type `F[B]`.
+This says that `F` is a functor, if there is a function `map` that takes a value of type `F[A]`, a function `f: A => B` and returns a value of type `F[B]`.
 
 ## The Word functor
 

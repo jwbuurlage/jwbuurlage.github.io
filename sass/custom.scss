@@ -42,11 +42,20 @@ p {
   line-height: 1.5;
 }
 
+code {
+  background: #eee;
+  padding: 5px;
+}
+
 pre {
-  background-color: #eee;
   padding: 10px;
   border: 1px solid #ccc;
   overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: none;
 }
 
 img {
@@ -111,9 +120,14 @@ header a + a {
   margin-left: 1rem;
 }
 
+footer {
+  margin-top: 50px;
+  height: 40px;
+}
+
 hr {
-    margin: 30px;
-    border-color: #ccc;
+    border: #ccc 1px solid;
+    margin-bottom: 30px;
 }
 
 li {
