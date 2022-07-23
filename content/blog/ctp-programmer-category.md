@@ -1,6 +1,6 @@
 +++
 title = "A category of types and functions"
-date = 2022-07-14
+date = 2022-07-23
 draft = true
 [extra]
 author = "Jan-Willem Buurlage"
@@ -138,76 +138,100 @@ enum Either[A, B]:
   case Left(a: A)
   case Right(b: B)
 ```
-Here, the type constructor either hold either a value of type `a` or of type `b`, corresponding to the value constructors `Left` and `Right`. We will revisit this idea (and `Either`) when talk about products and coproducts.
+Here, the type constructor either hold either a value of type `A` or of type `b`, corresponding to the value constructors `Left` and `Right`. We will revisit this idea (and `Either`) when talk about products and coproducts.
 
-A type class is a _common interface for types_. It defines a family of types that support the same operations. For example, a type class for objects that support equality is defined as:
-```haskell
-class Eq a where
-    (==) :: a -> a -> Bool
+A type class (implemented in Scala as a _trait_) is a _common interface for types_. It defines a family of types that support the same operations. For example, a trait for objects that support equality could be defined as:
+```scala
+trait Eq[T] {
+  def isEqual(x: T, y: T): Boolean
+}
 ```
-If we want to express the concept^[In C++, type constructors are referred to as _concepts_, and they have been a long time coming (but are not yet in the standard)] _functor_ using a typeclass, we have to state that it can send types to types, and that it sends functions between two types to functions with the appropriate signature, i.e.:
-```haskell
-class Functor F where
-    fmap :: (a -> b) -> F a -> F b
+If we want to express the concept of a _functor_ using a type class, we have to state that it can send types to types, and that it sends functions between two types to functions with the appropriate signature, i.e.:
+```scala
+trait Functor[F[_]]:
+  def map[A, B](x: F[A], f: A => B): F[B]
 ```
-This says that `F` is a functor, if there is a function `fmap` that takes a function `f :: a -> b` and maps it to a function `fmap f :: F a -> F b`. Note that we do not explicitly have to state that `F` sends types to types, because this can be induced from the fact that we use `F a` where the compiler expects a type.
+This says that `F` is a functor, if there is a function `map` that takes a value of type `F[A]`, a function `f :: A => B` and returns a value of type `F[B]`.
 
-## The List functor
+## The Word functor
 
-The _list functor_ in Haskell is denoted with `[]`, and a list of type `a` is denoted `[a]` (which is syntactic sugar, normally the type would be `[] a`).
+Let us build the 'Word' functor from the ground up. We use a concept called a 'cons-list', with which we define a word over an alphabet recursively as being either
 
-Let us try to define this functor from the ground up. If we would write `List` instead of `[]`, then first we have to define what a list is. We can define this as follows:
-```haskell
-data List a = Nil | Cons a (List a)
+- empty
+- or a letter followed by a word
+
+```scala
+enum Word[+A]:
+    case Cons(x: A, xs: Word[A])
+    case Nil
 ```
-Here the type constructor has two possible ways of constructing (partitioning the possible values of the type):  a list of `a`s is either empty (corresponding to the _constructor_ `Nil`), or that it is the concatenation (corresponding to the _constructor_ `Cons`) of an object of type `a` with another list of `a`s. Note that this is a recursive definition!
 
-Next we define the `fmap` corresponding to our `List` functor (i.e. how it maps functions). The corresponding definition to the map described for the _word functor_ is:
-```haskell
-instance Functor List where
-    fmap _ Nil = Nil
-    fmap f (Cons x t) = Cons (f x) (fmap f t)
+We have two possible ways of constructing a word (partitioning the possible values of the type):  a word of `A`s is either empty (corresponding to the _constructor_ `Nil`), or that it is the concatenation (corresponding to the _constructor_ `Cons`) of an object of type `A` with another word of `A`s. Note the recursive definition.
+
+Next we define the `map` for our `Word` functor. The corresponding definition to the map described for the _word functor_ is:
+```scala
+given Functor[Word] with
+  def map[A, B](xs: Word[A], f: A => B): Word[B] =
+    xs match 
+      case Word.Cons(y, ys) => Word.Cons(f(y), map(ys, f))
+      case Word.Nil => Word.Nil
 ```
-If a list is empty, then we get the empty set, otherwise we map the indivual values in the list recursively using the given `f`. In `C++` this `fmap` functor roughly corresponds to `std::transform`, while for Python the closest thing would be the `map` function. With these two definitions, `List` is a functor! We could check the that it satisfies the requirements.
+If a word is empty, then we get an empty word back. Otherwise, we map the individual letters in the list recursively using the given `f`.
 
-As mentioned, `List` is implemented in the standard library as `[]`, and `Cons` is written as `:`, while the empty list is written also as `[]`. This allows you to write:
-```haskell
-x = 1 : 2 : [] -- this results in `[1, 2] :: [Int]`!
+> In `C++` this `map` functor roughly corresponds to `std::transform`, while for Python the closest thing would be the `map` function.
+ 
+With these two definitions, we have turned `Word` into a functor.
+
+`Word` is implemented as `List` in the standard library of Scala, and `a :: b` is the syntactic sugar replacing `Word.Cons(a, b)`.
+
+```scala
+val x = 1 :: 2 :: Nil // List(1, 2)
 ```
 
 ## The Maybe functor
 
-As a simpler example, consider a type that either has no value or it has a value corresponding to some type `a`. In Haskell, this is called `Maybe`, while in C++ this is called `std::optional`, in Python the same idea could be achieved using:
+As a simpler example, consider a type that either has no value or it has a value corresponding to some type `A`. In Haskell, this is called `Maybe`, while in C++ this is called `std::optional`, in Python the same idea could be achieved using:
 ```python
 def fn(a):
     if (a >= 0)
         return sqrt(a)
     return None
 ```
-This function returns `None` (corresponding to 'no value') if we provide 'invalid input'. This functor can be defined as:
-```haskell
-data Maybe a = Nothing | Just a
+This function returns `None` (corresponding to 'no value') if we provide 'invalid input'.
+
+In Scala, this type can be implemented as:
+```scala
+enum Maybe[+A]:
+    case Some(x: A)
+    case None
 ```
-And to turn it into a functor, we define `fmap`:
-```haskell
-instance Functor Maybe where
-    fmap _ Nothing = Nothing
-    fmap f (Just a) = Just (f a)
+And to turn it into a functor, we define `map`:
+```scala
+given Functor[Maybe] with
+  def map[A, B](xs: Maybe[A], f: A => B): Maybe[B] =
+    xs match 
+      case Maybe.Some(y) => Maybe.Some(f(y))
+      case Maybe.None => Maybe.None
 ```
+
+`Maybe` is implemented in the Scala standard library as `Option`.
 
 ## Polymorphic functions as natural transformations
 
-Now that we view type constructors as functors, we can consider natural transformations between type constructors. If we let `a` be a type, then a natural transformation `alpha` would be something that maps between `F a` and `G a`, where `F` and `G` are type constructors:
-```haskell
-alpha :: F a -> G a
+In the previous blog post we introduced natural transformations as a family of functions between two functors \\( F \\) and \\( G \\).
+
+Now that we view type constructors as functors, we can consider natural transformations between type constructors. If we let `A` be a type, then a natural transformation `alpha` would be something that maps between `F[A]` and `G[A]`, where `F` and `G` are type constructors:
+```scala
+alpha: F[A] => G[A]
 ```
-Note that implicitly we talk about the component of `alpha` at `a`, since this function is _polymorphic_ the right component gets picked by the compiler. For example, say we have a list `[a]`, and we want to obtain the first element of this list. If the list is empty, then there is no such element, otherwise we obtain an `a`; i.e. the result is a `Maybe a`:
-```haskell
-head :: [a] -> Maybe a
-head [] = Nothing
-head (x:xs) = Just x
+Note that implicitly we talk about the component of `alpha` at `A`. This function is _polymorphic_ the right component gets picked by the compiler. For example, say we have a word `Word[A]`, and we want to obtain the first element of this list. If the list is empty, then there is no such element, otherwise we obtain an `A`; i.e. the result is a `Maybe[A]`:
+```scala
+def head[A](xs: Word[A]): Maybe[A] =
+  xs match
+    case Word.Nil => Maybe.None
+    case Word.Cons(x, _) => Maybe.Some(x)
 ```
-Here, we have a natural transformation between the `List` and the `Maybe` functor!
+Here, we have a natural transformation between the `Word` and the `Maybe` functor!
 
 ## Parametric polymorphism and ad-hoc polymorphis
 
@@ -224,31 +248,38 @@ double f(double a) { return 2.0 * a; }
 ```
 Here, e.g. `f<int>(1)` would yield `2`, while `f<char>('a')` would result in a compilation error.
 
-In Haskell, this is not allowed, polymorphic functions must work for _all types_, this is called parametric polymorphism. Specializing function definitions is done using type classes^[in C++ this would be done using overloading and (partial) template specialization]. This has an important consequence (or perhaps, it is the underlying reason): a parametric polymorphic function satisfies automatically the naturality conditions.
+What we are talking about here is _parametric polymorphism_: polymorphic functions must work for _all types_. Specializing function definitions is done using traits. This has an important consequence (or perhaps, it is the underlying reason): a parametric polymorphic function satisfies automatically the naturality conditions.
 
 The corresponding naturality square in this context is:
 
 ```
-\begin{figure}[H]
-\centering
-\begin{tikzcd}
-\texttt{F a} \arrow[r, "\texttt{alpha}"] \arrow[d, "\texttt{fmap f :: F a -> F b}"'] & \texttt{G a} \arrow[d, "\texttt{fmap f :: G a -> G b}"]\\
-\texttt{F b} \arrow[r, "\texttt{alpha}"'] & \texttt{G b}
-\end{tikzcd}
-\end{figure}
+             alpha
+         F[A]────► G[A]
+          │          │
+map(_, f) │          │ map(_, f)
+          │          │
+          ▼          ▼
+         F[B]────► G[B]
+             alpha
 ```
 
-Here, the left `fmap` corresponds to `F`, while the right `fmap` corresponds to `G`, and the top `alpha` is implicitely the component at `a`, while the bottom one is the component at `b`. What we would have to show, is that:
+Here, the left `map` corresponds to `F`, while the right `map` corresponds to `G`, and the top `alpha` is implicitely the component at `A`, while the bottom one is the component at `B`. What we would have to show, is that:
 
-```haskell
-fmap f . alpha = alpha . fmap f
+```scala
+map(_, f) compose alpha = alpha compose map(_, f)
 ```
 
-Indeed this can be shown in a very general context, and it has to do with the fact that the 'bodies' for `f`, `fmap` and `alpha` are the same for all types. We will discuss this in an upcoming part on _free theorems_.
+It turns out that this can be shown in a very general context, and it has to do with the fact that the 'bodies' for `f`, `map` and `alpha` are the same for all types. This is related to _free theorems_, which we will not go into in this seris.
 
-Let us revisit our `head :: [a] -> Maybe a` example, and consider the naturality condition here. It says that:
+Let us revisit our `head` example, and consider the naturality condition here. It says that:
 
-```haskell
-fmap f . head = head . fmap f
+```scala
+map(_, f) compose head = head compose map(_, f)
 ```
-Here, the fmap on the lhs corresonds to the `Maybe` functor, while on the rhs it corresponds to the `[]` functor. The lhs can b e read like this; take the first element of the list, then apply f on it. The rhs can be read as "apply the function f to the entire list, then take the first element". The result is the same; the funtion f applied to the head of the list (if any). On the rhs we apply the function `f` for each element in the list, whereas on the lhs we only apply it to the head. Because of the constraint on polymorphic function, the compiler knows that the result is equal and can choose which one to use!
+Here, the map on the left-hand side corresonds to the `Maybe` functor, while on the right-hand side it corresponds to the `Word` functor.
+
+First, the left-hand side can be read like this. Take the first element of the list, then apply `f` to it.
+
+The right-hand side can be read as "apply the function `f` to the entire list, then take the first element".
+
+The result is the same. The function `f` applied to the head of the list (if any). On the rhs we apply the function `f` for each element in the list, whereas on the lhs we only apply it to the head. Because of the constraint on polymorphic function, the compiler knows that the result is equal and can choose to use the most efficient one!
