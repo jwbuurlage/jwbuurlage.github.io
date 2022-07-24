@@ -2,6 +2,10 @@
 title = "Using Boost.Hana to simplify the generation of Python bindings"
 date = 2018-10-11
 draft = false
+
+[taxonomies]
+tags = ["cpp", "python"]
+
 [extra]
 author = "Jan-Willem Buurlage"
 +++

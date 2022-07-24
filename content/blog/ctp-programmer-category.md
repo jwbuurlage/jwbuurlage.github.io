@@ -2,6 +2,10 @@
 title = "A category of types and functions"
 date = 2022-07-23
 draft = false
+
+[taxonomies]
+tags = ["mathematics", "scala", "functional-programming"]
+
 [extra]
 author = "Jan-Willem Buurlage"
 +++
@@ -10,13 +14,13 @@ author = "Jan-Willem Buurlage"
 
 ## Sets and types
 
-To establish a link between functional programming and category theory, we need to find a category that is applicable. Observe that a _type_ in a programming language, corresponds to a _set_ in mathematics. Indeed, the type `int` in C based languages, corresponds to some finite set of numbers, the type `char` to a set of letters like `'a'`, `'z'` and `'$'`, and the type `bool` is a set of two elements (`true` and `false`). This category, the category of types, turns out to be a very fruitful way to look at programming.
+To apply ideas from category theory to functional programming, we first need to figure out what the relevant category is. One observation is that a _type_ in a programming language, is much like a _set_ in mathematics. For example, the type `int` in C based languages, corresponds to some finite set of numbers. The type `char` to a set of letters `'a'`, `'z'` and `'$'`. And the type `bool` is a set of two elements: `true` and `false`. This category, the _category of types_, allows us to look at programming through the lens of category theory.
 
-In this post we will hopefully give an idea of how category theory applies to programming, but we will not go into to much detail yet as this is saved for later post.
+In this post we will give an idea of how category theory applies to programming. In upcoming posts, we will dig deeper into the introduced concepts (and beyond).
 
-We will take as our model for the category of types the category **Set**. Recall that the elements of **Set** are sets, and the arrows correspond to maps. There is a major issue to address here. Mathematical maps and functions in a computer program are not identical, for example we are missing the bottom value \\( \perp \\), which for example indicates a program crash. 
+We can take as our model for the category of types the category **Set**. Recall that the elements of **Set** are sets, and the arrows correspond to maps. We will glance over a lot of technicalities. Mathematical maps and functions in a computer program are not identical, for example we are missing the bottom value \\( \perp \\), for example, which indicates a program that did not terminate with a value. 
 
-As we will need a language with higher-kinded types later on, we will use the Scala programming language for the examples here.
+To be able to fully apply the ideas from category theory, we will need a language with higher-kinded types later on. This includes languages like Scala and Haskell. Here, we will use the Scala programming language for the examples given, but the focus will be on the mathematics and general theory.
 
 We can express that an object has a certain type:
 
@@ -30,7 +34,7 @@ To define a function \\( f: A \to B \\) from type \\( A \\) to type \\( B \\) in
 f: A => B
 ```
 
-To compose:
+To compose two functions:
 
 ```scala
 g: B => C
@@ -53,9 +57,9 @@ assert(id(3) == 3)
 assert(id("foo") == "foo")
 ```
 
-In mathematics all functions are *pure*: they will always give the same output for the same input. This is not always the case for computer programs. Using IO functions, returning the current date, using a global variable are all examples of impure operations that are common in programming. We will focus on `pure` functions here, and try to avoid any side effects.
+In mathematics all functions are *pure*: they will always give the same output for the same input. This is not always the case for computer programs. Operations such as performing I/O, returning the current date, or using a global variable are all examples of impure operations that are common in programming. We will focus on "pure" functions here, and try to avoid any side effects.
 
-We take as our model the category **Set**, so should be a type that corresponds to the empty set \\( \emptyset \\). In C / C++, the obvious candidate would be `void` for this set, but consider a function definition:
+As our model category is **Set**, there should be a type that corresponds to the empty set \\( \emptyset \\). In C / C++, the obvious candidate would be `void` for this set, but consider a function definition:
 ```cpp
 void f() { ... };
 ```
@@ -65,7 +69,7 @@ In Scala, the type corresponding to the *singleton set* is `()`and its single va
 ```scala
 val f = () => 3
 ```
-we can invoke it as `f ()`.
+we can invoke it as `f()`.
 
 Instead, the type `Nothing` corresponds to the empty set, and there can never be a value of this type. We can imagine the (unique) polymorphic (in the return type!) function that takes `Nothing`.
 ```scala
@@ -75,13 +79,13 @@ Note that you can never call this function, as `Nothing` is uninhibited: there a
 
 You may be tempted to discard the type `Nothing` as something that is only used by academics to make the type system 'complete', but there are a number of legitimate uses for `Nothing`. An example is *continuation passing style*, or CPS, where functions do not return a value, but pass control over to another function:
 ```scala
-type Continuation[a] => a => Nothing
+type Continuation[A] => A => Nothing
 ```
 In other words, a continuation is a function that *never returns*, which can be used to manipulate control flows (in a type-safe manner).
 
-Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In the category of types `Nothing` is initial and `()` is terminal.
+Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In a [previous blog post](/blog/ctp-categories/) we introduced the concepts of _initial_ and _terminal_ objects. In the category of types `Nothing` is initial and `()` is terminal.
 
-To summarize this introduction, in the category of 'computer programs', types are objects, and *pure* functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this (admittedly informally defined) category that we will call **Type**.
+To summarize this introduction, in the category of types, types are objects, and *pure* functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this (admittedly informally defined) category that we will call **Type**.
 
 ## Containers as functors
 
@@ -157,14 +161,16 @@ This says that `F` is a functor, if there is a function `map` that takes a value
 
 Let us build the 'Word' functor from the ground up. We use a concept called a 'cons-list', with which we define a word over an alphabet recursively as being either
 
-- empty
-- or a letter followed by a word
+1. a letter followed by a word
+1. empty
 
 ```scala
 enum Word[+A]:
     case Cons(x: A, xs: Word[A])
     case Nil
 ```
+
+(The syntax `+A` indicates a 'contravariant type', which we will not discuss here yet)
 
 We have two possible ways of constructing a word (partitioning the possible values of the type):  a word of `A`s is either empty (corresponding to the _constructor_ `Nil`), or that it is the concatenation (corresponding to the _constructor_ `Cons`) of an object of type `A` with another word of `A`s. Note the recursive definition.
 
@@ -218,7 +224,7 @@ given Functor[Maybe] with
 
 ## Polymorphic functions as natural transformations
 
-In the previous blog post we introduced natural transformations as a family of functions between two functors \\( F \\) and \\( G \\).
+In a [previous blog post](/blog/ctp-categories/) we introduced natural transformations as a family of functions between two functors \\( F \\) and \\( G \\).
 
 Now that we view type constructors as functors, we can consider natural transformations between type constructors. If we let `A` be a type, then a natural transformation `alpha` would be something that maps between `F[A]` and `G[A]`, where `F` and `G` are type constructors:
 ```scala
@@ -269,7 +275,7 @@ Here, the left `map` corresponds to `F`, while the right `map` corresponds to `G
 map(_, f) compose alpha = alpha compose map(_, f)
 ```
 
-It turns out that this can be shown in a very general context, and it has to do with the fact that the 'bodies' for `f`, `map` and `alpha` are the same for all types. This is related to _free theorems_, which we will not go into in this seris.
+It turns out that this can be shown in a very general context, and it has to do with the fact that the 'bodies' for `f`, `map` and `alpha` are the same for all types. This is related to _free theorems_, which we will not go into in this series.
 
 Let us revisit our `head` example, and consider the naturality condition here. It says that:
 
@@ -278,8 +284,7 @@ map(_, f) compose head = head compose map(_, f)
 ```
 Here, the map on the left-hand side corresonds to the `Maybe` functor, while on the right-hand side it corresponds to the `Word` functor.
 
-First, the left-hand side can be read like this. Take the first element of the list, then apply `f` to it.
+- The left-hand side can be read as: "take the first element of the list, then apply `f` to it".
+- The right-hand side can be read as: "apply the function `f` to the entire list, then take the first element".
 
-The right-hand side can be read as "apply the function `f` to the entire list, then take the first element".
-
-The result is the same. The function `f` applied to the head of the list (if any). On the rhs we apply the function `f` for each element in the list, whereas on the lhs we only apply it to the head. Because of the constraint on polymorphic function, the compiler knows that the result is equal and can choose to use the most efficient one!
+The result is the same, but obviously the left-hand side is more efficient in that it only has to apply `f` once. Because of the constraint on polymorphic functions, the compiler knows that the result is equal and can choose to use the most efficient one!

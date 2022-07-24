@@ -2,26 +2,36 @@
 
 {% block content %}
 <article>
-<div>
+    <div>
 
-        <div class="row py-3">
-        <h3>
-            <small class="text-muted">{{ page.date }}</small> <br />
-        </h3>
-        <h1>
-            {{ page.title | safe }}
-        </h1>
-        <p class="lead" style="font-family:serif;color:grey;">
-        </p>
+        <div>
+            <h3>
+                <small class="text-muted">{{ page.date }}</small> <br />
+            </h3>
+            <h1>
+                {{ page.title | safe }}
+            </h1>
+
+            {% if page.taxonomies.tags %}
+            <ul class="tag-list">
+                {% for tag in page.taxonomies.tags %}
+                <li>
+                   {{ tag }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <hr />
+
+        <section class="post">
+            <article>
+                {{ page.content | safe }}
+            </article>
+        </section>
+
     </div>
-
-    <section class="post">
-        <article>
-            {{ page.content | safe }}
-        </article>
-    </section>
-
-</div>
 </article>
 
 <footer>

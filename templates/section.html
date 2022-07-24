@@ -1,14 +1,27 @@
 {% extends "index.html" %}
 
 {% block content %}
-<main role="main">
+<main>
+<ul class="blog-post-list">
 {% for page in section.pages %}
+    <li>
     <h3>
-        <small>{{ page.date }}</small> <br />
+    <small>{{ page.date }}</small> <br />
     <a href="{{ page.permalink }}">
         {{ page.title }}
     </a>
     </h3>
+    {% if page.taxonomies.tags %}
+    <ul class="tag-list">
+        {% for tag in page.taxonomies.tags %}
+        <li>
+           {{ tag }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    </li>
 {% endfor %}
-</div>
+</ul>
+</main>
 {% endblock %}

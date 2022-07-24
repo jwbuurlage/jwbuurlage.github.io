@@ -2,6 +2,10 @@
 title = "Categories, functors, and natural transformations"
 date = 2022-07-06
 draft = false
+
+[taxonomies]
+tags = ["mathematics", "scala", "functional-programming"]
+
 [extra]
 author = "Jan-Willem Buurlage"
 +++

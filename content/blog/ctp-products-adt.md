@@ -2,6 +2,10 @@
 title = "Products, coproducts, and algebraic data types"
 date = 2022-07-23
 draft = true
+
+[taxonomies]
+tags = ["mathematics", "scala", "functional-programming"]
+
 [extra]
 author = "Jan-Willem Buurlage"
 +++
