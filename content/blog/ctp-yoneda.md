@@ -16,24 +16,28 @@ The Yoneda Lemma relates a category \\(\mathcal{C}\\) with the functors from \\(
 
 ## Hom-functors
 
-The *hom-functor* for some fixed object \\(c\\), is a functor that sends any object \\(a\\) to the hom-set \\(\text{Hom}(c, a)\\). It is clear that for each object we get an associated object in **Set**, but what should this functor do with arrows? We will denote the candidate functor with \\(F = \text{Hom}(c, -)\\). Say we have an arrow \\(f: a \to b\\):
+The *hom-functor* for some fixed object \\(c\\), is a functor that sends any object \\(a\\) to the hom-set \\(\text{Hom}(c, a)\\), the set of all arrows between \\( c \\) and \\(a\\). It is clear that for each object we get an associated object in **Set**, but what should this functor do with arrows? We will denote the candidate functor with \\(F = \text{Hom}(c, -)\\). Say we have an arrow \\(f: a \to b\\):
 
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-a \arrow[d, "f"] \arrow[r, "F"] & \text{Hom}(c, a) \arrow[d, "?"] \\
-b  \arrow[r, "F"] & \text{Hom}(c, b)
-\end{tikzcd}
-\end{figure}
+```ascii
+      F
+ a ────────► Hom(c, a)
+ │               │
+ │               │
+f│               │?
+ │               │
+ ▼    F          ▼
+ b ────────► Hom(c, b)
+ ```
 
-The arrow with a question mark is an arrow in **Set**. Arrows in sets are functions, which we can define by saying what it does on elements. The elements of the hom-sets are arrows in \\(\mathcal{C}\\). Given some element of \\(\text{Hom}(c, a)\\), i.e. an arrow in \\(\mathcal{C}\\): \\(g: c \to a\\), we need to obtain an element of \\(\text{Hom}(c, b)\\), i.e. an arrow from \\(c \to b\\). We have the following picture
+The arrow with a question mark is an arrow in **Set**. Arrows in sets are functions, which we can define by saying what it does on elements. The elements of the hom-sets are arrows in \\(\mathcal{C}\\). Given some element of \\(\text{Hom}(c, a)\\), i.e. an arrow in \\(\mathcal{C}\\): \\(g: c \to a\\), we need to obtain an element of \\(\text{Hom}(c, b)\\), i.e. an arrow from \\(c \to b\\). We have the following data:
 
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-c \arrow[r, "g"] \arrow[rr, bend left, "Ff(g) = ?"] & a & b
-\end{tikzcd}
-\end{figure}
+```ascii
+      Ff(g)=?
+┌─────────────┐
+│             ▼
+c ───► a      b
+   g
+```
 
 We can go to \\(a\\) from \\(c\\) using \\(g\\), but then we need a way to get from \\(a\\) to \\(b\\). We actually have a way to do this, namely the arrow \\(f: a \to b\\) that we started with. We need only to compose! This motivates the following definition:
 
@@ -66,25 +70,31 @@ For any category \\(\mathcal{C}\\) the Yoneda embedding is a functor between the
 
 **Definition**. Let \\(\mathcal{C}\\) and \\(\mathcal{D}\\) be two categories, then we define \\(\mathbf{Fun}(\mathcal{C}, \mathcal{D})\\) as the category that has functors \\(\mathcal{C} \to \mathcal{D}\\) as objects, and natural transformations between these functors as arrows.
 
-Now, we are ready to describe the Yoneda embedding. Note that because it is a functor between *the opposite of* \\(\mathcal{C}\\) and the category of *functors* between \\(\mathcal{C}\\) and **Set**, it should take objects to functors, and arrows to natural transformations. For all objects, we have introduced a functor associated to it in the previous section; the *hom-functor*.
+Now, we are ready to describe the Yoneda embedding. Note that because it is a functor between *the opposite of* \\(\mathcal{C}\\) and the category of *functors* between \\(\mathcal{C}\\) and **Set**, it should take objects to functors, and arrows to natural transformations. For all objects, we have introduced a functor associated to it in the previous section; the *hom-functor*. We can call the mapping between the object and its (covariant) hom-functor \\(Y\\).
 
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-a \arrow[d, "f"] \arrow[r, "Y"] & h^a \arrow[d, Leftarrow, "Yf^{\text{op}}"] \\
-b \arrow[u, bend left, dashed, "f^{\text{op}}"] \arrow[r, "Y"] & h^b
-\end{tikzcd}
-\end{figure}
+```ascii
+             Y       a
+    ┌──►a ────────► h
+    │   │           ▲
+ op │   │           │   op
+f   │  f│           │ Yf
+    │   │           │
+    │   ▼    Y      │b
+    └───b ────────► h
+```
 
 The natural transformation \\(Yf\\) should have components which are arrows in **Set**, indexed by objects in \\(\mathcal{C}\\). Let \\(k: c \to d\\), the corresponding naturality square looks like this:
 
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-\text{Hom}(a, c) \arrow[d, "h^a(k)"'] & \text{Hom}(b, c)  \arrow[l, "(Yf^{\text{op}})_c"'] \arrow[d, "h^b(k)"] \\
-\text{Hom}(a, d) & \text{Hom}(b, d) \arrow[l, "(Yf^{\text{op}})_d"]
-\end{tikzcd}
-\end{figure}
+```ascii
+             (Yf^op)c
+  Hom(a, c) ◄───────── Hom(b, c)
+      │                    │
+  a   │                    │  b
+ h (k)│                    │ h (k)
+      ▼                    ▼
+  Hom(a, d) ◄───────── Hom(b, d)
+             (Yf^op)d
+```
 
 So the natural components should be maps between hom-sets. As we will see, we can again find these maps by composition! This is summarized in the following definition:
 
@@ -99,14 +109,19 @@ Yf^{\text{op}} :& h^c \to h^b \\\\
 
 Note that the component is defined using *pre-composition*, it is a contravariant hom-functor, whereas the objects \\(Ya\\) are *covariant* hom-functors, i.e. use *post-composition*. Let us check that \\(Yf\\) is indeed a natural transformation by looking at the naturality square introduced above, let \\(\ell: a \to c\\), and lets trace it through the diagram for some \\(k: c \to d\\) and \\(g: b \to a\\):
 
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-\ell \in \text{Hom}(a, c) \arrow[r, "(Yg^{\text{op}})_c"] \arrow[d, "h^a(k)"'] & \text{Hom}(b, c) \ni \ell \circ g  \arrow[d, "h^b(k)"] \\
-k \circ \ell \in \text{Hom}(a, d) \arrow[r, "(Yg^{\text{op}})_d"] & \text{Hom}(b, d) \ni k \circ (\ell \circ g) = (k \circ \ell) \circ g
-\end{tikzcd}
-\end{figure}
-In other words, the naturality condition corresponds simply to the associativity in \\(\mathcal{C}\\). We say that \\(Yf\\) is the _induced natural transformation_ of \\(f\\).
+```
+            
+         (Yg^op)c
+     l  ─────────► l . g
+     │             │
+ a   │             │  b
+h (k)│             │ h (k)
+     ▼             ▼
+ k . l  ─────────► k . l . g
+         (Yg^op)d
+```
+
+In words: the naturality condition corresponds simply to the associativity in \\(\mathcal{C}\\). We say that \\(Yf\\) is the _induced natural transformation_ of \\(f\\).
 
 The reason that the Yoneda functor is of such interest is because of the following:
 
@@ -204,7 +219,7 @@ When looking at what this means for the arrows, we noted that in particular any 
 
 To prove this, we stated and proved the Yoneda lemma -- which is an important result in its own right. It shows that for an arbitrary set-valued functor, there is a bijection between elements of the set \\(F a\\) and natural transformations from \\(h^a\\) to \\(F\\),
 
-All functors in Haskell are set-valued, since that is our category of interest. We first show two simple applications of Yoneda's lemma in mathematics, and next we see some initial applications of the Yoneda lemma to Haskell. In later parts we will see more advanced uses.
+All functors in programming are set-valued, since types can be viewed as set. We first show two simple applications of Yoneda's lemma in mathematics, and next we see some initial applications of the Yoneda lemma to programming.
 
 ## Examples of applications
 
@@ -266,20 +281,19 @@ Another application of Yoneda is the following classic result from group theory 
 > 
 > Recall that \\(\text{Aut}(G_{\text{set}})\\) is a group (a permutation group), and note that the collection of automorphisms defined by left multiplication of elements of \\(G\\) is indeed a subgroup of this permutation group. The correspondence between \\(G\\) and the "automorphisms by left-multiplication" is easily seen to be a group isomorphism.
 
-## Yoneda in Haskell
+## Yoneda in programming
 
-We will discuss a hopefully intuitive way of looking at the Yoneda lemma in Haskell, by pinpointing a function with a single evaluation. In later parts we will discuss many more applications of Yoneda to Haskell, in particular when we discuss *generalized ADTs* and *lenses*.
+We will discuss a hopefully intuitive way of looking at the Yoneda lemma in Scala, by pinpointing a function with a single evaluation. 
 
-Let us first see how we can translate the relevant tools of Yoneda to Haskell. We have the following concepts:
+Let us first see how we can translate the relevant tools of Yoneda to Scala. We have the following concepts:
 
-- *hom-sets*: the hom-set of types `a` and `b` are the arrows between `a` and `b`, i.e. functions of the type `(a -> b)`. Note that this hom-set is again in the category of types.
-- The *hom-functor* corresponding to a type `a` should be a functor, i.e. a type constructor, that produces the hom-set `(a -> b)` when given a type `b`, for some fixed type `a`. On functions `(b -> c)` it should get a function between the hom-sets of `a` and `b, c` respectively, i.e.:
+- *hom-sets*: the hom-set of types `A` and `B` are the arrows between `A` and `B`, i.e. functions of the type `A => B`. Note that this hom-set is again in the category of types.
+- The *hom-functor* corresponding to a type `A` should be a functor, i.e. a type constructor, that produces the hom-set `A => B` when given a type `B`, for some fixed type `A`. On functions `B => C` it should get a function between the hom-sets of `A` and `B, C` respectively, i.e.:
 
-  ```haskell
-      instance Functor (HomFunctor a) where
-          fmap :: (b -> c) -> (a -> b) -> (a -> c)
-          fmap f g = f . g
-  ```
+```scala
+def map[A, B, C](f: B => C, g: A => B): A => C =
+  f compose g
+```
 
   And indeed, we see that we can simply use composition.
 - Yoneda's lemma says that for any other functor `F`, we can produce a natural transformation (i.e.\ polymorphic function in a type `b`) from the hom-functor for a fixed `a` by looking at elements of `F a`.
@@ -290,30 +304,33 @@ Next we look at a simple example of how to apply this final point in Haskell.
 
 I first encountered this example here: <http://blog.sigfpe.com/2006/11/yoneda-lemma.html>.
 
-We set `F` equal to `Id`, the identity functor, and consider a natural transformation between `HomFunctor a` and `Id`, this has the form (at the component `b`):
+We set `F` equal to `Id`, the identity functor, and consider a natural transformation between `HomFunctor[A]` and `Id`, this has the form (at the component `B`):
 
-```haskell
---    (HomFunctor a) b      Id b
---            |               |
-machine :: (a -> b)     ->    b
+```scala
+// We fix A
+type A = ...;
+
+// HomFunctor[A, B]    Id[B]
+//                |        |
+def machine[B](f: A => B): B =
+  // ...?
 ```
-Say we are given any function with this signature, and we want to know how it is implemented. We can actually do this in a *single evaluation*, using the Yoneda lemma. The Yoneda lemma says precisely that such a *machine* is given uniquely by any element of `Id a = a`, i.e. some value of the type `a`. This makes a lot of sense in this context, since we can be given *any* `b`, and the only tool that we have to produce a value for `b` is to use the function `f :: a -> b` that is supplied to us. Furthermore, the polymorphic function should behave the same for any type, so it can only be implemented as:
+Say we are given any function with this signature, and we want to know how it is implemented. We can actually do this in a *single evaluation*, using the Yoneda lemma. The Yoneda lemma says precisely that such a *machine* is given uniquely by any element of `Id[A] = A`, i.e. some value of the type `A`. This makes a lot of sense in this context, since we can be given *any* `B`, and the only tool that we have to produce a value for `B` is to use the function `f: A => B` that is supplied to us. Furthermore, the polymorphic function should behave the same for any type, so it can only be implemented as:
 ```haskell
-machine :: (a -> b) -> b
-machine f = f x
+def machine[A, B](f: A => B): B =
+  f(x)
 ```
-where `x` is some fixed element of type `a`. Now, the Yoneda lemma also tells us a way to obtain `x`, we simply supply `f = id`:
-```haskell
-x <- machine id -- obtain the 'hidden element'
+where `x` is some fixed element of type `A`. Now, the Yoneda lemma also tells us a way to obtain `x`, we simply supply the identity `id = (y: Any) => y`:
+```scala
+x = machine(id) // obtain the 'hidden element'
 ```
 
-What if `F` is not the identity function, but say the `List` functor. The story actually does not change much, we now have a function with the signature:
-```haskell
---    (HomFunctor a) b      List b
---            |               |
-machine :: (a -> b)     ->   [b]
+What if `F` is not the identity function, but say the `Word` functor introduced [in a previous post](/blog/ctp-programmer-category.md). The story actually does not change much, we now have a function with the signature:
+```scala
+def machine[B](f: A => B): Word[B] =
+  // ...?
 ```
-the Yoneda lemma says that internally, any function of this signature should maintain a list of the type `[a]`, and when given a function `f :: a -> b` it fmaps this over the internal list to produce a value of the type `[b]`. Again, we can get this list by feeding the `id` function into the machine.
+the Yoneda lemma says that internally, any function of this signature should maintain a word of the type `Word[A]`, and when given a function `f: A => B` it maps this over the internal list to produce a value of the type `Word[B]`. Again, we can get this list by feeding the `id` function into the machine.
 
 ### Continuation Passing Style
 
