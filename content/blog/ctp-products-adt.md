@@ -311,7 +311,7 @@ _proof_. Let us first show that we can construct the functors \\(G_c\\) and \\(H
 
 \\( F \langle \text{id}_c, g \rangle \circ F \langle \text{id}_c, g' \rangle = G_c g \circ G_c g' \\)
 
-The mapped arrows have the correct (co)domains, hence \\(G_c\\) is a functor for all \\(c\\). We immediately have \\( G_c d = H_d c \\), as by definition both sides are equal to \\(F \langle c, d \rangle\\). To show \\( (G_{c'} g \circ H_d f = H_{d'} f \circ G_c g \\) we compute:
+The mapped arrows have the correct (co)domains, hence \\(G_c\\) is a functor for all \\(c\\). We immediately have \\( G_c d = H_d c \\), as by definition both sides are equal to \\(F \langle c, d \rangle\\). To show \\( G_{c'} g \circ H_d f = H_{d'} f \circ G_c g \\) we compute:
 
 \begin{align*}
 G_{c'} g \circ H\_d f &= F \langle \text{id}\_{c'}, g \rangle \circ F \langle f, \text{id}\_d \rangle \\\\
