@@ -148,7 +148,7 @@ This gives us an idea for a natural transformation corresponding to an element o
 
 **Proposition**. Let \\(F: \mathcal{C} \to \mathbf{Set}\\) be a functor, and \\(a \in \mathcal{C}\\). Any element \\(x \in Fa\\) induces a natural transformation from \\(h^a\\) to \\(F\\), by evaluating any lifted arrow in \\(x\\).
 
-> _proof_. We have to show that this induces a natural transformation, i.e\ that the following diagram commutes:
+> _proof_. We have to show that this induces a natural transformation, i.e. that the following diagram commutes:
 > 
 > \begin{figure}[H]
 > \centering
@@ -290,15 +290,15 @@ Let us first see how we can translate the relevant tools of Yoneda to Scala. We 
 - *hom-sets*: the hom-set of types `A` and `B` are the arrows between `A` and `B`, i.e. functions of the type `A => B`. Note that this hom-set is again in the category of types.
 - The *hom-functor* corresponding to a type `A` should be a functor, i.e. a type constructor, that produces the hom-set `A => B` when given a type `B`, for some fixed type `A`. On functions `B => C` it should get a function between the hom-sets of `A` and `B, C` respectively, i.e.:
 
-```scala
-def map[A, B, C](f: B => C, g: A => B): A => C =
-  f compose g
-```
+  ```scala
+  def map[A, B, C](f: B => C, g: A => B): A => C =
+    f compose g
+  ```
 
   And indeed, we see that we can simply use composition.
-- Yoneda's lemma says that for any other functor `F`, we can produce a natural transformation (i.e.\ polymorphic function in a type `b`) from the hom-functor for a fixed `a` by looking at elements of `F a`.
+- Yoneda's lemma says that for any other functor `F`, we can produce a natural transformation (i.e. polymorphic function in a type `B`) from the hom-functor for a fixed `A` by looking at elements of `F[A]`.
 
-Next we look at a simple example of how to apply this final point in Haskell.
+Next we look at a simple example of how to apply this final point in Scala.
 
 ### Reverse engineering machines
 
@@ -316,7 +316,7 @@ def machine[B](f: A => B): B =
   // ...?
 ```
 Say we are given any function with this signature, and we want to know how it is implemented. We can actually do this in a *single evaluation*, using the Yoneda lemma. The Yoneda lemma says precisely that such a *machine* is given uniquely by any element of `Id[A] = A`, i.e. some value of the type `A`. This makes a lot of sense in this context, since we can be given *any* `B`, and the only tool that we have to produce a value for `B` is to use the function `f: A => B` that is supplied to us. Furthermore, the polymorphic function should behave the same for any type, so it can only be implemented as:
-```haskell
+```scala
 def machine[A, B](f: A => B): B =
   f(x)
 ```
@@ -336,7 +336,8 @@ the Yoneda lemma says that internally, any function of this signature should mai
 
 In programming, there is an equivalence between what is called *direct* style, where functions return values, and *continuation passing style* (CPS), where each *called function* takes an additional argument which is a *handler function* that does something with the result of the called function.
 
-Say we have some function
+Say we have some function in C++.
+
 ```cpp
 T add(T a, T b) {
     return a + b;
@@ -356,7 +357,7 @@ add_cps(1, 2, [](auto result) {
 ```
 In other words, the CPS version of the function does not *return a value*, but rather passes the result to a handler. We do not bind the result of a function to a value, but rather to the *argument of a handler function*.
 
-You may recognize this style of programming from writing concurrent programs, where continuations can be used to deal with values produced in the future by other threads without blocking. Continuations are also often used in UI frameworks, where a handler is used whenever e.g. a button is pressed, or the value of a slider has changed.
+You may recognize this style of programming from writing asynchronous programs, where continuations can be used to deal with values produced in the future by other threads without blocking/suspending the at the callsite. Continuations are also often used in UI frameworks, where a handler is used whenever e.g. a button is pressed, or the value of a slider has changed.
 
 This CPS passing style can also be used to implement exceptions. Say we have a function that can throw:
 ```cpp
@@ -367,12 +368,12 @@ void can_throw(F raise, G cont) {
 Here, the idea is that `raise` gets called if an error occurs, while `cont` gets called when a result has been computed succesfully. What is also interesting is that CPS can be used to implement *control flow*. For example, the called function can call cont multiple times (loops), or only conditionally.
 
 Let us show that the *continuation passing transform* (CPT), i.e. going from direct style to CPS, is nothing more then the Yoneda embedding. Say we have a function:
-```haskell
-f :: a -> b
+```scala
+f: A => B
 ```
-Let us remind ourselves that the Yoneda embedding takes such an arrow, and produces a map \\((Yf)_c = \text{Hom}(c, b) \rightarrow \text{Hom}(c, a)\\) for all \\(c \in \mathcal{C}\\). In Haskell, this embedding could be implemented like this:
-```haskell
-yoneda :: forall x. (a -> b) -> (b -> x) -> (a -> x)
-yoneda f = \k -> k . f
+Let us remind ourselves that the Yoneda embedding takes such an arrow, and produces a map \\((Yf)_c = \text{Hom}(c, b) \rightarrow \text{Hom}(c, a)\\) for all \\(c \in \mathcal{C}\\). In Scala, this embedding could be implemented like this:
+```scala
+def yoneda [A, B]: X => (f: (A => B), g: (B => X)): (A => X) =
+  (k: A => X) => k compose f
 ```
 Going the other way around is easy, we simply pass `id` as our continuation `k`.
