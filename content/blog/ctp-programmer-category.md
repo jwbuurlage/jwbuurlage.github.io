@@ -142,7 +142,7 @@ enum Either[A, B]:
   case Left(a: A)
   case Right(b: B)
 ```
-Here, the type constructor either hold either a value of type `A` or of type `b`, corresponding to the value constructors `Left` and `Right`. We will revisit this idea (and `Either`) when talk about products and coproducts.
+Here, the type constructor either hold either a value of type `A` or of type `B`, corresponding to the value constructors `Left` and `Right`. We will revisit this idea (and `Either`) when talk about products and coproducts.
 
 A type class (implemented in Scala as a _trait_) is a _common interface for types_. It defines a family of types that support the same operations. For example, a trait for objects that support equality could be defined as:
 ```scala

@@ -2,10 +2,10 @@
 >
 > 1. [Categories, functors, and natural transformations](/blog/ctp-categories/)
 > 1. [A category of types and functions](/blog/ctp-programmer-category/)
-> 1. Products, coproducts, and algebraic data types
+> 1. [Products, coproducts, and algebraic data types](/blog/ctp-products-adt)
 > 1. The Yoneda Lemma
 > 1. Adjunctions
 > 1. Monads
-> 1. Recursion and F-algebras
 > 1. Comonads
+> 1. Recursion and F-algebras
 > 1. Lenses and other optics

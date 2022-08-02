@@ -1,7 +1,7 @@
 +++
 title = "Products, coproducts, and algebraic data types"
-date = 2022-07-26
-draft = true
+date = 2022-08-02
+draft = false
 
 [taxonomies]
 tags = ["mathematics", "scala", "functional-programming"]
