@@ -1,7 +1,7 @@
 +++
 title = "The Yoneda Lemma"
-date = 2022-08-20
-draft = true
+date = 2023-02-28
+draft = false
 
 [taxonomies]
 tags = ["mathematics", "scala", "functional-programming"]
@@ -11,6 +11,8 @@ author = "Jan-Willem Buurlage"
 +++
 
 {{ ctptoc() }}
+
+---
 
 The Yoneda Lemma relates a category \\(\mathcal{C}\\) with the functors from \\(\mathcal{C}\\) to \\(\mathbf{Set}\\). Before we can introduce the lemma we will introduce a number of concepts; first we introduce a class of functors called *hom-functors*, we introduce the notion of *representable functors*, we will discuss the *Yoneda embedding* and finally we will move on to the Yoneda Lemma; one of the important tools in category theory
 
@@ -135,111 +137,30 @@ This means in particular that if a set-valued functor \\(F\\) is represented by 
 
 Again, by duality, there exists also a full and faithful functor from \\(\mathcal{C} \to \mathbf{Fun}(\mathcal{C}^{\text{op}}, \mathbf{Set})\\).
 
-## The Yoneda Lemma
-
-Corollary 1 tells us that any natural transformation between covariant hom-functors \\(h^a\\) and \\(h^b\\) is given by composition with an arrow in the reverse direction \\(f: b \to a\\). Note that this arrow is an element of \\(h^b a = \text{Hom}(b, a)\\).
-
-Less obviously, this result holds also for natural transformations between \\(h^a\\) and any other set-valued functor \\(F\\).
-
-What would a function between \\(h^a\\) and \\(F\\) look like? We see that a component of the natural transformation should take an element from \\(h^a b\\), i.e. an arrow \\(g: a \to b\\), to some element of \\(Fb\\). We can do this by *evaluating* the lifted arrow \\(Fg\\) , which is a map between the sets \\(Fa\\) and \\(Fb\\), at a fixed \\(x \in F a\\).
-
-This gives us an idea for a natural transformation corresponding to an element of \\(Fa\\). We summarize this in the following proposition.
-
-
-**Proposition**. Let \\(F: \mathcal{C} \to \mathbf{Set}\\) be a functor, and \\(a \in \mathcal{C}\\). Any element \\(x \in Fa\\) induces a natural transformation from \\(h^a\\) to \\(F\\), by evaluating any lifted arrow in \\(x\\).
-
-> _proof_. We have to show that this induces a natural transformation, i.e. that the following diagram commutes:
-> 
-> \begin{figure}[H]
-> \centering
-> \begin{tikzcd}[sep=large]
-> h^a b \arrow[d, "h^a f"'] \arrow[r, "F \\_ (x)"] & F b \arrow[d, "F f"] \\
-> h^a c \arrow[r, "F \\_ (x)"'] & F c
-> \end{tikzcd}
-> \end{figure}
-> 
-> Here we denote:
-> \\(F \\_ (x): h^a b \to F b,~f \mapsto F f(x).\\)
-> To show that the diagram commutes, fix an arrow \\(g: a \to b \in h^a b\\). If we start taking it along the top side we obtain:
-> \begin{align*}
-> F f (F g(x)) &= (F f \circ F g)(x) = F(f \circ g)(x) \\\\
-> &= (F \\_ (x))(f \circ g) = (F \\_ (x))((h^a f)(g))
-> \end{align*}
-> which is equal to taking it along the bottom, hence the diagram commutes.
-
-The Yoneda lemma states that *all natural transformations between \\(h^a\\) and \\(F\\) are of this form*.
-
-**Theorem 2**. _The Yoneda lemma_. Let \\(\mathcal{C}\\) be a category, let \\(a \in \mathcal{C}\\), and let \\(F: \mathcal{C} \to \mathbf{Set}\\) be a set-valued functor. There is a one-to-one correspondence between elements of \\(Fa\\), and natural transformations:
-\\(\mu: h^a \Rightarrow F.\\)
-
-> _proof_. We already saw that each element of \\(Fa\\) induces a natural transformation, so we have a map:
-> \\(\Phi: F a \to \text{Nat}(h^a, F).\\)
-> Here, \\(\text{Nat}(h^a, F)\\) denotes the set of natural transformations between \\(h^a\\) and \\(F\\).
-> 
->  We now need to show that \\(\Phi\\) has an inverse.
-> Let \\(\mu\\) be any natural transformation, then we can obtain an element of \\(F a\\) by looking at the component \\(\mu_a\\) and let it act on the identity arrow \\(\text{id}_c \in h^a a\\), i.e.:
->
-> \\(\Psi: \mu \mapsto \mu_a(\text{id}_a).\\)
->
-> Now let us show that \\(\Phi\\) and \\(\Psi\\) are inverses of each other. First, we compute:
->
-> \\( \Psi(\Phi(x)) = \Psi(F \\_ (x)) = F \text{id}\_a (x) = \text{id}\_{F a}(x) = x \\)
->
-> so \\(\Psi\\) is a left inverse of \\(\Phi\\). To show that it is also a right inverse, we need to show that:
-> \\(\Phi(\Psi(\mu)) = \mu,\\)
-> or in components:
-> \\(\Phi(\Psi(\mu))_b = \mu_b.\\)
-> We note that by definition, for any \\(f: a \to b\\) in \\(h^a b\\):
-> \\(\Phi(\Psi(\mu))_b (f) = (\Phi(\mu_a(\text{id}_a)))_b (f) = Ff (\mu_a(\text{id}_a)).\\)
-> Since \\(\mu\\) is a natural transformation we have that the following diagram commutes:
-> \begin{figure}[H]
-> \centering
-> \begin{tikzcd}[sep=large]
-> h^a a \arrow[d, "h^a f"'] \arrow[r, "\mu_a"] & F a \arrow[d, "F f"] \\
-> h^a b \arrow[r, "\mu_b"'] & F b
-> \end{tikzcd}
-> \end{figure}
-> In particular, consider the element \\(\text{id}_a \in h^a a\\). Tracing this along bottom this gets mapped to \\(\mu_b (f)\\), while along the top it gives precisely \\(Ff (\mu_a(\text{id}_a))\\), so we have shown that:
-> \\(\Phi(\Psi(\mu))_b (f) = Ff (\mu_a(\text{id}_a)) = \mu_b(f).\\)
-> And hence, \\(\Psi\\) is also a right inverse of \\(\Phi\\), and thus \\(\Phi\\) is a bijection, as required.
-
-One can also show, that this correspondence is 'natural' in \\(a \in \mathcal{C}\\) and \\(F\\).
-
-Let us now prove Theorem 1.
-
-> _proof of Theorem 1_. By Yoneda's Lemma there is a bijection between the sets:
-> \\(\text{Nat}(h^b, h^a) \simeq h^a b = \text{Hom}(a, b)\\)
-> for all objects \\(a\\) and \\(b\\) of \\(\mathcal{C}\\), which directly implies that the functor \\(Y\\) is full and faithful.
-
-Let us recap what we have seen so far. We discussed a special class of set-valued functors called *hom-functors*. These hom-functors, like hom-sets, relate objects directly with the arrows between them.
-
-Next we showed that we can *embed* any category into the category of contravariant set-valued functors of this category, sending objects to their hom-functors. We also showed that this embedding, as a functor, is *full* and *faithful*, which suggests that all the information of the category and its objects, is contained in its hom-functors.
-
-When looking at what this means for the arrows, we noted that in particular any natural transformation between hom-functors is given by composition with arrows of our category.
-
-To prove this, we stated and proved the Yoneda lemma -- which is an important result in its own right. It shows that for an arbitrary set-valued functor, there is a bijection between elements of the set \\(F a\\) and natural transformations from \\(h^a\\) to \\(F\\),
-
-All functors in programming are set-valued, since types can be viewed as set. We first show two simple applications of Yoneda's lemma in mathematics, and next we see some initial applications of the Yoneda lemma to programming.
-
 ## Examples of applications
 
 **Example.** _Matrix row operations_. In linear algebra, row operations can be performed without changing the solutions of the linear system. Examples are row permutations, adding the j-th row to the i-th row, or multiplying a row by a (non-zero) scalar. We will show that these _row operations_ are natural, in the following sense.
 
 Let \\(\mathcal{C}\\) be the category where the objects are natural numbers \\(1, 2, 3, \ldots\\), and where arrows \\(n \to m\\) correspond to \\(m \times n\\) matrices. Composition is given by matrix multiplication, indeed if we have arrows:
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-n \arrow[r, "A_{m \times n}"] & m \arrow[r, "B_{k \times m}"] & k
-\end{tikzcd}
-\end{figure}
+```
+    A_(m x n)   B_(k x m)
+n  ─────────► m ─────────► k
+```
+
 then the composite \\(B_{k \times m} A_{m \times n} = C_{k \times n}\\) is an arrow from \\(n\\) to \\(k\\), as required. Consider contravariant hom-functors \\(h_n\\) for this category. The hom-set \\(h_n k = \text{Hom}(k, n)\\) consists of \\(n \times k\\) matrices. To show that row operations can be seen as natural transformations \\(\mu: h_n \Rightarrow h_n\\), we fix some \\(k \times m\\) matrix \\(B\\), and look at the following naturality square:
-\begin{figure}[H]
-\centering
-\begin{tikzcd}[sep=large]
-h_n k \arrow[r, "\mu_k"] \arrow[d, "h_n B"'] & h_n k \arrow[d, "h_n B"]\\
-h_n m \arrow[r, "\mu_m"] & h_n m
-\end{tikzcd}
-\end{figure}
+
+```
+            mu_k
+   h_n k  ─────────► h_n k
+       │             │ 
+       │             │
+ h_n B │             │ h_n B
+       │             │ 
+       ▼             ▼
+   h_n m ──────────► h_n m
+            mu_m
+```
+
 Considering some \\(n \times k\\) matrix \\(A\\), the naturality condition states:
 
 \\[\mu(A) B \overset{?}{=} \mu(AB).\\]
@@ -265,21 +186,114 @@ so to perform row operations on a matrix, one can equivalently left multiply wit
 **Example**.
 Another application of Yoneda is the following classic result from group theory known as _Cayley's Theorem_: Any group \\(G\\) is isomorphic to a subgroup of a permutation group.
 
-> _proof_. Recall that we can view a group \\(G\\) as a category \\(\mathcal{C}_G\\) with a single object \\(\{ \bullet \}\\) and with arrows \\(\bullet \to \bullet\\) corresponding to the elements of \\(g\\). Consider the Yoneda embedding \\(Y\\) of this category into \\(\mathbf{Fun}(\mathcal{C}\_G^{\text{op}}, \mathbf{Set})\\),
-> and in particular we consider the shape of the image of \\(\bullet\\) under the contravariant hom-functor \\(h\_\bullet\\):
->
-> \begin{figure}[H]
-> \centering
-> \begin{tikzcd}
-> \bullet \arrow[loop left, dashed, "G"] \arrow[r, "Y"] & h_\bullet \arrow[loop right, dashed, "\text{Nat}(h_{\bullet}{,} h_{\bullet})"]
-> \end{tikzcd}
-> \end{figure}
->
-> The arrows on the left (displayed collectively using a dashed arrow), corresponding to the elements of \\(G\\), get mapped _fully and faithfully_ (by Theorem 1) to the natural transformations between \\(h_\bullet\\) and itself (natural endomorphisms).
-> 
-> The natural endomorphisms \\(h_\bullet\\) are characterized, by Corollary 1, (at the only component \\(G\\)) by left-multiplication of elements \\(G\\) on the set \\(h_\bullet \bullet \simeq G_{\text{set}}\\) which is the underlying set of \\(G\\) (since it is \\(\text{Hom}(\bullet, \bullet)\\)). For each element \\(g \in G\\) we obtain an automorphism \\(G_{\text{set}} \to G_{\text{set}}\\) given by \\(h \mapsto gh\\).
-> 
-> Recall that \\(\text{Aut}(G_{\text{set}})\\) is a group (a permutation group), and note that the collection of automorphisms defined by left multiplication of elements of \\(G\\) is indeed a subgroup of this permutation group. The correspondence between \\(G\\) and the "automorphisms by left-multiplication" is easily seen to be a group isomorphism.
+ _proof_. Recall that we can view a group \\(G\\) as a category \\(\mathcal{C}_G\\) with a single object \\(\{ \bullet \}\\) and with arrows \\(\bullet \to \bullet\\) corresponding to the elements of \\(g\\). Consider the Yoneda embedding \\(Y\\) of this category into \\(\mathbf{Fun}(\mathcal{C}\_G^{\text{op}}, \mathbf{Set})\\),
+ and in particular we consider the shape of the image of \\(\bullet\\) under the contravariant hom-functor \\(h\_\bullet\\):
+ 
+ ```
+G     Y      Nat(h_., h_.)
+. ─────────► h_. 
+```
+
+
+The arrows on the left (displayed collectively as `G`), corresponding to the elements of \\(G\\), get mapped _fully and faithfully_ (by Theorem 1) to the natural transformations between \\(h_\bullet\\) and itself (natural endomorphisms).
+ 
+ The natural endomorphisms \\(h_\bullet\\) are characterized, by Corollary 1, (at the only component \\(G\\)) by left-multiplication of elements \\(G\\) on the set \\(h_\bullet \bullet \simeq G_{\text{set}}\\) which is the underlying set of \\(G\\) (since it is \\(\text{Hom}(\bullet, \bullet)\\)). For each element \\(g \in G\\) we obtain an automorphism \\(G_{\text{set}} \to G_{\text{set}}\\) given by \\(h \mapsto gh\\).
+ 
+ Recall that \\(\text{Aut}(G_{\text{set}})\\) is a group (a permutation group), and note that the collection of automorphisms defined by left multiplication of elements of \\(G\\) is indeed a subgroup of this permutation group. The correspondence between \\(G\\) and the "automorphisms by left-multiplication" is seen to be a group isomorphism by checking the definition directly. \\( \Box \\)
+
+## The Yoneda Lemma
+
+Corollary 1 tells us that any natural transformation between covariant hom-functors \\(h^a\\) and \\(h^b\\) is given by composition with an arrow in the reverse direction \\(f: b \to a\\). Note that this arrow is an element of \\(h^b a = \text{Hom}(b, a)\\).
+
+Less obviously, this result holds also for natural transformations between \\(h^a\\) and any other set-valued functor \\(F\\).
+
+What would a function between \\(h^a\\) and \\(F\\) look like? We see that a component of the natural transformation should take an element from \\(h^a b\\), i.e. an arrow \\(g: a \to b\\), to some element of \\(Fb\\). We can do this by *evaluating* the lifted arrow \\(Fg\\) , which is a map between the sets \\(Fa\\) and \\(Fb\\), at a fixed \\(x \in F a\\).
+
+This gives us an idea for a natural transformation corresponding to an element of \\(Fa\\). We summarize this in the following proposition.
+
+
+**Proposition**. Let \\(F: \mathcal{C} \to \mathbf{Set}\\) be a functor, and \\(a \in \mathcal{C}\\). Any element \\(x \in Fa\\) induces a natural transformation from \\(h^a\\) to \\(F\\), by evaluating any lifted arrow in \\(x\\).
+
+_proof_. We have to show that this induces a natural transformation, i.e. that the following diagram commutes:
+
+```
+      a    F_(x)
+     h b  ─────────► F b
+       │             │ 
+   a   │             │
+  h f  │             │ F f
+       │             │ 
+       ▼             ▼
+      a  ──────────► F c
+     h c    F_(x)
+```
+
+Here we denote:
+\\(F \\_ (x): h^a b \to F b,~f \mapsto F f(x).\\)
+To show that the diagram commutes, fix an arrow \\(g: a \to b \in h^a b\\). If we start taking it along the top side we obtain:
+\begin{align*}
+F f (F g(x)) &= (F f \circ F g)(x) = F(f \circ g)(x) \\\\
+&= (F \\_ (x))(f \circ g) = (F \\_ (x))((h^a f)(g))
+\end{align*}
+which is equal to taking it along the bottom, hence the diagram commutes. \\(\Box\\)
+
+The Yoneda lemma states that *all natural transformations between \\(h^a\\) and \\(F\\) are of this form*.
+
+**Theorem 2**. _The Yoneda lemma_. Let \\(\mathcal{C}\\) be a category, let \\(a \in \mathcal{C}\\), and let \\(F: \mathcal{C} \to \mathbf{Set}\\) be a set-valued functor. There is a one-to-one correspondence between elements of \\(Fa\\), and natural transformations:
+\\(\mu: h^a \Rightarrow F.\\)
+
+_proof_. We already saw that each element of \\(Fa\\) induces a natural transformation, so we have a map:
+\\(\Phi: F a \to \text{Nat}(h^a, F).\\)
+Here, \\(\text{Nat}(h^a, F)\\) denotes the set of natural transformations between \\(h^a\\) and \\(F\\).
+
+ We now need to show that \\(\Phi\\) has an inverse.
+Let \\(\mu\\) be any natural transformation, then we can obtain an element of \\(F a\\) by looking at the component \\(\mu_a\\) and let it act on the identity arrow \\(\text{id}_c \in h^a a\\), i.e.:
+
+\\(\Psi: \mu \mapsto \mu_a(\text{id}_a).\\)
+
+Now let us show that \\(\Phi\\) and \\(\Psi\\) are inverses of each other. First, we compute:
+
+\\( \Psi(\Phi(x)) = \Psi(F \\_ (x)) = F \text{id}\_a (x) = \text{id}\_{F a}(x) = x \\)
+
+so \\(\Psi\\) is a left inverse of \\(\Phi\\). To show that it is also a right inverse, we need to show that:
+\\(\Phi(\Psi(\mu)) = \mu,\\)
+or in components:
+\\(\Phi(\Psi(\mu))_b = \mu_b.\\)
+We note that by definition, for any \\(f: a \to b\\) in \\(h^a b\\):
+\\(\Phi(\Psi(\mu))_b (f) = (\Phi(\mu_a(\text{id}_a)))_b (f) = Ff (\mu_a(\text{id}_a)).\\)
+Since \\(\mu\\) is a natural transformation we have that the following diagram commutes:
+```
+            mu_a(x)
+   h^a a  ─────────► F a
+       │             │ 
+       │             │
+ h^a f │             │ F f
+       │             │ 
+       ▼             ▼
+   h^a b ──────────► F b
+            mu_b(x)
+```
+In particular, consider the element \\(\text{id}_a \in h^a a\\). Tracing this along bottom this gets mapped to \\(\mu_b (f)\\), while along the top it gives precisely \\(Ff (\mu_a(\text{id}_a))\\), so we have shown that:
+\\(\Phi(\Psi(\mu))_b (f) = Ff (\mu_a(\text{id}_a)) = \mu_b(f).\\)
+And hence, \\(\Psi\\) is also a right inverse of \\(\Phi\\), and thus \\(\Phi\\) is a bijection, as required. \\(\Box\\)
+
+One can also show, that this correspondence is 'natural' in \\(a \in \mathcal{C}\\) and \\(F\\).
+
+Let us now prove Theorem 1.
+
+> _proof of Theorem 1_. By Yoneda's Lemma there is a bijection between the sets:
+> \\(\text{Nat}(h^b, h^a) \simeq h^a b = \text{Hom}(a, b)\\)
+> for all objects \\(a\\) and \\(b\\) of \\(\mathcal{C}\\), which directly implies that the functor \\(Y\\) is full and faithful.
+
+Let us recap what we have seen so far. We discussed a special class of set-valued functors called *hom-functors*. These hom-functors, like hom-sets, relate objects directly with the arrows between them.
+
+Next we showed that we can *embed* any category into the category of contravariant set-valued functors of this category, sending objects to their hom-functors. We also showed that this embedding, as a functor, is *full* and *faithful*, which suggests that all the information of the category and its objects, is contained in its hom-functors.
+
+When looking at what this means for the arrows, we noted that in particular any natural transformation between hom-functors is given by composition with arrows of our category.
+
+To prove this, we stated and proved the Yoneda lemma -- which is an important result in its own right. It shows that for an arbitrary set-valued functor, there is a bijection between elements of the set \\(F a\\) and natural transformations from \\(h^a\\) to \\(F\\),
+
+All functors in programming are set-valued, since types can be viewed as set. We first show two simple applications of Yoneda's lemma in mathematics, and next we see some initial applications of the Yoneda lemma to programming.
 
 ## Yoneda in programming
 
