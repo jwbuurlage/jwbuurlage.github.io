@@ -21,6 +21,12 @@ html {
   }
 }
 
+@media only screen and (max-width: 600px) {
+  html {
+    padding: 1.0em;
+  }
+}
+
 body {
   padding-bottom: 2.5em;
 }
@@ -127,10 +133,15 @@ ul.blog-post-list h3 {
 
 pre {
   padding: 10px;
+  overflow-x: auto;
 }
 
 pre code {
   display: inline-block;
+}
+
+p {
+  overflow-x: auto;
 }
 
 img {
