@@ -1,4 +1,4 @@
-$hl-color: #008888;
+$hl-color: #333333;
 
 * {
   margin: 0;
@@ -7,18 +7,22 @@ $hl-color: #008888;
 
 html {
   height: 100%;
-  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   margin: 0 auto;
   padding: 1.5em;
-  font-size: 1.5em;
-  background-color: #efefef;
-  color: #333;
+  background-color: #f9f9f9;
+  color: #444;
 }
 
 @media (min-width: 768px) {
   html {
     max-width: 40em;
   }
+}
+
+body {
+  padding-bottom: 2.5em;
 }
 
 header {
@@ -47,14 +51,14 @@ p {
 }
 
 h1, h2, h3, h4 {
-  margin-top: 15px;
+  margin-top: 50px;
   margin-bottom: 10px;
   line-height: 1.25em;
   color: #333;
 }
-h4 {
-  margin-top: -10px;
-  font-weight: 400;
+
+h3, h4 {
+  margin-top: 0px;
 }
 
 h3 {
@@ -73,11 +77,11 @@ li {
 a {
   font-weight: 600;
   color: $hl-color;
-  text-decoration: none;
 }
 
 a:hover, a:focus, a:active {
   text-decoration: underline;
+  opacity: 0.6;
 }
 
 p {
@@ -129,11 +133,6 @@ pre code {
   display: inline-block;
 }
 
-//pre code {
-//  background: none;
-//  padding: none;
-//}
-
 img {
   max-width: 60%;
   display: block;
@@ -146,47 +145,7 @@ blockquote {
   font-style: italic;
   border-left: solid 1px $hl-color;
 }
-//
-//table {
-//  font-size: 1rem;
-//  text-align: left;
-//  caption-side: bottom;
-//  margin-bottom: 2em;
-//}
-//
-//table * {
-//    border: none;
-// }
-//table thead, table tr {
-//  display: table;
-//  table-layout: fixed;
-//  width: 100%;
-//}
-//
-//table tr:nth-child(even) {
-//  background-color: rgba(200, 200, 200, 0.2);
-//}
-//
-//table tbody {
-//  display: block;
-//  max-height: 70vh;
-//  overflow-y: auto;
-//}
-//
-//table td, table th {
-//  padding: 0.25em;
-//}
-//
-//figure {
-//  margin: 1em 0;
-//}
-//
-//
-//footer {
-//  margin-top: 50px;
-//  height: 40px;
-//}
-//
+
 hr {
   border: #ccc 1px solid;
   margin-top: 20px;
@@ -194,9 +153,3 @@ hr {
   display: inline-block;
   width: 100%;
 }
-//
-//li {
-//    padding-left: 0.2em;
-//    margin-left: 1em;
-//}
-//

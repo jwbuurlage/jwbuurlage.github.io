@@ -3,15 +3,13 @@
 {% block content %}
 <article>
     <div>
-
         <div>
-            <h3>
-                <small class="text-muted">{{ page.date }}</small> <br />
-            </h3>
             <h1>
                 {{ page.title | safe }}
             </h1>
-
+            <h3>
+                <small class="text-muted">{{ page.date }}</small> <br />
+            </h3>
             {% if page.taxonomies.tags %}
             <ul class="tag-list">
                 {% for tag in page.taxonomies.tags %}
@@ -35,5 +33,6 @@
 </article>
 
 <footer>
+        <hr />
 </footer>
 {% endblock %}
