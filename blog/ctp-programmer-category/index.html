@@ -1,0 +1,271 @@
+<!DOCTYPE html <html lang="en">
+
+<head>
+  <title>Personal webpage and blog of Jan-Willem Buurlage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/custom.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/academic/">Academic</a>
+      
+    </nav>
+  </header>
+
+  <div class="container">
+    
+<article>
+    <div>
+        <div>
+            <h1>
+                A category of types and functions
+            </h1>
+            <h3>
+                <small class="text-muted">2022-07-23</small> <br />
+            </h3>
+            
+            <ul class="tag-list">
+                
+                <li>
+                   mathematics
+                </li>
+                
+                <li>
+                   scala
+                </li>
+                
+                <li>
+                   functional-programming
+                </li>
+                
+            </ul>
+            
+        </div>
+
+        <hr />
+
+        <section class="post">
+            <article>
+                <blockquote>
+<p>In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit <a href="https://github.com/jwbuurlage/category-theory-programmers">the notes I wrote back then</a>, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.</p>
+<ol>
+<li><a href="/blog/ctp-categories/">Categories, functors, and natural transformations</a></li>
+<li><a href="/blog/ctp-programmer-category/">A category of types and functions</a></li>
+<li><a href="/blog/ctp-products-adt">Products, coproducts, and algebraic data types</a></li>
+<li><a href="/blog/ctp-yoneda">The Yoneda Lemma</a></li>
+</ol>
+</blockquote>
+<h2 id="sets-and-types">Sets and types</h2>
+<p>To apply ideas from category theory to functional programming, we first need to figure out what the relevant category is. One observation is that a <em>type</em> in a programming language, is much like a <em>set</em> in mathematics. For example, the type <code>int</code> in C based languages, corresponds to some finite set of numbers. The type <code>char</code> to a set of letters <code>'a'</code>, <code>'z'</code> and <code>'$'</code>. And the type <code>bool</code> is a set of two elements: <code>true</code> and <code>false</code>. This category, the <em>category of types</em>, allows us to look at programming through the lens of category theory.</p>
+<p>In this post we will give an idea of how category theory applies to programming. In upcoming posts, we will dig deeper into the introduced concepts (and beyond).</p>
+<p>We can take as our model for the category of types the category <strong>Set</strong>. Recall that the elements of <strong>Set</strong> are sets, and the arrows correspond to maps. We will glance over a lot of technicalities. Mathematical maps and functions in a computer program are not identical, for example we are missing the bottom value \( \perp \), for example, which indicates a program that did not terminate with a value. </p>
+<p>To be able to fully apply the ideas from category theory, we will need a language with higher-kinded types later on. This includes languages like Scala and Haskell. Here, we will use the Scala programming language for the examples given, but the focus will be on the mathematics and general theory.</p>
+<p>We can express that an object has a certain type:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>a: </span><span style="color:#b48ead;">Int
+</span></code></pre>
+<p>To define a function \( f: A \to B \) from type \( A \) to type \( B \) in Scala:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span style="color:#b48ead;">=&gt; </span><span>B
+</span></code></pre>
+<p>To compose two functions:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#bf616a;">g</span><span>: </span><span style="color:#d08770;">B </span><span style="color:#b48ead;">=&gt; </span><span>C
+</span><span>h = g compose f
+</span></code></pre>
+<p>This means that <code>h</code> is a function <code>h: A =&gt; C</code>. Note how easy it is to compose functions in Scala.</p>
+<p>We need some additional operations to truly turn it into a category. Scala has <code>identity</code> built in:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>identity: </span><span style="color:#d08770;">Any </span><span>-&gt; </span><span style="color:#d08770;">Any
+</span></code></pre>
+<p>We can also define it ourselves as a generic lambda expression</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">id </span><span>= [</span><span style="color:#d08770;">A</span><span>] =&gt; (</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">A</span><span>) </span><span style="color:#b48ead;">=&gt;</span><span> x
+</span><span>assert(id(</span><span style="color:#d08770;">3</span><span>) == </span><span style="color:#d08770;">3</span><span>)
+</span><span>assert(id(&quot;</span><span style="color:#a3be8c;">foo</span><span>&quot;) == &quot;</span><span style="color:#a3be8c;">foo</span><span>&quot;)
+</span></code></pre>
+<p>In mathematics all functions are <em>pure</em>: they will always give the same output for the same input. This is not always the case for computer programs. Operations such as performing I/O, returning the current date, or using a global variable are all examples of impure operations that are common in programming. We will focus on &quot;pure&quot; functions here, and try to avoid any side effects.</p>
+<p>As our model category is <strong>Set</strong>, there should be a type that corresponds to the empty set \( \emptyset \). In C / C++, the obvious candidate would be <code>void</code> for this set, but consider a function definition:</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">f</span><span>() { ... };
+</span></code></pre>
+<p>This can be seen as a function from <code>void -&gt; void</code>. We can call this function using <code>f()</code>, but what does it mean to call a function? We always invoke a function for an argument, so <code>void</code> actually corresponds to the set with a single element! Note that C functions that return void either do nothing useful (i.e. discard their arguments), or are impure. Indeed, even using a pointer argument to return a value indirectly modifies a 'global state'.</p>
+<p>In Scala, the type corresponding to the <em>singleton set</em> is <code>()</code>and its single value is also denoted with <code>()</code>. Meaning that if we have a function:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">f </span><span>= () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#d08770;">3
+</span></code></pre>
+<p>we can invoke it as <code>f()</code>.</p>
+<p>Instead, the type <code>Nothing</code> corresponds to the empty set, and there can never be a value of this type. We can imagine the (unique) polymorphic (in the return type!) function that takes <code>Nothing</code>.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">absurd</span><span>: [</span><span style="color:#d08770;">A</span><span>] =&gt; </span><span style="color:#b48ead;">Nothing </span><span>=&gt; </span><span style="color:#d08770;">A </span><span>= </span><span style="color:#d08770;">null
+</span></code></pre>
+<p>Note that you can never call this function, as <code>Nothing</code> is uninhibited: there are no values that have that type.</p>
+<p>You may be tempted to discard the type <code>Nothing</code> as something that is only used by academics to make the type system 'complete', but there are a number of legitimate uses for <code>Nothing</code>. An example is <em>continuation passing style</em>, or CPS, where functions do not return a value, but pass control over to another function:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">type </span><span>Continuation[</span><span style="color:#d08770;">A</span><span>] =&gt; </span><span style="color:#d08770;">A </span><span>=&gt; Nothing
+</span></code></pre>
+<p>In other words, a continuation is a function that <em>never returns</em>, which can be used to manipulate control flows (in a type-safe manner).</p>
+<p>Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In a <a href="/blog/ctp-categories/">previous blog post</a> we introduced the concepts of <em>initial</em> and <em>terminal</em> objects. In the category of types <code>Nothing</code> is initial and <code>()</code> is terminal.</p>
+<p>To summarize this introduction, in the category of types, types are objects, and <em>pure</em> functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this (admittedly informally defined) category that we will call <strong>Type</strong>.</p>
+<h2 id="containers-as-functors">Containers as functors</h2>
+<p>When we consider functors in the category of types, the first question is 'to what category?'. Here, we will almost exclusively talk about functors from <strong>Type</strong> to itself. Functors from a category to itself are called <em>endofunctors</em>.</p>
+<p>Endofunctors in <strong>Type</strong> map types to types, and functions to functions. There are many examples of functors in programming. Let us first consider the concept of <em>lists of objects</em>, i.e. arrays or vectors. In C++ a list would be written as:</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span>std::vector&lt;T&gt; xs;
+</span></code></pre>
+<p>or in Python we would have;</p>
+<pre data-lang="python" style="background-color:#eff1f5;color:#4f5b66;" class="language-python "><code class="language-python" data-lang="python"><span>&gt;&gt;&gt; </span><span style="color:#b48ead;">import </span><span>numpy </span><span style="color:#b48ead;">as </span><span>np
+</span><span>&gt;&gt;&gt; a = np.</span><span style="color:#bf616a;">array</span><span>([</span><span style="color:#d08770;">1</span><span>,</span><span style="color:#d08770;">2</span><span>,</span><span style="color:#d08770;">3</span><span>], </span><span style="color:#bf616a;">dtype</span><span>=&#39;</span><span style="color:#a3be8c;">int</span><span>&#39;)
+</span><span>&gt;&gt;&gt; </span><span style="color:#96b5b4;">type</span><span>(a)
+</span><span>&lt;</span><span style="background-color:#bf616a;color:#eff1f5;">class</span><span> &#39;</span><span style="color:#a3be8c;">numpy.ndarray</span><span>&#39;&gt;
+</span><span>&gt;&gt;&gt; a.dtype
+</span><span style="color:#bf616a;">dtype</span><span>(&#39;</span><span style="color:#a3be8c;">int64</span><span>&#39;)
+</span></code></pre>
+<p>Note that the true type of the <code>np.array</code> is hidden inside the object, meaning it's the responsiblity of the program to make sure that the types of operations match! (The reason that we consider NumPy arrays is that normal 'lists' in Python are actually <em>tuples</em>, which we will discuss when we talk about products and coproducts.)</p>
+<p>Let us consider the mathematical way of expressing arrays of a certain type.</p>
+<h3 id="kleen-closures">Kleen closures</h3>
+<p>Lists of some fixed type are more generally called <strong>words over some alphabet</strong> (an <em>alphabet</em> here is a set of letters) \( X \), and we denote the set of all finite words of elements in \( X \) as \( X^* \). This is also called the <em>Kleene closure</em> of \( X \).</p>
+<p>Elements in \( X^* \) look like:
+$$(x_1, x_2, x_3)$$
+$$(x_1)$$
+$$()$$
+These are all examples of <em>words</em> in \( X \) (where the last example corresponds to the empty word). If we want to construct a <em>word functor</em> \( T \), then \( T \) would then have the signature:</p>
+<p>\begin{align*}
+T&amp;: X \to X^* \\
+&amp;: (f: X \to Y) \mapsto (Tf: X^* \to Y^*)
+\end{align*}</p>
+<p>For this second option, we have an obvious candidate for the precise function. Let \( f: X \to Y \) be some map, then \( Tf \) maps a word in \( X \) to a word in \( Y \) in the following way:
+$$Tf(x_1, x_2, x_3, ... x_n) = (f(x_1), f(x_2), f(x_3), \ldots, f(x_n)).$$</p>
+<p><strong>Type classes and type constructors</strong></p>
+<p>We will express this idea in Scala, but before we can do this we first have to consider type classes and type constructors. A <em>type constructor</em> is a 'function' that given a type, creates another type. A <em>type constructor</em> can have multiple <em>value constructors</em>, and these constructors can be differentiated between using something called <em>pattern matching</em> which we will see later.</p>
+<p>Let us defined our own <code>Boolean</code> type.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Bool:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>False
+</span><span>    </span><span style="color:#b48ead;">case </span><span>True
+</span></code></pre>
+<p>Here, we define the type constructor <code>Bool</code> as the resulting type corresponding to the <em>value</em> given by the value constructors <code>True</code> and <code>False</code>, which both are nullary constructors (that take no argument as types!). However, type constructors can take one or multiple types for their value constructors:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Either[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]:
+</span><span>  </span><span style="color:#b48ead;">case </span><span>Left(</span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#d08770;">A</span><span>)
+</span><span>  </span><span style="color:#b48ead;">case </span><span>Right(</span><span style="color:#bf616a;">b</span><span>: </span><span style="color:#d08770;">B</span><span>)
+</span></code></pre>
+<p>Here, the type constructor either hold either a value of type <code>A</code> or of type <code>B</code>, corresponding to the value constructors <code>Left</code> and <code>Right</code>. We will revisit this idea (and <code>Either</code>) when talk about products and coproducts.</p>
+<p>A type class (implemented in Scala as a <em>trait</em>) is a <em>common interface for types</em>. It defines a family of types that support the same operations. For example, a trait for objects that support equality could be defined as:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#d08770;"> Eq</span><span>[</span><span style="color:#d08770;">T</span><span>] </span><span style="color:#343d46;">{
+</span><span style="color:#343d46;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">isEqual</span><span style="color:#343d46;">(</span><span style="color:#bf616a;">x</span><span style="color:#343d46;">: </span><span style="color:#d08770;">T</span><span style="color:#343d46;">, </span><span style="color:#bf616a;">y</span><span style="color:#343d46;">: </span><span style="color:#d08770;">T</span><span style="color:#343d46;">): </span><span style="color:#b48ead;">Boolean
+</span><span style="color:#343d46;">}
+</span></code></pre>
+<p>If we want to express the concept of a <em>functor</em> using a type class, we have to state that it can send types to types, and that it sends functions between two types to functions with the appropriate signature, i.e.:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#d08770;"> Functor</span><span>[</span><span style="color:#d08770;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]]:
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>], </span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">B</span><span>]
+</span></code></pre>
+<p>This says that <code>F</code> is a functor, if there is a function <code>map</code> that takes a value of type <code>F[A]</code>, a function <code>f: A =&gt; B</code> and returns a value of type <code>F[B]</code>.</p>
+<h2 id="the-word-functor">The Word functor</h2>
+<p>Let us build the 'Word' functor from the ground up. We use a concept called a 'cons-list', with which we define a word over an alphabet recursively as being either</p>
+<ol>
+<li>a letter followed by a word</li>
+<li>empty</li>
+</ol>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Word[+</span><span style="color:#d08770;">A</span><span>]:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Cons(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">A</span><span>, </span><span style="color:#bf616a;">xs</span><span>: </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">A</span><span>])
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Nil
+</span></code></pre>
+<p>(The syntax <code>+A</code> indicates a 'contravariant type', which we will not discuss here yet)</p>
+<p>We have two possible ways of constructing a word (partitioning the possible values of the type):  a word of <code>A</code>s is either empty (corresponding to the <em>constructor</em> <code>Nil</code>), or that it is the concatenation (corresponding to the <em>constructor</em> <code>Cons</code>) of an object of type <code>A</code> with another word of <code>A</code>s. Note the recursive definition.</p>
+<p>Next we define the <code>map</code> for our <code>Word</code> functor. The corresponding definition to the map described for the <em>word functor</em> is:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>given Functor[</span><span style="color:#d08770;">Word</span><span>] with
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">xs</span><span>: </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">A</span><span>], </span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">B</span><span>] =
+</span><span>    xs </span><span style="color:#b48ead;">match 
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Word.Cons(</span><span style="color:#bf616a;">y</span><span>, </span><span style="color:#bf616a;">ys</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Word.Cons(f(y), map(ys, f))
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Word.Nil </span><span style="color:#b48ead;">=&gt; </span><span>Word.Nil
+</span></code></pre>
+<p>If a word is empty, then we get an empty word back. Otherwise, we map the individual letters in the list recursively using the given <code>f</code>.</p>
+<blockquote>
+<p>In <code>C++</code> this <code>map</code> functor roughly corresponds to <code>std::transform</code>, while for Python the closest thing would be the <code>map</code> function.</p>
+</blockquote>
+<p>With these two definitions, we have turned <code>Word</code> into a functor.</p>
+<p><code>Word</code> is implemented as <code>List</code> in the standard library of Scala, and <code>a :: b</code> is the syntactic sugar replacing <code>Word.Cons(a, b)</code>.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">x </span><span>= </span><span style="color:#d08770;">1</span><span> :: </span><span style="color:#d08770;">2</span><span> :: Nil </span><span style="color:#a7adba;">// List(1, 2)
+</span></code></pre>
+<h2 id="the-maybe-functor">The Maybe functor</h2>
+<p>As a simpler example, consider a type that either has no value or it has a value corresponding to some type <code>A</code>. In Haskell, this is called <code>Maybe</code>, while in C++ this is called <code>std::optional</code>, in Python the same idea could be achieved using:</p>
+<pre data-lang="python" style="background-color:#eff1f5;color:#4f5b66;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">fn</span><span>(</span><span style="color:#bf616a;">a</span><span>):
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(a &gt;= </span><span style="color:#d08770;">0</span><span>)
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">sqrt</span><span>(a)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">None
+</span></code></pre>
+<p>This function returns <code>None</code> (corresponding to 'no value') if we provide 'invalid input'.</p>
+<p>In Scala, this type can be implemented as:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Maybe[+</span><span style="color:#d08770;">A</span><span>]:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Some(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">A</span><span>)
+</span><span>    </span><span style="color:#b48ead;">case </span><span>None
+</span></code></pre>
+<p>And to turn it into a functor, we define <code>map</code>:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>given Functor[</span><span style="color:#d08770;">Maybe</span><span>] with
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">xs</span><span>: </span><span style="color:#d08770;">Maybe</span><span>[</span><span style="color:#d08770;">A</span><span>], </span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">Maybe</span><span>[</span><span style="color:#d08770;">B</span><span>] =
+</span><span>    xs </span><span style="color:#b48ead;">match 
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Maybe.Some(</span><span style="color:#bf616a;">y</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Maybe.Some(f(y))
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Maybe.None </span><span style="color:#b48ead;">=&gt; </span><span>Maybe.None
+</span></code></pre>
+<p><code>Maybe</code> is implemented in the Scala standard library as <code>Option</code>.</p>
+<h2 id="polymorphic-functions-as-natural-transformations">Polymorphic functions as natural transformations</h2>
+<p>In a <a href="/blog/ctp-categories/">previous blog post</a> we introduced natural transformations as a family of functions between two functors \( F \) and \( G \).</p>
+<p>Now that we view type constructors as functors, we can consider natural transformations between type constructors. If we let <code>A</code> be a type, then a natural transformation <code>alpha</code> would be something that maps between <code>F[A]</code> and <code>G[A]</code>, where <code>F</code> and <code>G</code> are type constructors:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#bf616a;">alpha</span><span>: </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>] </span><span style="color:#b48ead;">=&gt; </span><span>G[</span><span style="color:#d08770;">A</span><span>]
+</span></code></pre>
+<p>Note that implicitly we talk about the component of <code>alpha</code> at <code>A</code>. This function is <em>polymorphic</em> the right component gets picked by the compiler. For example, say we have a word <code>Word[A]</code>, and we want to obtain the first element of this list. If the list is empty, then there is no such element, otherwise we obtain an <code>A</code>; i.e. the result is a <code>Maybe[A]</code>:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">head</span><span>[</span><span style="color:#d08770;">A</span><span>](</span><span style="color:#bf616a;">xs</span><span>: </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">A</span><span>]): </span><span style="color:#d08770;">Maybe</span><span>[</span><span style="color:#d08770;">A</span><span>] =
+</span><span>  xs </span><span style="color:#b48ead;">match
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Word.Nil </span><span style="color:#b48ead;">=&gt; </span><span>Maybe.None
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Word.Cons(</span><span style="color:#bf616a;">x</span><span>, </span><span style="color:#bf616a;">_</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Maybe.Some(x)
+</span></code></pre>
+<p>Here, we have a natural transformation between the <code>Word</code> and the <code>Maybe</code> functor!</p>
+<h2 id="parametric-polymorphism-and-ad-hoc-polymorphism">Parametric polymorphism and ad-hoc polymorphism</h2>
+<p>In C++, a template does not have to be defined for all types, i.e. we can write:</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">template </span><span>&lt;</span><span style="color:#b48ead;">typename</span><span> T&gt;
+</span><span>T </span><span style="color:#8fa1b3;">f</span><span>(T </span><span style="color:#bf616a;">a</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">template </span><span>&lt;&gt;
+</span><span style="color:#b48ead;">int </span><span style="color:#8fa1b3;">f</span><span>(</span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">a</span><span>) { </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">2 </span><span>* a; }
+</span><span>
+</span><span style="color:#b48ead;">template </span><span>&lt;&gt;
+</span><span style="color:#b48ead;">double </span><span style="color:#8fa1b3;">f</span><span>(</span><span style="color:#b48ead;">double </span><span style="color:#bf616a;">a</span><span>) { </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">2.0 </span><span>* a; }
+</span></code></pre>
+<p>Here, e.g. <code>f&lt;int&gt;(1)</code> would yield <code>2</code>, while <code>f&lt;char&gt;('a')</code> would result in a compilation error.</p>
+<p>What we are talking about here is <em>parametric polymorphism</em>: polymorphic functions must work for <em>all types</em>. Specializing function definitions is done using traits. This has an important consequence (or perhaps, it is the underlying reason): a parametric polymorphic function satisfies automatically the naturality conditions.</p>
+<p>The corresponding naturality square in this context is:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>             alpha
+</span><span>         F[A]────► G[A]
+</span><span>          │          │
+</span><span>map(_, f) │          │ map(_, f)
+</span><span>          │          │
+</span><span>          ▼          ▼
+</span><span>         F[B]────► G[B]
+</span><span>             alpha
+</span></code></pre>
+<p>Here, the left <code>map</code> corresponds to <code>F</code>, while the right <code>map</code> corresponds to <code>G</code>, and the top <code>alpha</code> is implicitely the component at <code>A</code>, while the bottom one is the component at <code>B</code>. What we would have to show, is that:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>map(</span><span style="color:#bf616a;">_</span><span>, f) compose alpha = alpha compose map(</span><span style="color:#bf616a;">_</span><span>, f)
+</span></code></pre>
+<p>It turns out that this can be shown in a very general context, and it has to do with the fact that the 'bodies' for <code>f</code>, <code>map</code> and <code>alpha</code> are the same for all types. This is related to <em>free theorems</em>, which we will not go into in this series.</p>
+<p>Let us revisit our <code>head</code> example, and consider the naturality condition here. It says that:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>map(</span><span style="color:#bf616a;">_</span><span>, f) compose head = head compose map(</span><span style="color:#bf616a;">_</span><span>, f)
+</span></code></pre>
+<p>Here, the map on the left-hand side corresonds to the <code>Maybe</code> functor, while on the right-hand side it corresponds to the <code>Word</code> functor.</p>
+<ul>
+<li>The left-hand side can be read as: &quot;take the first element of the list, then apply <code>f</code> to it&quot;.</li>
+<li>The right-hand side can be read as: &quot;apply the function <code>f</code> to the entire list, then take the first element&quot;.</li>
+</ul>
+<p>The result is the same, but obviously the left-hand side is more efficient in that it only has to apply <code>f</code> once. Because of the constraint on polymorphic functions, the compiler knows that the result is equal and can choose to use the most efficient one!</p>
+
+            </article>
+        </section>
+
+    </div>
+</article>
+
+<footer>
+        <hr />
+</footer>
+
+  </div>
+
+</body>
+</html>

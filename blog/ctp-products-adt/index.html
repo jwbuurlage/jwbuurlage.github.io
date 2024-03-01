@@ -1,0 +1,330 @@
+<!DOCTYPE html <html lang="en">
+
+<head>
+  <title>Personal webpage and blog of Jan-Willem Buurlage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/custom.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/academic/">Academic</a>
+      
+    </nav>
+  </header>
+
+  <div class="container">
+    
+<article>
+    <div>
+        <div>
+            <h1>
+                Products, coproducts, and algebraic data types
+            </h1>
+            <h3>
+                <small class="text-muted">2022-08-02</small> <br />
+            </h3>
+            
+            <ul class="tag-list">
+                
+                <li>
+                   mathematics
+                </li>
+                
+                <li>
+                   scala
+                </li>
+                
+                <li>
+                   functional-programming
+                </li>
+                
+            </ul>
+            
+        </div>
+
+        <hr />
+
+        <section class="post">
+            <article>
+                <blockquote>
+<p>In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit <a href="https://github.com/jwbuurlage/category-theory-programmers">the notes I wrote back then</a>, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.</p>
+<ol>
+<li><a href="/blog/ctp-categories/">Categories, functors, and natural transformations</a></li>
+<li><a href="/blog/ctp-programmer-category/">A category of types and functions</a></li>
+<li><a href="/blog/ctp-products-adt">Products, coproducts, and algebraic data types</a></li>
+<li><a href="/blog/ctp-yoneda">The Yoneda Lemma</a></li>
+</ol>
+</blockquote>
+<h2 id="duality-and-products-of-objects">Duality and products of objects</h2>
+<h3 id="products">Products</h3>
+<p>Initial objects and terminal objects have a <em>universal property</em>, meaning that they are defined by the property that e.g. all other objects have a <em>unique morphism to the object</em>. A more involved example of such a universal property is the <em>notion of a product of objects</em>. The categorical product is a unifying definition for many 'products' encountered in mathematics, such as the cartesian product, product group, products of topological spaces, and so on.</p>
+<p><strong>Definition</strong>. Let \(\mathcal{C}\) be a category, and let \(a, b \in \mathcal{C}\) be objects in \(\mathcal{C}\). A <em>product</em> of \(a\) and \(b\) is an object \(a \times b \in \mathcal{C}\) along with two arrows \(p_1: a \times b \to a\) and \(p_2: a \times b \to b\) (the <em>projections</em>) so that for all objects \(c \in \mathcal{C}\) and arrows \(f: c \to a\) and \(g: c \to b\) there exists a unique morphism \(q: c \to a \times b\) that makes the following diagram commute:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>  ┌────── c ──────┐
+</span><span>  │       │       │ 
+</span><span> f│       │q      │g
+</span><span>  ▼       ▼       ▼
+</span><span>  a ◄── a x b ──► b
+</span><span>     p1       p2
+</span></code></pre>
+<p>In this case, the (unique) arrows \(q\) are what gives the product a <em>universal mapping property</em>. If a product exists, it is unique up to unique isomorphism.</p>
+<p>We say that the functions \(f\) and \(g\) <em>factors</em> through \(a \times b\), or that \(a \times b\) <em>factorizes</em> \(f\) and \(g\). The reason for this name is clear when making the analogy with numbers. From the diagram above, we have the following two equalities:</p>
+<p>\(f = p_1 \circ q,~g = p_2 \circ q.\)</p>
+<p>Let's give a concrete example with numbers. We consider the category of natural numbers, where an arrow \( a \to b \) indicates that \( b \) is a multiple of \( a \).</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>   ┌───── 3 ──────┐
+</span><span>x10│      │x5     │x15
+</span><span>   ▼      ▼       ▼
+</span><span>  30 ◄─── 15 ───► 45
+</span><span>     x2       x3
+</span></code></pre>
+<p>Note that the two equalities translate to</p>
+<ul>
+<li>\( 10 = 5 \times 2 \)</li>
+<li>\( 15 = 5 \times 3 \)</li>
+</ul>
+<p>In this category, the product corresponds to the greatest common divisor of \( a \) and \( b \). Indeed, \( c \) would have to be <em>any</em> common divisor of \( a \) and \( b \) for \( f \) and \( g \) to exist. The <em>greatest</em> common divisor, is always a multiple of any given common divisor.</p>
+<p><strong>Example</strong>. Let us consider the product of objects in <strong>Set</strong>. Consider two sets \(A, B\). We have a clear candidate for a product; the cartesian product \(A \times B\). Given any element (or <em>pair</em>) \((a, b) \in A \times B\), the projections \(p_1, p_2\) send it to \(a\) and \(b\) respectively. Is this indeed a product?</p>
+<p>Let \(V\) be any other set, with arrows (functions) \(f\) to \(A\) and \(g\) to \(B\). Can we construct a (unique) arrow \(q\) to \(A \times B\)?</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>   ┌────── V ──────┐
+</span><span>   │       │       │ 
+</span><span>  f│       │q?     │g
+</span><span>   ▼       ▼       ▼
+</span><span>   A ◄── A x B ──► B
+</span><span>      p1       p2
+</span></code></pre>
+<p>Consider any element \(v \in V\). It gets mapped to \(f(v) \in A\), and \(g(v) \in B\). Let \(q: v \mapsto (f(v), g(v))\), then \((p_1 \circ q)(v) = f(v)\), and thus \(p_1 \circ q = f\). Similarly \(p_2 \circ q = g\).</p>
+<p>Indeed, we have constructed an arrow that makes the above diagram commute. It should also be clear that this is the <em>only arrow</em> that satisfies this, as if \( q \) maps any of the two components differently, after projecting we would not end up with the correct value. We conclude that \(A \times B\) is the product of \(A\) and \(B\) in the category <strong>Set</strong>. Another valid example of a product of sets would be \(B \times A\), which is clearly isomorphic to \(A \times B\). The isomorphism corresponds to 'swapping' the elements, which is its own inverse.</p>
+<p>For a completely different example, we consider the category corresponding to a poset.</p>
+<p><strong>Example.</strong> Let us consider the product of objects in the category corresponding to some poset \(P\). Consider two elements \(x, y \in P\). A product \(z \equiv x \times y\) would be equipped with two arrows \(z \to x\) and \(z \to y\), which means \(z \leq x\) and \(z \leq y\). Furthermore, for any element \(w\) with arrows to \(x, y\) (i.e. \(w \leq x\) and \(w \leq y\)), there has to be an arrow \(q: w \to z\) (i.e. \(w \leq z\)). This is the same as saying that, in addition to \(z \leq x\) and \(z \leq y\), we have for all elements \(w\) of the poset:
+\(w \leq x \text{ and } w \leq y \implies w \leq z\)
+This means that \(z\) is the &quot;largest element that is smaller or equal to \(x\) and \(y\)&quot;, also called the <em>infimum</em> of \(x\) and \(y\).</p>
+<h3 id="duality">Duality</h3>
+<p>For any category, we can define the category with all arrows (and composition) reversed.</p>
+<p><strong>Definition</strong>. The <em>opposite category</em> \(\mathcal{C}^{\text{op}}\) of a category \(\mathcal{C}\) is the category with:</p>
+<ul>
+<li>The same objects as \(\mathcal{C}\).</li>
+<li>For all arrows \(f: a \to b\) in \(\mathcal{C}\), there is an arrow \(f^{\text{op}}: b \to a\)</li>
+<li>The composition of \(f^{\text{op}} : a \to b\) and \(g^{\text{op}}: b \to c\) is given by:
+\(g^{\text{op}} \circ f^{\text{op}} = (f \circ g)^{\text{op}}\)</li>
+</ul>
+<p>The opposite category is very useful, because many concepts defined in the original category have 'dual notions' in the opposite category. Clearly, for example, an <em>initial object in \(\mathcal{C}\) is a terminal object in \(\mathcal{C}^{\text{op}}\)</em>. Similarly, an arrow that is <em>mono in \(\mathcal{C}\) is epi in \(\mathcal{C}^{\text{op}}\)</em>. This is called <strong>duality</strong>, and provides so-called 'co-' notions of constructs, as well as co- versions of theorems.</p>
+<p>Whenever defining something it always make sense to see what this means in the opposite category, giving you a lot of free information. For example, we showed that faithful functors reflects monos. Looking at the dual category, we immediately have that it also reflects epis!</p>
+<h3 id="coproducts">Coproducts</h3>
+<p>Let us apply the idea of <em>duality</em>. What would be the dual notion of the product? Let us take the product diagram, and reverse the arrows:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> ┌─────► c ◄─────┐
+</span><span> │       ▲       │ 
+</span><span>f|       |q      |g
+</span><span> |       |       |
+</span><span> a ──► a + b ◄── b
+</span><span>    p1       p2
+</span></code></pre>
+<p>We have arrows going from objects \(a, b\) into the coproduct (written \( a + b \), we will see why soon), and from this coproduct arrows going to arbitrary target objects \(c\). The arrows \(a \to a + b\) and \(b \to a + b\) already look kind of like an inclusion. Let us see what happens when we apply duality to the product definition, and change some names.</p>
+<p><strong>Definition</strong>. Let \(\mathcal{C}\) be a category, and let \(a, b \in \mathcal{C}\) be objects in \(\mathcal{C}\). A <em>coproduct</em> of \(a\) and \(b\) is an object \(a + b \in \mathcal{C}\) along with two arrows \(i_1: a + b \leftarrow a\) and \(i_2: a + b \leftarrow b\) (the <em>inclusions</em>) so that for all objects \(c \in \mathcal{C}\) and arrows \(f: c \leftarrow a\) and \(g: c \leftarrow b\) there exists a unique morphism \(q: c \leftarrow a + b\) that makes the following diagram commute:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> ┌─────► c ◄─────┐
+</span><span> │       ▲       │ 
+</span><span>f|       |q      |g
+</span><span> |       |       |
+</span><span> a ──► a + b ◄── b
+</span><span>    i1       i2
+</span></code></pre>
+<p>Note that this is precisely the definition of the product, with all arrows reversed and the projections renamed to \(i_1\) and \(i_2\).</p>
+<p>Because of the properties that we will soon discover, the coproduct is also called the <em>sum</em>. While it may seem like a similar construction, this dual notion turns out to be fundamentally different. To show this, let us explore what it means in the category <strong>Set</strong>.</p>
+<p><strong>Example.</strong> Consider two sets \(A, B\). When looking at the diagram for the coproduct, we see that we need to find some kind of set in which elements of \(A\) and \(B\) are represented but completely independent; since \(c\) is now the target of the function $q$ we have to factor through \(a + b\): it needs to be able to reflect the full image under \( f \), as well as the full image under \( g \).</p>
+<p>This means that \( A + B \) has to be the <em>disjoint union</em> of \(A\) and \(B\). The ordinary union of two non-disjoint sets would not be enough, as in the intersection of \(A\) and \(B\) we would not know whether \(q\) should represent \(f\) or \(g\). We represent the disjoint union as:</p>
+<p>\(A + B \equiv { (a, 0)~|~a \in A } \cup { (b, 1)~|~b \in B }.\)</p>
+<p>It is clear what \(i_1\) and \(i_2\) should be: they add the relevant tag \( 0 \) or \( 1 \) as the second component of the pair.</p>
+<p>Let \(V\) be any set, and assume we are given arrows (functions) \(f: A \to V\) and \(g: B \to V\).</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> ┌─────► V ◄─────┐
+</span><span> │       ▲       │ 
+</span><span>f|       |q      |g
+</span><span> |       |       |
+</span><span> A ──► A + B ◄── B
+</span><span>    i1       i2
+</span></code></pre>
+<p>Consider any element \(a \in A\). It gets mapped to \(f(a) \in V\), and to \(i_1(a) = (a, 0)\) in \(A + B\). Then we should set \(q(a, 0) \equiv f(a)\), and similarly we set \(q(b, 1) \equiv g(b)\). This already defines \(q\) uniquely and completely, so we conclude that the disjoint union is indeed the coproduct in the category <strong>Set</strong>.</p>
+<p>We note there that the coproduct (and product) of two objects, generalizes also to products of more than 2 objects (by simply adding more maps \(i_1, i_2, i_3 \ldots\)).</p>
+<h2 id="algebraic-data-types">Algebraic data types</h2>
+<p>Let us apply the product (and coproduct) concepts to the category of types. Since we already saw what these constructs mean for sets, namely the cartesian product and the disjoint union respectively, it should be clear what this means for types.</p>
+<p>Given a type \(A\) and a type \(B\), the product corresponds to a <em>pair</em> (or more generally, a <em>tuple</em>), written <code>(A, B)</code> in Scala. For example:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">x</span><span>: (</span><span style="color:#b48ead;">Int</span><span>, </span><span style="color:#d08770;">String</span><span>) = (</span><span style="color:#d08770;">3</span><span>, &quot;</span><span style="color:#a3be8c;">foo</span><span>&quot;)
+</span></code></pre>
+<p>To allow us to experiment a bit more freely, let us define our own version of a pair.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Pair[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]:
+</span><span>  </span><span style="color:#b48ead;">case </span><span>Pair(</span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#d08770;">A</span><span>, </span><span style="color:#bf616a;">b</span><span>: </span><span style="color:#d08770;">B</span><span>)
+</span></code></pre>
+<p>Here, we give the unique value constructor the same name as its type constructor. The coproduct (or <em>sum type</em>) corresponds to a value that has either type <code>A</code>, or type <code>B</code>. This is implemented as the <code>Either</code> data type we already saw in a <a href="https://jwbuurlage.github.io/blog/ctp-products-adt/./blog/ctp-programmer-category">previous post</a>.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Either[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]:
+</span><span>  </span><span style="color:#b48ead;">case </span><span>Left(</span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#d08770;">A</span><span>)
+</span><span>  </span><span style="color:#b48ead;">case </span><span>Right(</span><span style="color:#bf616a;">b</span><span>: </span><span style="color:#d08770;">B</span><span>)
+</span></code></pre>
+<p>Here, the two value constructors take an element of type <code>A</code>, or an element of type <code>B</code> respectively.</p>
+<p>A sum type means choosing an alternative between types, while the product type is a combination of the types. A simple example of a sum type has only three 0-ary value constructors.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Enum:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>One
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Two
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Three
+</span></code></pre>
+<p>We can also combine sum and product types. A node of a binary tree of type <code>A</code> has a sum type: it is either a <code>Leaf</code>, or it is the product type of:
+- Tree on the left
+- value of type <code>A</code> for the value of the node
+- Tree on the right</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>enum Tree[+</span><span style="color:#d08770;">A</span><span>]:
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Node (</span><span style="color:#bf616a;">left</span><span>: </span><span style="color:#d08770;">Tree</span><span>[</span><span style="color:#d08770;">A</span><span>], </span><span style="color:#bf616a;">value</span><span>: </span><span style="color:#d08770;">A</span><span>, </span><span style="color:#bf616a;">right</span><span>: </span><span style="color:#d08770;">Tree</span><span>[</span><span style="color:#d08770;">A</span><span>])
+</span><span>    </span><span style="color:#b48ead;">case </span><span>Leaf
+</span></code></pre>
+<h2 id="adts-in-c">ADTs in C++</h2>
+<p>In C++, using ADTs requires a variety of different language and library features.</p>
+<ul>
+<li>
+<p>We can use <code>std::pair</code> (or a <code>std::tuple</code> for n-ary products) to mimic a type as <code>Pair</code>. However, its using it is arguably a bit awkward and convoluted.</p>
+</li>
+<li>
+<p>You could also use a <code>struct</code> (of one or more elements) to implement product types.</p>
+</li>
+<li>
+<p>A sum type corresponds roughly to a <code>union</code>. In C++17 a standardized 'tagged union' <code>std::variant</code> was added that more accurately models the coproduct.</p>
+</li>
+<li>
+<p>An <code>enum</code> represents a fixed number of alternative constants. This correponds to the sum type of multiple 0-ary value constructors (implicitly the finite sum type of the type <code>()</code> with itself).</p>
+</li>
+</ul>
+<h2 id="adts-as-a-semi-ring">ADTs as a semi-ring</h2>
+<p>Using the product and sum types, we can turn the type system into a semi-ring, where we define:</p>
+<ul>
+<li>\(0\) = <code>Void</code></li>
+<li>\(1\) = <code>()</code></li>
+<li>\(A + B\) = <code>Either[A, B]</code></li>
+<li>\(A \times B\) = <code>(A, B)</code></li>
+</ul>
+<p>Let us check that \(0\) really works as \(0\). If we add <code>Void</code> to a type <code>A</code>, we get <code>Either[A, Void]</code>. Since there can never be a value of type <code>Void</code>, we are guaranteed to get a <code>Left a</code> when we see a value of type <code>Either[A, Void]</code>, which means the type is isomorphic to <code>A</code>.</p>
+<p>In other words:</p>
+<p>\(A + 0 = a.\)</p>
+<p>Similarly, if we have a product with <code>Void</code>, we can never instantiate a pair (because there is no value for <code>Void</code>), so the corresponding product type is again <code>Void</code>.</p>
+<p>\(A \times 0 = 0.\)</p>
+<p>Although this is all a bit of a stretch, this analogy has some interesting properties, and we can do some real algebra with our types and try to interpret the results. Consider the <code>Word</code> type:</p>
+<pre data-lang="haskell" style="background-color:#eff1f5;color:#4f5b66;" class="language-haskell "><code class="language-haskell" data-lang="haskell"><span>enum </span><span style="color:#d08770;">Word</span><span>[+</span><span style="color:#d08770;">A</span><span>]:
+</span><span>    </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">Cons</span><span>(x: </span><span style="color:#d08770;">A</span><span>, xs: </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">A</span><span>])
+</span><span>    </span><span style="color:#b48ead;">case </span><span style="color:#d08770;">Empty
+</span></code></pre>
+<p>In our 'semi-ring', writing \(x\) for <code>Word[A]</code>, this would look like the expression:
+\(x = 1 + a \times x\)
+This is unsolvable, but we can try to iteratively substitute \(x\) into the right hand side:</p>
+<p>\begin{align*}
+x &amp;= 1 + a \times (1 + a x)\\
+&amp;= 1 + a + a^2 x\\
+&amp;= 1 + a + a^2 (1 + a x)\\
+&amp;= 1 + a + a^2 + a^3 (1 + ax) \\
+&amp;= \ldots
+\end{align*}</p>
+<p>Which can be read as 'a list is either empty, or it has one element of type <code>a</code>, or it has two elements of type <code>a</code>, etc.</p>
+<p>Although this is mostly an entertaining (and, depending on your view, an overly complicated) way of looking at types, a similar correspondence from types to logical operations forms the basis of the Curry-Howard isomorphism that connects type theory to logic in a very fundamental way.</p>
+<h2 id="bi-functors">Bi-functors</h2>
+<p><strong>Definition</strong>. Given two categories \(\mathcal{C}, \mathcal{D}\) their product category \(\mathcal{C} \times \mathcal{D}\) is given by:</p>
+<ul>
+<li>The objects are pairs \((c, d)\) where \(c \in \mathcal{C}\) and \(d \in \mathcal{D}\).</li>
+<li>The arrows are pairs of arrows, \((f, g): (c, d) \to (c', d')\) for \(f: c \to c'\) in \(\mathcal{C}\) and \(g: d \to d'\) in \(\mathcal{D}\).</li>
+<li>The identity arrow for \((c, d)\) is the pair \((\text{id}_c, \text{id}_d)\).</li>
+<li>Composition of arrows happens per component, i.e.\ when \(f, g \in \mathcal{C}\) and \(h, k \in \mathcal{D}\):
+\((f, h) \circ (g, k) \equiv (f \circ g, h \circ k)\)</li>
+</ul>
+<p>Note that alternatively we could define this as the product of objects in the category <strong>Cat</strong>.</p>
+<p>This brings us to the concept of a bifunctor, which can be seen as a 'functor of two arguments'.</p>
+<p><strong>Definition</strong>. Let \(\mathcal{C}, \mathcal{D}, \mathcal{E}\) be categories. A bifunctor is a functor:
+\(F: \mathcal{C} \times \mathcal{D} \to \mathcal{E}.\)</p>
+<p>In Scala the bifunctor can be implemented as a <code>trait</code> as follows:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#d08770;"> Bifunctor</span><span>[</span><span style="color:#d08770;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">_</span><span>]]:
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">bimap</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>](</span><span style="color:#bf616a;">f</span><span>: (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">C</span><span>), </span><span style="color:#bf616a;">g</span><span>: (</span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">D</span><span>), </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]): </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>] =
+</span><span>    first(f, second(g, x)) 
+</span><span>  
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">first</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">C</span><span>](</span><span style="color:#bf616a;">f</span><span>: (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">C</span><span>), </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]): </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">B</span><span>] =
+</span><span>    bimap(f, (</span><span style="color:#bf616a;">y</span><span>: </span><span style="color:#d08770;">B</span><span>) </span><span style="color:#b48ead;">=&gt;</span><span> y, x)
+</span><span>
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">second</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">D</span><span>](</span><span style="color:#bf616a;">g</span><span>: (</span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">D</span><span>), </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]): </span><span style="color:#d08770;">F</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">D</span><span>] =
+</span><span>    bimap((</span><span style="color:#bf616a;">y</span><span>: </span><span style="color:#d08770;">A</span><span>) </span><span style="color:#b48ead;">=&gt;</span><span> y, g, x)
+</span></code></pre>
+<p>Here you see a circular definition. This means it is enough to <em>either</em> provide the <code>bimap</code>, or the <code>first</code> and <code>second</code> functions.</p>
+<p>We can prove why this is enough mathematically, as shown in the following proposition. We denote pairs as \(\langle c, d \rangle \in \mathcal{C} \times \mathcal{D}\):</p>
+<p><strong>Proposition</strong>. Let \(F: \mathcal{C} \times \mathcal{D} \to \mathcal{E}\) be a bifunctor. Then:</p>
+<p>\(
+F \langle c, - \rangle \equiv G_c: \mathcal{D} \to \mathcal{E}, d \mapsto F \langle c, d \rangle, (g: d \to d') \mapsto F \langle \text{id}_c, g \rangle
+\)
+\(
+F \langle -, d \rangle \equiv H_d: \mathcal{C} \to \mathcal{E}, c \mapsto F \langle c, d \rangle, (f: c \to c') \mapsto F \langle f, \text{id}_d \rangle
+\)</p>
+<p>are functors for all \(c \in \mathcal{C}\) and \(d \in \mathcal{D}\) respectively, and furthermore they satisfy:</p>
+<p>\(G_c d = H_d c\)</p>
+<p>\(G_{c'} g \circ H_d f = H_{d'} f \circ G_c g\)</p>
+<p>for all \(c, c' \in \mathcal{C}\) and \(d, d' \in \mathcal{D}\).</p>
+<p>Conversely, let \(G_c, H_d\) be family of functors so that the above two equalities hold, then:</p>
+<p>\(\tilde{F}: \mathcal{C} \times \mathcal{D} \to \mathcal{E}, \langle c, d \rangle \mapsto G_c d, \langle f, g \rangle \mapsto H_{d'} f \circ G_c g\)</p>
+<p>is a bifunctor, and satisfies \(\tilde{F} \langle c, - \rangle = G_c\) and \(\tilde{F} \langle -, d \rangle = H_d\).</p>
+<p><em>proof</em>. Let us first show that we can construct the functors \(G_c\) and \(H_d\) from a bifunctor \(F\). We show that \(G_c\) is a functor, \(H_d\) follows similarly.</p>
+<p>\( G_c(\text{id}_d) = F \langle \text{id}_c, \text{id}_d \rangle = \text{id}_{F \langle c, d \rangle} \)</p>
+<p>\(G_c(g \circ g') = F \langle \text{id}_c, g \circ g' \rangle = F (\langle \text{id}_c, g \rangle \circ \langle \text{id}_c, g' \rangle) \)</p>
+<p>\( F \langle \text{id}_c, g \rangle \circ F \langle \text{id}_c, g' \rangle = G_c g \circ G_c g' \)</p>
+<p>The mapped arrows have the correct (co)domains, hence \(G_c\) is a functor for all \(c\). We immediately have \( G_c d = H_d c \), as by definition both sides are equal to \(F \langle c, d \rangle\). To show \( G_{c'} g \circ H_d f = H_{d'} f \circ G_c g \) we compute:</p>
+<p>\begin{align*}
+G_{c'} g \circ H_d f &amp;= F \langle \text{id}_{c'}, g \rangle \circ F \langle f, \text{id}_d \rangle \\
+&amp;= F(\langle \text{id}_c, g \rangle \circ \langle f, \text{id}_d \rangle) = F(\langle f, g \rangle) = F(\langle f, \text{id}_{d'} \rangle \circ \langle \text{id}_c, g \rangle) \\
+&amp;= F\langle f, \text{id}_{d'} \rangle \circ F\langle \text{id}_c, g \rangle = H_{d'} f \circ G_c g
+\end{align*}</p>
+<p>To show the converse statement, we compute:</p>
+<p>\begin{align*}
+F \langle \text{id}_c, \text{id}_d \rangle &amp;= G_c \text{id}_d \circ H_d \text{id}_c = \text{id}_{G_c d} \circ \text{id}_{H_d c} = \text{id}_{F \langle c, d \rangle} \circ \text{id}_{F \langle c, d \rangle} = \text{id}_{F \langle c, d \rangle} \\
+F(\langle f, g \rangle \circ \langle f', g' \rangle) &amp;= F\langle f \circ f', g \circ g' \rangle = G_{c'} g \circ G_{c'} g' \circ H_d f \circ H_d f' \\
+&amp;= G_{c'} g \circ H_{d'} f \circ G_{c} g' \circ H_d f' = F \langle f, g \rangle \circ F \langle f', g' \rangle
+\end{align*}</p>
+<p>Which concludes the proof.</p>
+<p><strong>Example</strong>. Whenever you have a category \(\mathcal{C}\) where the product of two objects exists for all pairs of objects, then this gives rise to a bifunctor:</p>
+<p>\begin{align*}
+\times&amp;: \mathcal{C} \times \mathcal{C} \to \mathcal{C}\\
+&amp;: (a, b) \mapsto a \times b\\
+&amp;: (f: a \to a', g: b \to b') \mapsto (f \times g: a \times b \to a' \times b')
+\end{align*}</p>
+<p>where we find \(f \times g\) by looking at the diagram:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>     p1       p2
+</span><span>  a ◄── a x b ──► b
+</span><span>  │       │       │ 
+</span><span> f│       │ f x g │g
+</span><span>  ▼       ▼       ▼
+</span><span>  a&#39;◄── a&#39;x b&#39;──► b&#39;
+</span><span>     p1&#39;      p2&#39;
+</span></code></pre>
+<p>By definition of the product \(a' \times b'\), we have that for any object \(c\) that has arrows to \(a'\) and \(b'\), there should be a <em>unique</em> arrow \(c \to a' \times b'\). Note that \(f \circ p_1\) and \(g \circ p_2\) are arrows from \(a \times b\) to \(a'\) and \(b'\) respectively. Taking \( c \equiv a \times b \), this means that we can set \(f \times g\) to the unique arrow going between \(a \times b\) and \(a' \times b'\).</p>
+<p>By duality, there is also a bifunctor corresponding to the coproduct if it is defined everywhere.</p>
+<p>What would these two examples mean in Scala? The product is the 'pair functor' <code>Pair</code>, and the coproduct is the sum type <code>Either</code>.</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>given Bifunctor[</span><span style="color:#d08770;">Either</span><span>] with
+</span><span>  </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">bimap</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>](</span><span style="color:#bf616a;">f</span><span>: (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">C</span><span>), </span><span style="color:#bf616a;">g</span><span>: (</span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">D</span><span>), </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">Either</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]): </span><span style="color:#d08770;">Either</span><span>[</span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>] =
+</span><span>    x </span><span style="color:#b48ead;">match 
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Either.Left(</span><span style="color:#bf616a;">x</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Either.Left(f(x))
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Either.Right(</span><span style="color:#bf616a;">y</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Either.Right(g(y))
+</span><span>
+</span><span>given Bifunctor[</span><span style="color:#d08770;">Pair</span><span>] with
+</span><span>  </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">bimap</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>](</span><span style="color:#bf616a;">f</span><span>: (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">C</span><span>), </span><span style="color:#bf616a;">g</span><span>: (</span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">D</span><span>), </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#d08770;">Pair</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]): </span><span style="color:#d08770;">Pair</span><span>[</span><span style="color:#d08770;">C</span><span>, </span><span style="color:#d08770;">D</span><span>] =
+</span><span>    x </span><span style="color:#b48ead;">match
+</span><span>      </span><span style="color:#b48ead;">case </span><span>Pair.Pair(</span><span style="color:#bf616a;">x</span><span>, </span><span style="color:#bf616a;">y</span><span>) </span><span style="color:#b48ead;">=&gt; </span><span>Pair.Pair(f(x), g(y))
+</span></code></pre>
+<p>These are examples of type constructors (or algebraic data types, as we have seen). Since functors compose, we could ask ourselves: &quot;Are all algebraic data types functors?&quot;. The answer is positive; functor implementations can be automatically derived for all ADTs! </p>
+
+            </article>
+        </section>
+
+    </div>
+</article>
+
+<footer>
+        <hr />
+</footer>
+
+  </div>
+
+</body>
+</html>

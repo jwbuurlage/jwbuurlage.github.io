@@ -1,0 +1,351 @@
+<!DOCTYPE html <html lang="en">
+
+<head>
+  <title>Personal webpage and blog of Jan-Willem Buurlage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/custom.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/academic/">Academic</a>
+      
+    </nav>
+  </header>
+
+  <div class="container">
+    
+<article>
+    <div>
+        <div>
+            <h1>
+                The Yoneda Lemma
+            </h1>
+            <h3>
+                <small class="text-muted">2023-02-28</small> <br />
+            </h3>
+            
+            <ul class="tag-list">
+                
+                <li>
+                   mathematics
+                </li>
+                
+                <li>
+                   scala
+                </li>
+                
+                <li>
+                   functional-programming
+                </li>
+                
+            </ul>
+            
+        </div>
+
+        <hr />
+
+        <section class="post">
+            <article>
+                <blockquote>
+<p>In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit <a href="https://github.com/jwbuurlage/category-theory-programmers">the notes I wrote back then</a>, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.</p>
+<ol>
+<li><a href="/blog/ctp-categories/">Categories, functors, and natural transformations</a></li>
+<li><a href="/blog/ctp-programmer-category/">A category of types and functions</a></li>
+<li><a href="/blog/ctp-products-adt">Products, coproducts, and algebraic data types</a></li>
+<li><a href="/blog/ctp-yoneda">The Yoneda Lemma</a></li>
+</ol>
+</blockquote>
+<hr />
+<p>The Yoneda Lemma relates a category \(\mathcal{C}\) with the functors from \(\mathcal{C}\) to \(\mathbf{Set}\). Before we can introduce the lemma we will introduce a number of concepts; first we introduce a class of functors called <em>hom-functors</em>, we introduce the notion of <em>representable functors</em>, we will discuss the <em>Yoneda embedding</em> and finally we will move on to the Yoneda Lemma; one of the important tools in category theory</p>
+<h2 id="hom-functors">Hom-functors</h2>
+<p>The <em>hom-functor</em> for some fixed object \(c\), is a functor that sends any object \(a\) to the hom-set \(\text{Hom}(c, a)\), the set of all arrows between \( c \) and \(a\). It is clear that for each object we get an associated object in <strong>Set</strong>, but what should this functor do with arrows? We will denote the candidate functor with \(F = \text{Hom}(c, -)\). Say we have an arrow \(f: a \to b\):</p>
+<pre data-lang="ascii" style="background-color:#eff1f5;color:#4f5b66;" class="language-ascii "><code class="language-ascii" data-lang="ascii"><span>      F
+</span><span> a ────────► Hom(c, a)
+</span><span> │               │
+</span><span> │               │
+</span><span>f│               │?
+</span><span> │               │
+</span><span> ▼    F          ▼
+</span><span> b ────────► Hom(c, b)
+</span></code></pre>
+<p>The arrow with a question mark is an arrow in <strong>Set</strong>. Arrows in sets are functions, which we can define by saying what it does on elements. The elements of the hom-sets are arrows in \(\mathcal{C}\). Given some element of \(\text{Hom}(c, a)\), i.e. an arrow in \(\mathcal{C}\): \(g: c \to a\), we need to obtain an element of \(\text{Hom}(c, b)\), i.e. an arrow from \(c \to b\). We have the following data:</p>
+<pre data-lang="ascii" style="background-color:#eff1f5;color:#4f5b66;" class="language-ascii "><code class="language-ascii" data-lang="ascii"><span>      Ff(g)=?
+</span><span>┌─────────────┐
+</span><span>│             ▼
+</span><span>c ───► a      b
+</span><span>   g
+</span></code></pre>
+<p>We can go to \(a\) from \(c\) using \(g\), but then we need a way to get from \(a\) to \(b\). We actually have a way to do this, namely the arrow \(f: a \to b\) that we started with. We need only to compose! This motivates the following definition:</p>
+<p><strong>Definition</strong>. Let \(\mathcal{C}\) be a category, and let \(c \in \mathcal{C}\) and \(f: a \to b \in \mathcal{C}\). We define the (covariant) <strong>hom-functor</strong> \(\text{Hom}(c, -): \mathcal{C} \to \mathbf{Set}\) as:
+\begin{align*}
+\text{Hom}(c, -)(a) = &amp;\text{Hom}(c, a) \\
+\text{Hom}(c, -)(f) : &amp;\text{Hom}(c, a) \to \text{Hom}(c, b),\\
+&amp;g \mapsto f \circ g
+\end{align*}
+Clearly the identity arrow gets mapped to the identity map. To show that compositions are preserved, we compute for any arrow \(h: c \to a\):
+\begin{align*}
+\text{Hom}(c, -)(g \circ f)(h) &amp;= (g \circ f) \circ h \\
+&amp;= g \circ (f \circ h) \\
+&amp;= g \circ (\text{Hom}(c, -)(f)(h)) \\
+&amp;= \text{Hom}(c, -)(g) \left( \text{Hom}(c, -)(f)(h)\right) \\
+&amp;= \left(\text{Hom}(c, -)(g) \circ \text{Hom}(c, -)(f) \right)(h)
+\end{align*}</p>
+<p>We can also define the contravariant hom-functor: \(\mathcal{C}^{\text{op}} \to \mathbf{Set}\) by <em>precomposing with \(f\)</em>, and we denote it as \(\text{Hom}(-, d)\).</p>
+<p>Let us introduce a term; functors are called <strong>naturally isomorphic</strong> if there is a natural transformation between them for which all components are isomorphisms. Hom-functors are such an important class of functors from \(\mathcal{C} \to \mathbf{Set}\), that they motivate the following definition:</p>
+<p><strong>Definition</strong>. A functor \(F: \mathcal{C} \to \mathbf{Set}\) is called <strong>representable</strong> if it is naturally isomorphic to a hom-functor.</p>
+<p>To simplify the notation in the upcoming sections, we will denote the covariant hom-functor \(\text{Hom}(a, -) = h^a\) and the contravariant hom-functor \(\text{Hom}(-, b) = h_b\).</p>
+<h2 id="yoneda-embedding">Yoneda Embedding</h2>
+<p>For any category \(\mathcal{C}\) the Yoneda embedding is a functor between the opposite category and the category of functors between \(\mathcal{C}\) and <strong>Set</strong>. Let us first introduce this target category.</p>
+<p><strong>Definition</strong>. Let \(\mathcal{C}\) and \(\mathcal{D}\) be two categories, then we define \(\mathbf{Fun}(\mathcal{C}, \mathcal{D})\) as the category that has functors \(\mathcal{C} \to \mathcal{D}\) as objects, and natural transformations between these functors as arrows.</p>
+<p>Now, we are ready to describe the Yoneda embedding. Note that because it is a functor between <em>the opposite of</em> \(\mathcal{C}\) and the category of <em>functors</em> between \(\mathcal{C}\) and <strong>Set</strong>, it should take objects to functors, and arrows to natural transformations. For all objects, we have introduced a functor associated to it in the previous section; the <em>hom-functor</em>. We can call the mapping between the object and its (covariant) hom-functor \(Y\).</p>
+<pre data-lang="ascii" style="background-color:#eff1f5;color:#4f5b66;" class="language-ascii "><code class="language-ascii" data-lang="ascii"><span>             Y       a
+</span><span>    ┌──►a ────────► h
+</span><span>    │   │           ▲
+</span><span> op │   │           │   op
+</span><span>f   │  f│           │ Yf
+</span><span>    │   │           │
+</span><span>    │   ▼    Y      │b
+</span><span>    └───b ────────► h
+</span></code></pre>
+<p>The natural transformation \(Yf\) should have components which are arrows in <strong>Set</strong>, indexed by objects in \(\mathcal{C}\). Let \(k: c \to d\), the corresponding naturality square looks like this:</p>
+<pre data-lang="ascii" style="background-color:#eff1f5;color:#4f5b66;" class="language-ascii "><code class="language-ascii" data-lang="ascii"><span>             (Yf^op)c
+</span><span>  Hom(a, c) ◄───────── Hom(b, c)
+</span><span>      │                    │
+</span><span>  a   │                    │  b
+</span><span> h (k)│                    │ h (k)
+</span><span>      ▼                    ▼
+</span><span>  Hom(a, d) ◄───────── Hom(b, d)
+</span><span>             (Yf^op)d
+</span></code></pre>
+<p>So the natural components should be maps between hom-sets. As we will see, we can again find these maps by composition! This is summarized in the following definition:</p>
+<p><strong>Definition</strong>. The <strong>Yoneda functor</strong> \(Y: \mathcal{C}^{\text{op}} \to \mathbf{Fun}(\mathcal{C}, \mathbf{Set})\), is defined as follows. Let \(a \in \mathcal{C}\) and \(f: b \to c\) in \(\mathcal{C}\).
+\begin{align*}
+Ya =&amp; h^a \\
+Yf^{\text{op}} :&amp; h^c \to h^b \\
+(Yf^{\text{op}})_a:&amp; \text{Hom}(c, a) \to \text{Hom}(b, a) \\
+:&amp; (g: c \to a) \mapsto (g \circ f: b \to a) \\
+=&amp; h_a f
+\end{align*}</p>
+<p>Note that the component is defined using <em>pre-composition</em>, it is a contravariant hom-functor, whereas the objects \(Ya\) are <em>covariant</em> hom-functors, i.e. use <em>post-composition</em>. Let us check that \(Yf\) is indeed a natural transformation by looking at the naturality square introduced above, let \(\ell: a \to c\), and lets trace it through the diagram for some \(k: c \to d\) and \(g: b \to a\):</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>            
+</span><span>         (Yg^op)c
+</span><span>     l  ─────────► l . g
+</span><span>     │             │
+</span><span> a   │             │  b
+</span><span>h (k)│             │ h (k)
+</span><span>     ▼             ▼
+</span><span> k . l  ─────────► k . l . g
+</span><span>         (Yg^op)d
+</span></code></pre>
+<p>In words: the naturality condition corresponds simply to the associativity in \(\mathcal{C}\). We say that \(Yf\) is the <em>induced natural transformation</em> of \(f\).</p>
+<p>The reason that the Yoneda functor is of such interest is because of the following:</p>
+<p><strong>Theorem 1</strong>. The Yoneda functor \(Y\) is <em>full</em> and <em>faithful</em>.</p>
+<p>We will prove this in the next section, after we state and prove the Yoneda lemma. This theorem has the following corollary:</p>
+<p><strong>Corollary 1</strong>. Let \(\mu: h^a \to h^b\) be a natural transformation between hom-functors, then it is given by composition with a unique arrow \(f: b \to a\). Furthermore, \(\mu\) is a (natural) isomorphism if and only if \(f\) is an isomorphism.</p>
+<p>This means in particular that if a set-valued functor \(F\) is represented by both \(a\) and \(b\), then there is an isomorphism \(a \overset{\sim}{\rightarrow} b\).</p>
+<p>Again, by duality, there exists also a full and faithful functor from \(\mathcal{C} \to \mathbf{Fun}(\mathcal{C}^{\text{op}}, \mathbf{Set})\).</p>
+<h2 id="examples-of-applications">Examples of applications</h2>
+<p><strong>Example.</strong> <em>Matrix row operations</em>. In linear algebra, row operations can be performed without changing the solutions of the linear system. Examples are row permutations, adding the j-th row to the i-th row, or multiplying a row by a (non-zero) scalar. We will show that these <em>row operations</em> are natural, in the following sense.</p>
+<p>Let \(\mathcal{C}\) be the category where the objects are natural numbers \(1, 2, 3, \ldots\), and where arrows \(n \to m\) correspond to \(m \times n\) matrices. Composition is given by matrix multiplication, indeed if we have arrows:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>    A_(m x n)   B_(k x m)
+</span><span>n  ─────────► m ─────────► k
+</span></code></pre>
+<p>then the composite \(B_{k \times m} A_{m \times n} = C_{k \times n}\) is an arrow from \(n\) to \(k\), as required. Consider contravariant hom-functors \(h_n\) for this category. The hom-set \(h_n k = \text{Hom}(k, n)\) consists of \(n \times k\) matrices. To show that row operations can be seen as natural transformations \(\mu: h_n \Rightarrow h_n\), we fix some \(k \times m\) matrix \(B\), and look at the following naturality square:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>            mu_k
+</span><span>   h_n k  ─────────► h_n k
+</span><span>       │             │ 
+</span><span>       │             │
+</span><span> h_n B │             │ h_n B
+</span><span>       │             │ 
+</span><span>       ▼             ▼
+</span><span>   h_n m ──────────► h_n m
+</span><span>            mu_m
+</span></code></pre>
+<p>Considering some \(n \times k\) matrix \(A\), the naturality condition states:</p>
+<p>\[\mu(A) B \overset{?}{=} \mu(AB).\]</p>
+<p>To show this, we observe that for all row transformations we have:</p>
+<p>\[\mu(A) = A + \tilde{A}\]</p>
+<p>where the rows of \(\tilde{A}\) are either empty, or are multiples of rows of \(A\), or:</p>
+<p>\[\mu(A) = A + \Lambda A.\]</p>
+<p>Where \(\Lambda\) is a matrix whose elements \(\Lambda_{ij}\) represent how many times row \(j\) should be added to row \(i\). This means we have</p>
+<p>\[\mu(A) B = (A + \Lambda A) B = AB + \Lambda AB = \mu(AB).\]</p>
+<p>as required. By Corollary 1 we have that any natural transformation \(\mu: h_n \Rightarrow h_n\) is given by postcomposition (in this category: left-multiplication) with a unique arrow \(D: n \to n\). The Yoneda lemma allows us to identify this arrow; it is equal to:</p>
+<p>\[D = \mu_n(\text{Id}_n),\]</p>
+<p>so to perform row operations on a matrix, one can equivalently left multiply with a matrix obtained by applying these operations to the identity matrix. This powers the technique for manually inverting a matrix \(A\), where you perform row operations to the matrix \(A\) and simultaneously to another matrix \(B\) that is initially the identity matrix, until you reduce \(A\) to the identity matrix. The resulting matrix \(B\), when left multiplied with the original \(A\) will perform the row operations, and hence \(BA = \text{Id}\), or \(B = A^{-1}\).</p>
+<p><strong>Example</strong>.
+Another application of Yoneda is the following classic result from group theory known as <em>Cayley's Theorem</em>: Any group \(G\) is isomorphic to a subgroup of a permutation group.</p>
+<p><em>proof</em>. Recall that we can view a group \(G\) as a category \(\mathcal{C}_G\) with a single object \({ \bullet }\) and with arrows \(\bullet \to \bullet\) corresponding to the elements of \(g\). Consider the Yoneda embedding \(Y\) of this category into \(\mathbf{Fun}(\mathcal{C}_G^{\text{op}}, \mathbf{Set})\),
+and in particular we consider the shape of the image of \(\bullet\) under the contravariant hom-functor \(h_\bullet\):</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>G     Y      Nat(h_., h_.)
+</span><span>. ─────────► h_. 
+</span></code></pre>
+<p>The arrows on the left (displayed collectively as <code>G</code>), corresponding to the elements of \(G\), get mapped <em>fully and faithfully</em> (by Theorem 1) to the natural transformations between \(h_\bullet\) and itself (natural endomorphisms).</p>
+<p>The natural endomorphisms \(h_\bullet\) are characterized, by Corollary 1, (at the only component \(G\)) by left-multiplication of elements \(G\) on the set \(h_\bullet \bullet \simeq G_{\text{set}}\) which is the underlying set of \(G\) (since it is \(\text{Hom}(\bullet, \bullet)\)). For each element \(g \in G\) we obtain an automorphism \(G_{\text{set}} \to G_{\text{set}}\) given by \(h \mapsto gh\).</p>
+<p>Recall that \(\text{Aut}(G_{\text{set}})\) is a group (a permutation group), and note that the collection of automorphisms defined by left multiplication of elements of \(G\) is indeed a subgroup of this permutation group. The correspondence between \(G\) and the &quot;automorphisms by left-multiplication&quot; is seen to be a group isomorphism by checking the definition directly. \( \Box \)</p>
+<h2 id="the-yoneda-lemma">The Yoneda Lemma</h2>
+<p>Corollary 1 tells us that any natural transformation between covariant hom-functors \(h^a\) and \(h^b\) is given by composition with an arrow in the reverse direction \(f: b \to a\). Note that this arrow is an element of \(h^b a = \text{Hom}(b, a)\).</p>
+<p>Less obviously, this result holds also for natural transformations between \(h^a\) and any other set-valued functor \(F\).</p>
+<p>What would a function between \(h^a\) and \(F\) look like? We see that a component of the natural transformation should take an element from \(h^a b\), i.e. an arrow \(g: a \to b\), to some element of \(Fb\). We can do this by <em>evaluating</em> the lifted arrow \(Fg\) , which is a map between the sets \(Fa\) and \(Fb\), at a fixed \(x \in F a\).</p>
+<p>This gives us an idea for a natural transformation corresponding to an element of \(Fa\). We summarize this in the following proposition.</p>
+<p><strong>Proposition</strong>. Let \(F: \mathcal{C} \to \mathbf{Set}\) be a functor, and \(a \in \mathcal{C}\). Any element \(x \in Fa\) induces a natural transformation from \(h^a\) to \(F\), by evaluating any lifted arrow in \(x\).</p>
+<p><em>proof</em>. We have to show that this induces a natural transformation, i.e. that the following diagram commutes:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>      a    F_(x)
+</span><span>     h b  ─────────► F b
+</span><span>       │             │ 
+</span><span>   a   │             │
+</span><span>  h f  │             │ F f
+</span><span>       │             │ 
+</span><span>       ▼             ▼
+</span><span>      a  ──────────► F c
+</span><span>     h c    F_(x)
+</span></code></pre>
+<p>Here we denote:
+\(F \_ (x): h^a b \to F b,~f \mapsto F f(x).\)
+To show that the diagram commutes, fix an arrow \(g: a \to b \in h^a b\). If we start taking it along the top side we obtain:
+\begin{align*}
+F f (F g(x)) &amp;= (F f \circ F g)(x) = F(f \circ g)(x) \\
+&amp;= (F \_ (x))(f \circ g) = (F \_ (x))((h^a f)(g))
+\end{align*}
+which is equal to taking it along the bottom, hence the diagram commutes. \(\Box\)</p>
+<p>The Yoneda lemma states that <em>all natural transformations between \(h^a\) and \(F\) are of this form</em>.</p>
+<p><strong>Theorem 2</strong>. <em>The Yoneda lemma</em>. Let \(\mathcal{C}\) be a category, let \(a \in \mathcal{C}\), and let \(F: \mathcal{C} \to \mathbf{Set}\) be a set-valued functor. There is a one-to-one correspondence between elements of \(Fa\), and natural transformations:
+\(\mu: h^a \Rightarrow F.\)</p>
+<p><em>proof</em>. We already saw that each element of \(Fa\) induces a natural transformation, so we have a map:
+\(\Phi: F a \to \text{Nat}(h^a, F).\)
+Here, \(\text{Nat}(h^a, F)\) denotes the set of natural transformations between \(h^a\) and \(F\).</p>
+<p>We now need to show that \(\Phi\) has an inverse.
+Let \(\mu\) be any natural transformation, then we can obtain an element of \(F a\) by looking at the component \(\mu_a\) and let it act on the identity arrow \(\text{id}_c \in h^a a\), i.e.:</p>
+<p>\(\Psi: \mu \mapsto \mu_a(\text{id}_a).\)</p>
+<p>Now let us show that \(\Phi\) and \(\Psi\) are inverses of each other. First, we compute:</p>
+<p>\( \Psi(\Phi(x)) = \Psi(F \_ (x)) = F \text{id}_a (x) = \text{id}_{F a}(x) = x \)</p>
+<p>so \(\Psi\) is a left inverse of \(\Phi\). To show that it is also a right inverse, we need to show that:
+\(\Phi(\Psi(\mu)) = \mu,\)
+or in components:
+\(\Phi(\Psi(\mu))_b = \mu_b.\)
+We note that by definition, for any \(f: a \to b\) in \(h^a b\):
+\(\Phi(\Psi(\mu))_b (f) = (\Phi(\mu_a(\text{id}_a)))_b (f) = Ff (\mu_a(\text{id}_a)).\)
+Since \(\mu\) is a natural transformation we have that the following diagram commutes:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>            mu_a(x)
+</span><span>   h^a a  ─────────► F a
+</span><span>       │             │ 
+</span><span>       │             │
+</span><span> h^a f │             │ F f
+</span><span>       │             │ 
+</span><span>       ▼             ▼
+</span><span>   h^a b ──────────► F b
+</span><span>            mu_b(x)
+</span></code></pre>
+<p>In particular, consider the element \(\text{id}_a \in h^a a\). Tracing this along bottom this gets mapped to \(\mu_b (f)\), while along the top it gives precisely \(Ff (\mu_a(\text{id}_a))\), so we have shown that:
+\(\Phi(\Psi(\mu))_b (f) = Ff (\mu_a(\text{id}_a)) = \mu_b(f).\)
+And hence, \(\Psi\) is also a right inverse of \(\Phi\), and thus \(\Phi\) is a bijection, as required. \(\Box\)</p>
+<p>One can also show, that this correspondence is 'natural' in \(a \in \mathcal{C}\) and \(F\).</p>
+<p>Let us now prove Theorem 1.</p>
+<blockquote>
+<p><em>proof of Theorem 1</em>. By Yoneda's Lemma there is a bijection between the sets:
+\(\text{Nat}(h^b, h^a) \simeq h^a b = \text{Hom}(a, b)\)
+for all objects \(a\) and \(b\) of \(\mathcal{C}\), which directly implies that the functor \(Y\) is full and faithful.</p>
+</blockquote>
+<p>Let us recap what we have seen so far. We discussed a special class of set-valued functors called <em>hom-functors</em>. These hom-functors, like hom-sets, relate objects directly with the arrows between them.</p>
+<p>Next we showed that we can <em>embed</em> any category into the category of contravariant set-valued functors of this category, sending objects to their hom-functors. We also showed that this embedding, as a functor, is <em>full</em> and <em>faithful</em>, which suggests that all the information of the category and its objects, is contained in its hom-functors.</p>
+<p>When looking at what this means for the arrows, we noted that in particular any natural transformation between hom-functors is given by composition with arrows of our category.</p>
+<p>To prove this, we stated and proved the Yoneda lemma -- which is an important result in its own right. It shows that for an arbitrary set-valued functor, there is a bijection between elements of the set \(F a\) and natural transformations from \(h^a\) to \(F\),</p>
+<p>All functors in programming are set-valued, since types can be viewed as set. We first show two simple applications of Yoneda's lemma in mathematics, and next we see some initial applications of the Yoneda lemma to programming.</p>
+<h2 id="yoneda-in-programming">Yoneda in programming</h2>
+<p>We will discuss a hopefully intuitive way of looking at the Yoneda lemma in Scala, by pinpointing a function with a single evaluation. </p>
+<p>Let us first see how we can translate the relevant tools of Yoneda to Scala. We have the following concepts:</p>
+<ul>
+<li>
+<p><em>hom-sets</em>: the hom-set of types <code>A</code> and <code>B</code> are the arrows between <code>A</code> and <code>B</code>, i.e. functions of the type <code>A =&gt; B</code>. Note that this hom-set is again in the category of types.</p>
+</li>
+<li>
+<p>The <em>hom-functor</em> corresponding to a type <code>A</code> should be a functor, i.e. a type constructor, that produces the hom-set <code>A =&gt; B</code> when given a type <code>B</code>, for some fixed type <code>A</code>. On functions <code>B =&gt; C</code> it should get a function between the hom-sets of <code>A</code> and <code>B, C</code> respectively, i.e.:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>, </span><span style="color:#d08770;">C</span><span>](</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">C</span><span>, </span><span style="color:#bf616a;">g</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">C </span><span>=
+</span><span>  f compose g
+</span></code></pre>
+<p>And indeed, we see that we can simply use composition.</p>
+</li>
+<li>
+<p>Yoneda's lemma says that for any other functor <code>F</code>, we can produce a natural transformation (i.e. polymorphic function in a type <code>B</code>) from the hom-functor for a fixed <code>A</code> by looking at elements of <code>F[A]</code>.</p>
+</li>
+</ul>
+<p>Next we look at a simple example of how to apply this final point in Scala.</p>
+<h3 id="reverse-engineering-machines">Reverse engineering machines</h3>
+<p>I first encountered this example here: <a href="http://blog.sigfpe.com/2006/11/yoneda-lemma.html">http://blog.sigfpe.com/2006/11/yoneda-lemma.html</a>.</p>
+<p>We set <code>F</code> equal to <code>Id</code>, the identity functor, and consider a natural transformation between <code>HomFunctor[A]</code> and <code>Id</code>, this has the form (at the component <code>B</code>):</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#a7adba;">// We fix A
+</span><span style="color:#b48ead;">type </span><span>A = ...;
+</span><span>
+</span><span style="color:#a7adba;">// HomFunctor[A, B]    Id[B]
+</span><span style="color:#a7adba;">//                |        |
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">machine</span><span>[</span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">B </span><span>=
+</span><span>  </span><span style="color:#a7adba;">// ...?
+</span></code></pre>
+<p>Say we are given any function with this signature, and we want to know how it is implemented. We can actually do this in a <em>single evaluation</em>, using the Yoneda lemma. The Yoneda lemma says precisely that such a <em>machine</em> is given uniquely by any element of <code>Id[A] = A</code>, i.e. some value of the type <code>A</code>. This makes a lot of sense in this context, since we can be given <em>any</em> <code>B</code>, and the only tool that we have to produce a value for <code>B</code> is to use the function <code>f: A =&gt; B</code> that is supplied to us. Furthermore, the polymorphic function should behave the same for any type, so it can only be implemented as:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">machine</span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">B </span><span>=
+</span><span>  f(x)
+</span></code></pre>
+<p>where <code>x</code> is some fixed element of type <code>A</code>. Now, the Yoneda lemma also tells us a way to obtain <code>x</code>, we simply supply the identity <code>id = (y: Any) =&gt; y</code>:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span>x = machine(id) </span><span style="color:#a7adba;">// obtain the &#39;hidden element&#39;
+</span></code></pre>
+<p>What if <code>F</code> is not the identity function, but say the <code>Word</code> functor introduced <a href="/blog/ctp-programmer-category.md">in a previous post</a>. The story actually does not change much, we now have a function with the signature:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">machine</span><span>[</span><span style="color:#d08770;">B</span><span>](</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>): </span><span style="color:#d08770;">Word</span><span>[</span><span style="color:#d08770;">B</span><span>] =
+</span><span>  </span><span style="color:#a7adba;">// ...?
+</span></code></pre>
+<p>the Yoneda lemma says that internally, any function of this signature should maintain a word of the type <code>Word[A]</code>, and when given a function <code>f: A =&gt; B</code> it maps this over the internal list to produce a value of the type <code>Word[B]</code>. Again, we can get this list by feeding the <code>id</code> function into the machine.</p>
+<h3 id="continuation-passing-style">Continuation Passing Style</h3>
+<p>In programming, there is an equivalence between what is called <em>direct</em> style, where functions return values, and <em>continuation passing style</em> (CPS), where each <em>called function</em> takes an additional argument which is a <em>handler function</em> that does something with the result of the called function.</p>
+<p>Say we have some function in C++.</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span>T </span><span style="color:#8fa1b3;">add</span><span>(T </span><span style="color:#bf616a;">a</span><span>, T </span><span style="color:#bf616a;">b</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">return</span><span> a + b;
+</span><span>}
+</span></code></pre>
+<p>Which we can use by calling e.g. <code>auto x = add(1, 2)</code>. The CPS version of this function looks like</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">add_cps</span><span>(T </span><span style="color:#bf616a;">a</span><span>, T </span><span style="color:#bf616a;">b</span><span>, F </span><span style="color:#bf616a;">cont</span><span>) {
+</span><span>    </span><span style="color:#bf616a;">cont</span><span>(a + b);
+</span><span>}
+</span></code></pre>
+<p>and the way it is used is:</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#bf616a;">add_cps</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>, [](</span><span style="color:#b48ead;">auto</span><span> result) {
+</span><span>    </span><span style="color:#a7adba;">// ...
+</span><span>});
+</span></code></pre>
+<p>In other words, the CPS version of the function does not <em>return a value</em>, but rather passes the result to a handler. We do not bind the result of a function to a value, but rather to the <em>argument of a handler function</em>.</p>
+<p>You may recognize this style of programming from writing asynchronous programs, where continuations can be used to deal with values produced in the future by other threads without blocking/suspending the at the callsite. Continuations are also often used in UI frameworks, where a handler is used whenever e.g. a button is pressed, or the value of a slider has changed.</p>
+<p>This CPS passing style can also be used to implement exceptions. Say we have a function that can throw:</p>
+<pre data-lang="cpp" style="background-color:#eff1f5;color:#4f5b66;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#b48ead;">void </span><span style="color:#8fa1b3;">can_throw</span><span>(F </span><span style="color:#bf616a;">raise</span><span>, G </span><span style="color:#bf616a;">cont</span><span>) {
+</span><span>    </span><span style="color:#a7adba;">// ...
+</span><span>}
+</span></code></pre>
+<p>Here, the idea is that <code>raise</code> gets called if an error occurs, while <code>cont</code> gets called when a result has been computed succesfully. What is also interesting is that CPS can be used to implement <em>control flow</em>. For example, the called function can call cont multiple times (loops), or only conditionally.</p>
+<p>Let us show that the <em>continuation passing transform</em> (CPT), i.e. going from direct style to CPS, is nothing more then the Yoneda embedding. Say we have a function:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#bf616a;">f</span><span>: </span><span style="color:#d08770;">A </span><span style="color:#b48ead;">=&gt; </span><span>B
+</span></code></pre>
+<p>Let us remind ourselves that the Yoneda embedding takes such an arrow, and produces a map \((Yf)_c = \text{Hom}(c, b) \rightarrow \text{Hom}(c, a)\) for all \(c \in \mathcal{C}\). In Scala, this embedding could be implemented like this:</p>
+<pre data-lang="scala" style="background-color:#eff1f5;color:#4f5b66;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">yoneda </span><span>[</span><span style="color:#d08770;">A</span><span>, </span><span style="color:#d08770;">B</span><span>]: </span><span style="color:#d08770;">X </span><span>=&gt; (f: (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">B</span><span>), g: (</span><span style="color:#d08770;">B </span><span>=&gt; </span><span style="color:#d08770;">X</span><span>)): (</span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">X</span><span>) =
+</span><span>  (</span><span style="color:#bf616a;">k</span><span>: </span><span style="color:#d08770;">A </span><span>=&gt; </span><span style="color:#d08770;">X</span><span>) </span><span style="color:#b48ead;">=&gt;</span><span> k compose f
+</span></code></pre>
+<p>Going the other way around is easy, we simply pass <code>id</code> as our continuation <code>k</code>.</p>
+
+            </article>
+        </section>
+
+    </div>
+</article>
+
+<footer>
+        <hr />
+</footer>
+
+  </div>
+
+</body>
+</html>

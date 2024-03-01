@@ -1,0 +1,67 @@
+{
+    "papers": [
+        {
+            "year": "2020",
+            "journal": "Particle & Particle Systems Characterization",
+            "authors": "H Vanrompay, JWB, DM Pelt, V Kumar, X Zhuo, LM Liz-Marzan, S Bals, KJ Batenburg",
+            "url": "https://doi.org/10.1002/ppsc.202000073",
+            "title": "Real-Time Reconstruction of Arbitrary Slices for Quantitative and In Situ 3D Characterization of Nanoparticles"
+        },
+        {
+            "year": "2020",
+            "journal": "SIAM Conference on Parallel Processing for Scientific Computing",
+            "authors": "JWB, WJ Palenstijn, RH Bisseling, KJ Batenburg",
+            "url": "https://doi.org/10.1137/1.9781611976137.6",
+            "title": "A projection-based partitioning method for distributed tomographic reconstruction"
+        },
+        {
+            "year": "2019",
+            "journal": "Scientific Reports",
+            "authors": "JWB, C Schleputz et al",
+            "url": "https://doi.org/10.1038/s41598-019-54647-4",
+            "title": "Real-time reconstruction and visualisation towards dynamic feedback control during time-resolved tomography experiments at TOMCAT"
+        },
+        {
+            "year": "2019",
+            "journal": "IEEE Transactions on Radiation and Plasma Medical Sciences",
+            "authors": "D Marlevi, H Kohr, JWB, B Gao, KJ Batenburg, M Colarieti-Tosti",
+            "url": "https://doi.org/10.1109/TRPMS.2019.2942186",
+            "title": "Multigrid reconstruction in tomographic imaging"
+        },
+        {
+            "year": "2019",
+            "journal": "Parallel Computing",
+            "authors": "JWB, RH Bisseling, KJ Batenburg",
+            "url": "https://doi.org/10.1016/j.parco.2018.12.007",
+            "title": "A geometric partitioning method for distributed tomographic reconstruction"
+        },
+        {
+            "year": "2018",
+            "journal": "Euro-Par 2018: Parallel Processing",
+            "authors": "JWB, TR Bannink, RH Bisseling",
+            "url": "https://doi.org/10.1007/978-3-319-96983-1_37",
+            "title": "Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs"
+        },
+        {
+            "year": "2018",
+            "journal": "Measurement Science and Technology",
+            "authors": "JWB, H Kohr, WJ Palenstijn, KJ Batenburg",
+            "url": "http://iopscience.iop.org/article/10.1088/1361-6501/aab754/meta",
+            "title": "Real-time quasi-3D tomographic reconstruction"
+        },
+        {
+            "year": "2017",
+            "journal": "Preprint",
+            "authors": "JWB, TR Bannink, A Wits",
+            "url": "http://iopscience.iop.org/article/10.1088/1361-6501/aab754/meta",
+            "title": "Bulk-synchronous pseudo-streaming algorithms for many-core accelerators"
+        },
+        {
+            "year": "2016",
+            "journal": "Master's thesis, Utrecht University",
+            "authors": "JWB",
+            "url": "https://scholar.google.nl/scholar?cluster=18383112231106166666&hl=nl&as_sdt=0,5&sciodt=0,5",
+            "title": "Self-Improving Sparse Matrix Partitioning and Bulk-Synchronous Pseudostreaming"
+        }
+    ]
+}

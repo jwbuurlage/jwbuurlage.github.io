@@ -1,0 +1,1040 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - scala</title>
+    <link href="https://jwbuurlage.github.io/tags/scala/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://jwbuurlage.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-02-28T00:00:00+00:00</updated>
+    <id>https://jwbuurlage.github.io/tags/scala/atom.xml</id>
+    <entry xml:lang="en">
+        <title>The Yoneda Lemma</title>
+        <published>2023-02-28T00:00:00+00:00</published>
+        <updated>2023-02-28T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jwbuurlage.github.io/blog/ctp-yoneda/" type="text/html"/>
+        <id>https://jwbuurlage.github.io/blog/ctp-yoneda/</id>
+        <content type="html">&lt;blockquote&gt;
+&lt;p&gt;In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jwbuurlage&#x2F;category-theory-programmers&quot;&gt;the notes I wrote back then&lt;&#x2F;a&gt;, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;Categories, functors, and natural transformations&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-programmer-category&#x2F;&quot;&gt;A category of types and functions&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-products-adt&quot;&gt;Products, coproducts, and algebraic data types&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-yoneda&quot;&gt;The Yoneda Lemma&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;The Yoneda Lemma relates a category \(\mathcal{C}\) with the functors from \(\mathcal{C}\) to \(\mathbf{Set}\). Before we can introduce the lemma we will introduce a number of concepts; first we introduce a class of functors called &lt;em&gt;hom-functors&lt;&#x2F;em&gt;, we introduce the notion of &lt;em&gt;representable functors&lt;&#x2F;em&gt;, we will discuss the &lt;em&gt;Yoneda embedding&lt;&#x2F;em&gt; and finally we will move on to the Yoneda Lemma; one of the important tools in category theory&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;hom-functors&quot;&gt;Hom-functors&lt;&#x2F;h2&gt;
+&lt;p&gt;The &lt;em&gt;hom-functor&lt;&#x2F;em&gt; for some fixed object \(c\), is a functor that sends any object \(a\) to the hom-set \(\text{Hom}(c, a)\), the set of all arrows between \( c \) and \(a\). It is clear that for each object we get an associated object in &lt;strong&gt;Set&lt;&#x2F;strong&gt;, but what should this functor do with arrows? We will denote the candidate functor with \(F = \text{Hom}(c, -)\). Say we have an arrow \(f: a \to b\):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ascii&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-ascii &quot;&gt;&lt;code class=&quot;language-ascii&quot; data-lang=&quot;ascii&quot;&gt;&lt;span&gt;      F
+&lt;&#x2F;span&gt;&lt;span&gt; a ────────► Hom(c, a)
+&lt;&#x2F;span&gt;&lt;span&gt; │               │
+&lt;&#x2F;span&gt;&lt;span&gt; │               │
+&lt;&#x2F;span&gt;&lt;span&gt;f│               │?
+&lt;&#x2F;span&gt;&lt;span&gt; │               │
+&lt;&#x2F;span&gt;&lt;span&gt; ▼    F          ▼
+&lt;&#x2F;span&gt;&lt;span&gt; b ────────► Hom(c, b)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The arrow with a question mark is an arrow in &lt;strong&gt;Set&lt;&#x2F;strong&gt;. Arrows in sets are functions, which we can define by saying what it does on elements. The elements of the hom-sets are arrows in \(\mathcal{C}\). Given some element of \(\text{Hom}(c, a)\), i.e. an arrow in \(\mathcal{C}\): \(g: c \to a\), we need to obtain an element of \(\text{Hom}(c, b)\), i.e. an arrow from \(c \to b\). We have the following data:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ascii&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-ascii &quot;&gt;&lt;code class=&quot;language-ascii&quot; data-lang=&quot;ascii&quot;&gt;&lt;span&gt;      Ff(g)=?
+&lt;&#x2F;span&gt;&lt;span&gt;┌─────────────┐
+&lt;&#x2F;span&gt;&lt;span&gt;│             ▼
+&lt;&#x2F;span&gt;&lt;span&gt;c ───► a      b
+&lt;&#x2F;span&gt;&lt;span&gt;   g
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We can go to \(a\) from \(c\) using \(g\), but then we need a way to get from \(a\) to \(b\). We actually have a way to do this, namely the arrow \(f: a \to b\) that we started with. We need only to compose! This motivates the following definition:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Let \(\mathcal{C}\) be a category, and let \(c \in \mathcal{C}\) and \(f: a \to b \in \mathcal{C}\). We define the (covariant) &lt;strong&gt;hom-functor&lt;&#x2F;strong&gt; \(\text{Hom}(c, -): \mathcal{C} \to \mathbf{Set}\) as:
+\begin{align*}
+\text{Hom}(c, -)(a) = &amp;amp;\text{Hom}(c, a) \\
+\text{Hom}(c, -)(f) : &amp;amp;\text{Hom}(c, a) \to \text{Hom}(c, b),\\
+&amp;amp;g \mapsto f \circ g
+\end{align*}
+Clearly the identity arrow gets mapped to the identity map. To show that compositions are preserved, we compute for any arrow \(h: c \to a\):
+\begin{align*}
+\text{Hom}(c, -)(g \circ f)(h) &amp;amp;= (g \circ f) \circ h \\
+&amp;amp;= g \circ (f \circ h) \\
+&amp;amp;= g \circ (\text{Hom}(c, -)(f)(h)) \\
+&amp;amp;= \text{Hom}(c, -)(g) \left( \text{Hom}(c, -)(f)(h)\right) \\
+&amp;amp;= \left(\text{Hom}(c, -)(g) \circ \text{Hom}(c, -)(f) \right)(h)
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;We can also define the contravariant hom-functor: \(\mathcal{C}^{\text{op}} \to \mathbf{Set}\) by &lt;em&gt;precomposing with \(f\)&lt;&#x2F;em&gt;, and we denote it as \(\text{Hom}(-, d)\).&lt;&#x2F;p&gt;
+&lt;p&gt;Let us introduce a term; functors are called &lt;strong&gt;naturally isomorphic&lt;&#x2F;strong&gt; if there is a natural transformation between them for which all components are isomorphisms. Hom-functors are such an important class of functors from \(\mathcal{C} \to \mathbf{Set}\), that they motivate the following definition:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. A functor \(F: \mathcal{C} \to \mathbf{Set}\) is called &lt;strong&gt;representable&lt;&#x2F;strong&gt; if it is naturally isomorphic to a hom-functor.&lt;&#x2F;p&gt;
+&lt;p&gt;To simplify the notation in the upcoming sections, we will denote the covariant hom-functor \(\text{Hom}(a, -) = h^a\) and the contravariant hom-functor \(\text{Hom}(-, b) = h_b\).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yoneda-embedding&quot;&gt;Yoneda Embedding&lt;&#x2F;h2&gt;
+&lt;p&gt;For any category \(\mathcal{C}\) the Yoneda embedding is a functor between the opposite category and the category of functors between \(\mathcal{C}\) and &lt;strong&gt;Set&lt;&#x2F;strong&gt;. Let us first introduce this target category.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Let \(\mathcal{C}\) and \(\mathcal{D}\) be two categories, then we define \(\mathbf{Fun}(\mathcal{C}, \mathcal{D})\) as the category that has functors \(\mathcal{C} \to \mathcal{D}\) as objects, and natural transformations between these functors as arrows.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we are ready to describe the Yoneda embedding. Note that because it is a functor between &lt;em&gt;the opposite of&lt;&#x2F;em&gt; \(\mathcal{C}\) and the category of &lt;em&gt;functors&lt;&#x2F;em&gt; between \(\mathcal{C}\) and &lt;strong&gt;Set&lt;&#x2F;strong&gt;, it should take objects to functors, and arrows to natural transformations. For all objects, we have introduced a functor associated to it in the previous section; the &lt;em&gt;hom-functor&lt;&#x2F;em&gt;. We can call the mapping between the object and its (covariant) hom-functor \(Y\).&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ascii&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-ascii &quot;&gt;&lt;code class=&quot;language-ascii&quot; data-lang=&quot;ascii&quot;&gt;&lt;span&gt;             Y       a
+&lt;&#x2F;span&gt;&lt;span&gt;    ┌──►a ────────► h
+&lt;&#x2F;span&gt;&lt;span&gt;    │   │           ▲
+&lt;&#x2F;span&gt;&lt;span&gt; op │   │           │   op
+&lt;&#x2F;span&gt;&lt;span&gt;f   │  f│           │ Yf
+&lt;&#x2F;span&gt;&lt;span&gt;    │   │           │
+&lt;&#x2F;span&gt;&lt;span&gt;    │   ▼    Y      │b
+&lt;&#x2F;span&gt;&lt;span&gt;    └───b ────────► h
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The natural transformation \(Yf\) should have components which are arrows in &lt;strong&gt;Set&lt;&#x2F;strong&gt;, indexed by objects in \(\mathcal{C}\). Let \(k: c \to d\), the corresponding naturality square looks like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ascii&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-ascii &quot;&gt;&lt;code class=&quot;language-ascii&quot; data-lang=&quot;ascii&quot;&gt;&lt;span&gt;             (Yf^op)c
+&lt;&#x2F;span&gt;&lt;span&gt;  Hom(a, c) ◄───────── Hom(b, c)
+&lt;&#x2F;span&gt;&lt;span&gt;      │                    │
+&lt;&#x2F;span&gt;&lt;span&gt;  a   │                    │  b
+&lt;&#x2F;span&gt;&lt;span&gt; h (k)│                    │ h (k)
+&lt;&#x2F;span&gt;&lt;span&gt;      ▼                    ▼
+&lt;&#x2F;span&gt;&lt;span&gt;  Hom(a, d) ◄───────── Hom(b, d)
+&lt;&#x2F;span&gt;&lt;span&gt;             (Yf^op)d
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So the natural components should be maps between hom-sets. As we will see, we can again find these maps by composition! This is summarized in the following definition:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. The &lt;strong&gt;Yoneda functor&lt;&#x2F;strong&gt; \(Y: \mathcal{C}^{\text{op}} \to \mathbf{Fun}(\mathcal{C}, \mathbf{Set})\), is defined as follows. Let \(a \in \mathcal{C}\) and \(f: b \to c\) in \(\mathcal{C}\).
+\begin{align*}
+Ya =&amp;amp; h^a \\
+Yf^{\text{op}} :&amp;amp; h^c \to h^b \\
+(Yf^{\text{op}})_a:&amp;amp; \text{Hom}(c, a) \to \text{Hom}(b, a) \\
+:&amp;amp; (g: c \to a) \mapsto (g \circ f: b \to a) \\
+=&amp;amp; h_a f
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;Note that the component is defined using &lt;em&gt;pre-composition&lt;&#x2F;em&gt;, it is a contravariant hom-functor, whereas the objects \(Ya\) are &lt;em&gt;covariant&lt;&#x2F;em&gt; hom-functors, i.e. use &lt;em&gt;post-composition&lt;&#x2F;em&gt;. Let us check that \(Yf\) is indeed a natural transformation by looking at the naturality square introduced above, let \(\ell: a \to c\), and lets trace it through the diagram for some \(k: c \to d\) and \(g: b \to a\):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;            
+&lt;&#x2F;span&gt;&lt;span&gt;         (Yg^op)c
+&lt;&#x2F;span&gt;&lt;span&gt;     l  ─────────► l . g
+&lt;&#x2F;span&gt;&lt;span&gt;     │             │
+&lt;&#x2F;span&gt;&lt;span&gt; a   │             │  b
+&lt;&#x2F;span&gt;&lt;span&gt;h (k)│             │ h (k)
+&lt;&#x2F;span&gt;&lt;span&gt;     ▼             ▼
+&lt;&#x2F;span&gt;&lt;span&gt; k . l  ─────────► k . l . g
+&lt;&#x2F;span&gt;&lt;span&gt;         (Yg^op)d
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In words: the naturality condition corresponds simply to the associativity in \(\mathcal{C}\). We say that \(Yf\) is the &lt;em&gt;induced natural transformation&lt;&#x2F;em&gt; of \(f\).&lt;&#x2F;p&gt;
+&lt;p&gt;The reason that the Yoneda functor is of such interest is because of the following:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Theorem 1&lt;&#x2F;strong&gt;. The Yoneda functor \(Y\) is &lt;em&gt;full&lt;&#x2F;em&gt; and &lt;em&gt;faithful&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;We will prove this in the next section, after we state and prove the Yoneda lemma. This theorem has the following corollary:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Corollary 1&lt;&#x2F;strong&gt;. Let \(\mu: h^a \to h^b\) be a natural transformation between hom-functors, then it is given by composition with a unique arrow \(f: b \to a\). Furthermore, \(\mu\) is a (natural) isomorphism if and only if \(f\) is an isomorphism.&lt;&#x2F;p&gt;
+&lt;p&gt;This means in particular that if a set-valued functor \(F\) is represented by both \(a\) and \(b\), then there is an isomorphism \(a \overset{\sim}{\rightarrow} b\).&lt;&#x2F;p&gt;
+&lt;p&gt;Again, by duality, there exists also a full and faithful functor from \(\mathcal{C} \to \mathbf{Fun}(\mathcal{C}^{\text{op}}, \mathbf{Set})\).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;examples-of-applications&quot;&gt;Examples of applications&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Example.&lt;&#x2F;strong&gt; &lt;em&gt;Matrix row operations&lt;&#x2F;em&gt;. In linear algebra, row operations can be performed without changing the solutions of the linear system. Examples are row permutations, adding the j-th row to the i-th row, or multiplying a row by a (non-zero) scalar. We will show that these &lt;em&gt;row operations&lt;&#x2F;em&gt; are natural, in the following sense.&lt;&#x2F;p&gt;
+&lt;p&gt;Let \(\mathcal{C}\) be the category where the objects are natural numbers \(1, 2, 3, \ldots\), and where arrows \(n \to m\) correspond to \(m \times n\) matrices. Composition is given by matrix multiplication, indeed if we have arrows:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;    A_(m x n)   B_(k x m)
+&lt;&#x2F;span&gt;&lt;span&gt;n  ─────────► m ─────────► k
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;then the composite \(B_{k \times m} A_{m \times n} = C_{k \times n}\) is an arrow from \(n\) to \(k\), as required. Consider contravariant hom-functors \(h_n\) for this category. The hom-set \(h_n k = \text{Hom}(k, n)\) consists of \(n \times k\) matrices. To show that row operations can be seen as natural transformations \(\mu: h_n \Rightarrow h_n\), we fix some \(k \times m\) matrix \(B\), and look at the following naturality square:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;            mu_k
+&lt;&#x2F;span&gt;&lt;span&gt;   h_n k  ─────────► h_n k
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │
+&lt;&#x2F;span&gt;&lt;span&gt; h_n B │             │ h_n B
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;       ▼             ▼
+&lt;&#x2F;span&gt;&lt;span&gt;   h_n m ──────────► h_n m
+&lt;&#x2F;span&gt;&lt;span&gt;            mu_m
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Considering some \(n \times k\) matrix \(A\), the naturality condition states:&lt;&#x2F;p&gt;
+&lt;p&gt;\[\mu(A) B \overset{?}{=} \mu(AB).\]&lt;&#x2F;p&gt;
+&lt;p&gt;To show this, we observe that for all row transformations we have:&lt;&#x2F;p&gt;
+&lt;p&gt;\[\mu(A) = A + \tilde{A}\]&lt;&#x2F;p&gt;
+&lt;p&gt;where the rows of \(\tilde{A}\) are either empty, or are multiples of rows of \(A\), or:&lt;&#x2F;p&gt;
+&lt;p&gt;\[\mu(A) = A + \Lambda A.\]&lt;&#x2F;p&gt;
+&lt;p&gt;Where \(\Lambda\) is a matrix whose elements \(\Lambda_{ij}\) represent how many times row \(j\) should be added to row \(i\). This means we have&lt;&#x2F;p&gt;
+&lt;p&gt;\[\mu(A) B = (A + \Lambda A) B = AB + \Lambda AB = \mu(AB).\]&lt;&#x2F;p&gt;
+&lt;p&gt;as required. By Corollary 1 we have that any natural transformation \(\mu: h_n \Rightarrow h_n\) is given by postcomposition (in this category: left-multiplication) with a unique arrow \(D: n \to n\). The Yoneda lemma allows us to identify this arrow; it is equal to:&lt;&#x2F;p&gt;
+&lt;p&gt;\[D = \mu_n(\text{Id}_n),\]&lt;&#x2F;p&gt;
+&lt;p&gt;so to perform row operations on a matrix, one can equivalently left multiply with a matrix obtained by applying these operations to the identity matrix. This powers the technique for manually inverting a matrix \(A\), where you perform row operations to the matrix \(A\) and simultaneously to another matrix \(B\) that is initially the identity matrix, until you reduce \(A\) to the identity matrix. The resulting matrix \(B\), when left multiplied with the original \(A\) will perform the row operations, and hence \(BA = \text{Id}\), or \(B = A^{-1}\).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Example&lt;&#x2F;strong&gt;.
+Another application of Yoneda is the following classic result from group theory known as &lt;em&gt;Cayley&#x27;s Theorem&lt;&#x2F;em&gt;: Any group \(G\) is isomorphic to a subgroup of a permutation group.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. Recall that we can view a group \(G\) as a category \(\mathcal{C}_G\) with a single object \({ \bullet }\) and with arrows \(\bullet \to \bullet\) corresponding to the elements of \(g\). Consider the Yoneda embedding \(Y\) of this category into \(\mathbf{Fun}(\mathcal{C}_G^{\text{op}}, \mathbf{Set})\),
+and in particular we consider the shape of the image of \(\bullet\) under the contravariant hom-functor \(h_\bullet\):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;G     Y      Nat(h_., h_.)
+&lt;&#x2F;span&gt;&lt;span&gt;. ─────────► h_. 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The arrows on the left (displayed collectively as &lt;code&gt;G&lt;&#x2F;code&gt;), corresponding to the elements of \(G\), get mapped &lt;em&gt;fully and faithfully&lt;&#x2F;em&gt; (by Theorem 1) to the natural transformations between \(h_\bullet\) and itself (natural endomorphisms).&lt;&#x2F;p&gt;
+&lt;p&gt;The natural endomorphisms \(h_\bullet\) are characterized, by Corollary 1, (at the only component \(G\)) by left-multiplication of elements \(G\) on the set \(h_\bullet \bullet \simeq G_{\text{set}}\) which is the underlying set of \(G\) (since it is \(\text{Hom}(\bullet, \bullet)\)). For each element \(g \in G\) we obtain an automorphism \(G_{\text{set}} \to G_{\text{set}}\) given by \(h \mapsto gh\).&lt;&#x2F;p&gt;
+&lt;p&gt;Recall that \(\text{Aut}(G_{\text{set}})\) is a group (a permutation group), and note that the collection of automorphisms defined by left multiplication of elements of \(G\) is indeed a subgroup of this permutation group. The correspondence between \(G\) and the &amp;quot;automorphisms by left-multiplication&amp;quot; is seen to be a group isomorphism by checking the definition directly. \( \Box \)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-yoneda-lemma&quot;&gt;The Yoneda Lemma&lt;&#x2F;h2&gt;
+&lt;p&gt;Corollary 1 tells us that any natural transformation between covariant hom-functors \(h^a\) and \(h^b\) is given by composition with an arrow in the reverse direction \(f: b \to a\). Note that this arrow is an element of \(h^b a = \text{Hom}(b, a)\).&lt;&#x2F;p&gt;
+&lt;p&gt;Less obviously, this result holds also for natural transformations between \(h^a\) and any other set-valued functor \(F\).&lt;&#x2F;p&gt;
+&lt;p&gt;What would a function between \(h^a\) and \(F\) look like? We see that a component of the natural transformation should take an element from \(h^a b\), i.e. an arrow \(g: a \to b\), to some element of \(Fb\). We can do this by &lt;em&gt;evaluating&lt;&#x2F;em&gt; the lifted arrow \(Fg\) , which is a map between the sets \(Fa\) and \(Fb\), at a fixed \(x \in F a\).&lt;&#x2F;p&gt;
+&lt;p&gt;This gives us an idea for a natural transformation corresponding to an element of \(Fa\). We summarize this in the following proposition.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Proposition&lt;&#x2F;strong&gt;. Let \(F: \mathcal{C} \to \mathbf{Set}\) be a functor, and \(a \in \mathcal{C}\). Any element \(x \in Fa\) induces a natural transformation from \(h^a\) to \(F\), by evaluating any lifted arrow in \(x\).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. We have to show that this induces a natural transformation, i.e. that the following diagram commutes:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;      a    F_(x)
+&lt;&#x2F;span&gt;&lt;span&gt;     h b  ─────────► F b
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;   a   │             │
+&lt;&#x2F;span&gt;&lt;span&gt;  h f  │             │ F f
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;       ▼             ▼
+&lt;&#x2F;span&gt;&lt;span&gt;      a  ──────────► F c
+&lt;&#x2F;span&gt;&lt;span&gt;     h c    F_(x)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here we denote:
+\(F \_ (x): h^a b \to F b,~f \mapsto F f(x).\)
+To show that the diagram commutes, fix an arrow \(g: a \to b \in h^a b\). If we start taking it along the top side we obtain:
+\begin{align*}
+F f (F g(x)) &amp;amp;= (F f \circ F g)(x) = F(f \circ g)(x) \\
+&amp;amp;= (F \_ (x))(f \circ g) = (F \_ (x))((h^a f)(g))
+\end{align*}
+which is equal to taking it along the bottom, hence the diagram commutes. \(\Box\)&lt;&#x2F;p&gt;
+&lt;p&gt;The Yoneda lemma states that &lt;em&gt;all natural transformations between \(h^a\) and \(F\) are of this form&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Theorem 2&lt;&#x2F;strong&gt;. &lt;em&gt;The Yoneda lemma&lt;&#x2F;em&gt;. Let \(\mathcal{C}\) be a category, let \(a \in \mathcal{C}\), and let \(F: \mathcal{C} \to \mathbf{Set}\) be a set-valued functor. There is a one-to-one correspondence between elements of \(Fa\), and natural transformations:
+\(\mu: h^a \Rightarrow F.\)&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. We already saw that each element of \(Fa\) induces a natural transformation, so we have a map:
+\(\Phi: F a \to \text{Nat}(h^a, F).\)
+Here, \(\text{Nat}(h^a, F)\) denotes the set of natural transformations between \(h^a\) and \(F\).&lt;&#x2F;p&gt;
+&lt;p&gt;We now need to show that \(\Phi\) has an inverse.
+Let \(\mu\) be any natural transformation, then we can obtain an element of \(F a\) by looking at the component \(\mu_a\) and let it act on the identity arrow \(\text{id}_c \in h^a a\), i.e.:&lt;&#x2F;p&gt;
+&lt;p&gt;\(\Psi: \mu \mapsto \mu_a(\text{id}_a).\)&lt;&#x2F;p&gt;
+&lt;p&gt;Now let us show that \(\Phi\) and \(\Psi\) are inverses of each other. First, we compute:&lt;&#x2F;p&gt;
+&lt;p&gt;\( \Psi(\Phi(x)) = \Psi(F \_ (x)) = F \text{id}_a (x) = \text{id}_{F a}(x) = x \)&lt;&#x2F;p&gt;
+&lt;p&gt;so \(\Psi\) is a left inverse of \(\Phi\). To show that it is also a right inverse, we need to show that:
+\(\Phi(\Psi(\mu)) = \mu,\)
+or in components:
+\(\Phi(\Psi(\mu))_b = \mu_b.\)
+We note that by definition, for any \(f: a \to b\) in \(h^a b\):
+\(\Phi(\Psi(\mu))_b (f) = (\Phi(\mu_a(\text{id}_a)))_b (f) = Ff (\mu_a(\text{id}_a)).\)
+Since \(\mu\) is a natural transformation we have that the following diagram commutes:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;            mu_a(x)
+&lt;&#x2F;span&gt;&lt;span&gt;   h^a a  ─────────► F a
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │
+&lt;&#x2F;span&gt;&lt;span&gt; h^a f │             │ F f
+&lt;&#x2F;span&gt;&lt;span&gt;       │             │ 
+&lt;&#x2F;span&gt;&lt;span&gt;       ▼             ▼
+&lt;&#x2F;span&gt;&lt;span&gt;   h^a b ──────────► F b
+&lt;&#x2F;span&gt;&lt;span&gt;            mu_b(x)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In particular, consider the element \(\text{id}_a \in h^a a\). Tracing this along bottom this gets mapped to \(\mu_b (f)\), while along the top it gives precisely \(Ff (\mu_a(\text{id}_a))\), so we have shown that:
+\(\Phi(\Psi(\mu))_b (f) = Ff (\mu_a(\text{id}_a)) = \mu_b(f).\)
+And hence, \(\Psi\) is also a right inverse of \(\Phi\), and thus \(\Phi\) is a bijection, as required. \(\Box\)&lt;&#x2F;p&gt;
+&lt;p&gt;One can also show, that this correspondence is &#x27;natural&#x27; in \(a \in \mathcal{C}\) and \(F\).&lt;&#x2F;p&gt;
+&lt;p&gt;Let us now prove Theorem 1.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;proof of Theorem 1&lt;&#x2F;em&gt;. By Yoneda&#x27;s Lemma there is a bijection between the sets:
+\(\text{Nat}(h^b, h^a) \simeq h^a b = \text{Hom}(a, b)\)
+for all objects \(a\) and \(b\) of \(\mathcal{C}\), which directly implies that the functor \(Y\) is full and faithful.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Let us recap what we have seen so far. We discussed a special class of set-valued functors called &lt;em&gt;hom-functors&lt;&#x2F;em&gt;. These hom-functors, like hom-sets, relate objects directly with the arrows between them.&lt;&#x2F;p&gt;
+&lt;p&gt;Next we showed that we can &lt;em&gt;embed&lt;&#x2F;em&gt; any category into the category of contravariant set-valued functors of this category, sending objects to their hom-functors. We also showed that this embedding, as a functor, is &lt;em&gt;full&lt;&#x2F;em&gt; and &lt;em&gt;faithful&lt;&#x2F;em&gt;, which suggests that all the information of the category and its objects, is contained in its hom-functors.&lt;&#x2F;p&gt;
+&lt;p&gt;When looking at what this means for the arrows, we noted that in particular any natural transformation between hom-functors is given by composition with arrows of our category.&lt;&#x2F;p&gt;
+&lt;p&gt;To prove this, we stated and proved the Yoneda lemma -- which is an important result in its own right. It shows that for an arbitrary set-valued functor, there is a bijection between elements of the set \(F a\) and natural transformations from \(h^a\) to \(F\),&lt;&#x2F;p&gt;
+&lt;p&gt;All functors in programming are set-valued, since types can be viewed as set. We first show two simple applications of Yoneda&#x27;s lemma in mathematics, and next we see some initial applications of the Yoneda lemma to programming.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yoneda-in-programming&quot;&gt;Yoneda in programming&lt;&#x2F;h2&gt;
+&lt;p&gt;We will discuss a hopefully intuitive way of looking at the Yoneda lemma in Scala, by pinpointing a function with a single evaluation. &lt;&#x2F;p&gt;
+&lt;p&gt;Let us first see how we can translate the relevant tools of Yoneda to Scala. We have the following concepts:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;em&gt;hom-sets&lt;&#x2F;em&gt;: the hom-set of types &lt;code&gt;A&lt;&#x2F;code&gt; and &lt;code&gt;B&lt;&#x2F;code&gt; are the arrows between &lt;code&gt;A&lt;&#x2F;code&gt; and &lt;code&gt;B&lt;&#x2F;code&gt;, i.e. functions of the type &lt;code&gt;A =&amp;gt; B&lt;&#x2F;code&gt;. Note that this hom-set is again in the category of types.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;em&gt;hom-functor&lt;&#x2F;em&gt; corresponding to a type &lt;code&gt;A&lt;&#x2F;code&gt; should be a functor, i.e. a type constructor, that produces the hom-set &lt;code&gt;A =&amp;gt; B&lt;&#x2F;code&gt; when given a type &lt;code&gt;B&lt;&#x2F;code&gt;, for some fixed type &lt;code&gt;A&lt;&#x2F;code&gt;. On functions &lt;code&gt;B =&amp;gt; C&lt;&#x2F;code&gt; it should get a function between the hom-sets of &lt;code&gt;A&lt;&#x2F;code&gt; and &lt;code&gt;B, C&lt;&#x2F;code&gt; respectively, i.e.:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C &lt;&#x2F;span&gt;&lt;span&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  f compose g
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And indeed, we see that we can simply use composition.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Yoneda&#x27;s lemma says that for any other functor &lt;code&gt;F&lt;&#x2F;code&gt;, we can produce a natural transformation (i.e. polymorphic function in a type &lt;code&gt;B&lt;&#x2F;code&gt;) from the hom-functor for a fixed &lt;code&gt;A&lt;&#x2F;code&gt; by looking at elements of &lt;code&gt;F[A]&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Next we look at a simple example of how to apply this final point in Scala.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;reverse-engineering-machines&quot;&gt;Reverse engineering machines&lt;&#x2F;h3&gt;
+&lt;p&gt;I first encountered this example here: &lt;a href=&quot;http:&#x2F;&#x2F;blog.sigfpe.com&#x2F;2006&#x2F;11&#x2F;yoneda-lemma.html&quot;&gt;http:&#x2F;&#x2F;blog.sigfpe.com&#x2F;2006&#x2F;11&#x2F;yoneda-lemma.html&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;We set &lt;code&gt;F&lt;&#x2F;code&gt; equal to &lt;code&gt;Id&lt;&#x2F;code&gt;, the identity functor, and consider a natural transformation between &lt;code&gt;HomFunctor[A]&lt;&#x2F;code&gt; and &lt;code&gt;Id&lt;&#x2F;code&gt;, this has the form (at the component &lt;code&gt;B&lt;&#x2F;code&gt;):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; We fix A
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span&gt;A = ...;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; HomFunctor[A, B]    Id[B]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F;                |        |
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;machine&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; ...?
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Say we are given any function with this signature, and we want to know how it is implemented. We can actually do this in a &lt;em&gt;single evaluation&lt;&#x2F;em&gt;, using the Yoneda lemma. The Yoneda lemma says precisely that such a &lt;em&gt;machine&lt;&#x2F;em&gt; is given uniquely by any element of &lt;code&gt;Id[A] = A&lt;&#x2F;code&gt;, i.e. some value of the type &lt;code&gt;A&lt;&#x2F;code&gt;. This makes a lot of sense in this context, since we can be given &lt;em&gt;any&lt;&#x2F;em&gt; &lt;code&gt;B&lt;&#x2F;code&gt;, and the only tool that we have to produce a value for &lt;code&gt;B&lt;&#x2F;code&gt; is to use the function &lt;code&gt;f: A =&amp;gt; B&lt;&#x2F;code&gt; that is supplied to us. Furthermore, the polymorphic function should behave the same for any type, so it can only be implemented as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;machine&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  f(x)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;where &lt;code&gt;x&lt;&#x2F;code&gt; is some fixed element of type &lt;code&gt;A&lt;&#x2F;code&gt;. Now, the Yoneda lemma also tells us a way to obtain &lt;code&gt;x&lt;&#x2F;code&gt;, we simply supply the identity &lt;code&gt;id = (y: Any) =&amp;gt; y&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;x = machine(id) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; obtain the &amp;#39;hidden element&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;What if &lt;code&gt;F&lt;&#x2F;code&gt; is not the identity function, but say the &lt;code&gt;Word&lt;&#x2F;code&gt; functor introduced &lt;a href=&quot;&#x2F;blog&#x2F;ctp-programmer-category.md&quot;&gt;in a previous post&lt;&#x2F;a&gt;. The story actually does not change much, we now have a function with the signature:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;machine&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; ...?
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;the Yoneda lemma says that internally, any function of this signature should maintain a word of the type &lt;code&gt;Word[A]&lt;&#x2F;code&gt;, and when given a function &lt;code&gt;f: A =&amp;gt; B&lt;&#x2F;code&gt; it maps this over the internal list to produce a value of the type &lt;code&gt;Word[B]&lt;&#x2F;code&gt;. Again, we can get this list by feeding the &lt;code&gt;id&lt;&#x2F;code&gt; function into the machine.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;continuation-passing-style&quot;&gt;Continuation Passing Style&lt;&#x2F;h3&gt;
+&lt;p&gt;In programming, there is an equivalence between what is called &lt;em&gt;direct&lt;&#x2F;em&gt; style, where functions return values, and &lt;em&gt;continuation passing style&lt;&#x2F;em&gt; (CPS), where each &lt;em&gt;called function&lt;&#x2F;em&gt; takes an additional argument which is a &lt;em&gt;handler function&lt;&#x2F;em&gt; that does something with the result of the called function.&lt;&#x2F;p&gt;
+&lt;p&gt;Say we have some function in C++.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span&gt;T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add&lt;&#x2F;span&gt;&lt;span&gt;(T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; a + b;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Which we can use by calling e.g. &lt;code&gt;auto x = add(1, 2)&lt;&#x2F;code&gt;. The CPS version of this function looks like&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;add_cps&lt;&#x2F;span&gt;&lt;span&gt;(T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;, T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;, F &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cont&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cont&lt;&#x2F;span&gt;&lt;span&gt;(a + b);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;and the way it is used is:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;add_cps&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, [](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;auto&lt;&#x2F;span&gt;&lt;span&gt; result) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span&gt;});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In other words, the CPS version of the function does not &lt;em&gt;return a value&lt;&#x2F;em&gt;, but rather passes the result to a handler. We do not bind the result of a function to a value, but rather to the &lt;em&gt;argument of a handler function&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;You may recognize this style of programming from writing asynchronous programs, where continuations can be used to deal with values produced in the future by other threads without blocking&#x2F;suspending the at the callsite. Continuations are also often used in UI frameworks, where a handler is used whenever e.g. a button is pressed, or the value of a slider has changed.&lt;&#x2F;p&gt;
+&lt;p&gt;This CPS passing style can also be used to implement exceptions. Say we have a function that can throw:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;can_throw&lt;&#x2F;span&gt;&lt;span&gt;(F &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;raise&lt;&#x2F;span&gt;&lt;span&gt;, G &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;cont&lt;&#x2F;span&gt;&lt;span&gt;) {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; ...
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, the idea is that &lt;code&gt;raise&lt;&#x2F;code&gt; gets called if an error occurs, while &lt;code&gt;cont&lt;&#x2F;code&gt; gets called when a result has been computed succesfully. What is also interesting is that CPS can be used to implement &lt;em&gt;control flow&lt;&#x2F;em&gt;. For example, the called function can call cont multiple times (loops), or only conditionally.&lt;&#x2F;p&gt;
+&lt;p&gt;Let us show that the &lt;em&gt;continuation passing transform&lt;&#x2F;em&gt; (CPT), i.e. going from direct style to CPS, is nothing more then the Yoneda embedding. Say we have a function:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;B
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Let us remind ourselves that the Yoneda embedding takes such an arrow, and produces a map \((Yf)_c = \text{Hom}(c, b) \rightarrow \text{Hom}(c, a)\) for all \(c \in \mathcal{C}\). In Scala, this embedding could be implemented like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;yoneda &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;X &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; (f: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;), g: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;X&lt;&#x2F;span&gt;&lt;span&gt;)): (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;X&lt;&#x2F;span&gt;&lt;span&gt;) =
+&lt;&#x2F;span&gt;&lt;span&gt;  (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;k&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;X&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; k compose f
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Going the other way around is easy, we simply pass &lt;code&gt;id&lt;&#x2F;code&gt; as our continuation &lt;code&gt;k&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+</content>
+    </entry>
+    <entry xml:lang="en">
+        <title>Products, coproducts, and algebraic data types</title>
+        <published>2022-08-02T00:00:00+00:00</published>
+        <updated>2022-08-02T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jwbuurlage.github.io/blog/ctp-products-adt/" type="text/html"/>
+        <id>https://jwbuurlage.github.io/blog/ctp-products-adt/</id>
+        <content type="html">&lt;blockquote&gt;
+&lt;p&gt;In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jwbuurlage&#x2F;category-theory-programmers&quot;&gt;the notes I wrote back then&lt;&#x2F;a&gt;, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;Categories, functors, and natural transformations&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-programmer-category&#x2F;&quot;&gt;A category of types and functions&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-products-adt&quot;&gt;Products, coproducts, and algebraic data types&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-yoneda&quot;&gt;The Yoneda Lemma&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;duality-and-products-of-objects&quot;&gt;Duality and products of objects&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;products&quot;&gt;Products&lt;&#x2F;h3&gt;
+&lt;p&gt;Initial objects and terminal objects have a &lt;em&gt;universal property&lt;&#x2F;em&gt;, meaning that they are defined by the property that e.g. all other objects have a &lt;em&gt;unique morphism to the object&lt;&#x2F;em&gt;. A more involved example of such a universal property is the &lt;em&gt;notion of a product of objects&lt;&#x2F;em&gt;. The categorical product is a unifying definition for many &#x27;products&#x27; encountered in mathematics, such as the cartesian product, product group, products of topological spaces, and so on.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Let \(\mathcal{C}\) be a category, and let \(a, b \in \mathcal{C}\) be objects in \(\mathcal{C}\). A &lt;em&gt;product&lt;&#x2F;em&gt; of \(a\) and \(b\) is an object \(a \times b \in \mathcal{C}\) along with two arrows \(p_1: a \times b \to a\) and \(p_2: a \times b \to b\) (the &lt;em&gt;projections&lt;&#x2F;em&gt;) so that for all objects \(c \in \mathcal{C}\) and arrows \(f: c \to a\) and \(g: c \to b\) there exists a unique morphism \(q: c \to a \times b\) that makes the following diagram commute:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;  ┌────── c ──────┐
+&lt;&#x2F;span&gt;&lt;span&gt;  │       │       │ 
+&lt;&#x2F;span&gt;&lt;span&gt; f│       │q      │g
+&lt;&#x2F;span&gt;&lt;span&gt;  ▼       ▼       ▼
+&lt;&#x2F;span&gt;&lt;span&gt;  a ◄── a x b ──► b
+&lt;&#x2F;span&gt;&lt;span&gt;     p1       p2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In this case, the (unique) arrows \(q\) are what gives the product a &lt;em&gt;universal mapping property&lt;&#x2F;em&gt;. If a product exists, it is unique up to unique isomorphism.&lt;&#x2F;p&gt;
+&lt;p&gt;We say that the functions \(f\) and \(g\) &lt;em&gt;factors&lt;&#x2F;em&gt; through \(a \times b\), or that \(a \times b\) &lt;em&gt;factorizes&lt;&#x2F;em&gt; \(f\) and \(g\). The reason for this name is clear when making the analogy with numbers. From the diagram above, we have the following two equalities:&lt;&#x2F;p&gt;
+&lt;p&gt;\(f = p_1 \circ q,~g = p_2 \circ q.\)&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s give a concrete example with numbers. We consider the category of natural numbers, where an arrow \( a \to b \) indicates that \( b \) is a multiple of \( a \).&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;   ┌───── 3 ──────┐
+&lt;&#x2F;span&gt;&lt;span&gt;x10│      │x5     │x15
+&lt;&#x2F;span&gt;&lt;span&gt;   ▼      ▼       ▼
+&lt;&#x2F;span&gt;&lt;span&gt;  30 ◄─── 15 ───► 45
+&lt;&#x2F;span&gt;&lt;span&gt;     x2       x3
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that the two equalities translate to&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;\( 10 = 5 \times 2 \)&lt;&#x2F;li&gt;
+&lt;li&gt;\( 15 = 5 \times 3 \)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;In this category, the product corresponds to the greatest common divisor of \( a \) and \( b \). Indeed, \( c \) would have to be &lt;em&gt;any&lt;&#x2F;em&gt; common divisor of \( a \) and \( b \) for \( f \) and \( g \) to exist. The &lt;em&gt;greatest&lt;&#x2F;em&gt; common divisor, is always a multiple of any given common divisor.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Example&lt;&#x2F;strong&gt;. Let us consider the product of objects in &lt;strong&gt;Set&lt;&#x2F;strong&gt;. Consider two sets \(A, B\). We have a clear candidate for a product; the cartesian product \(A \times B\). Given any element (or &lt;em&gt;pair&lt;&#x2F;em&gt;) \((a, b) \in A \times B\), the projections \(p_1, p_2\) send it to \(a\) and \(b\) respectively. Is this indeed a product?&lt;&#x2F;p&gt;
+&lt;p&gt;Let \(V\) be any other set, with arrows (functions) \(f\) to \(A\) and \(g\) to \(B\). Can we construct a (unique) arrow \(q\) to \(A \times B\)?&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;   ┌────── V ──────┐
+&lt;&#x2F;span&gt;&lt;span&gt;   │       │       │ 
+&lt;&#x2F;span&gt;&lt;span&gt;  f│       │q?     │g
+&lt;&#x2F;span&gt;&lt;span&gt;   ▼       ▼       ▼
+&lt;&#x2F;span&gt;&lt;span&gt;   A ◄── A x B ──► B
+&lt;&#x2F;span&gt;&lt;span&gt;      p1       p2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Consider any element \(v \in V\). It gets mapped to \(f(v) \in A\), and \(g(v) \in B\). Let \(q: v \mapsto (f(v), g(v))\), then \((p_1 \circ q)(v) = f(v)\), and thus \(p_1 \circ q = f\). Similarly \(p_2 \circ q = g\).&lt;&#x2F;p&gt;
+&lt;p&gt;Indeed, we have constructed an arrow that makes the above diagram commute. It should also be clear that this is the &lt;em&gt;only arrow&lt;&#x2F;em&gt; that satisfies this, as if \( q \) maps any of the two components differently, after projecting we would not end up with the correct value. We conclude that \(A \times B\) is the product of \(A\) and \(B\) in the category &lt;strong&gt;Set&lt;&#x2F;strong&gt;. Another valid example of a product of sets would be \(B \times A\), which is clearly isomorphic to \(A \times B\). The isomorphism corresponds to &#x27;swapping&#x27; the elements, which is its own inverse.&lt;&#x2F;p&gt;
+&lt;p&gt;For a completely different example, we consider the category corresponding to a poset.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Example.&lt;&#x2F;strong&gt; Let us consider the product of objects in the category corresponding to some poset \(P\). Consider two elements \(x, y \in P\). A product \(z \equiv x \times y\) would be equipped with two arrows \(z \to x\) and \(z \to y\), which means \(z \leq x\) and \(z \leq y\). Furthermore, for any element \(w\) with arrows to \(x, y\) (i.e. \(w \leq x\) and \(w \leq y\)), there has to be an arrow \(q: w \to z\) (i.e. \(w \leq z\)). This is the same as saying that, in addition to \(z \leq x\) and \(z \leq y\), we have for all elements \(w\) of the poset:
+\(w \leq x \text{ and } w \leq y \implies w \leq z\)
+This means that \(z\) is the &amp;quot;largest element that is smaller or equal to \(x\) and \(y\)&amp;quot;, also called the &lt;em&gt;infimum&lt;&#x2F;em&gt; of \(x\) and \(y\).&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;duality&quot;&gt;Duality&lt;&#x2F;h3&gt;
+&lt;p&gt;For any category, we can define the category with all arrows (and composition) reversed.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. The &lt;em&gt;opposite category&lt;&#x2F;em&gt; \(\mathcal{C}^{\text{op}}\) of a category \(\mathcal{C}\) is the category with:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The same objects as \(\mathcal{C}\).&lt;&#x2F;li&gt;
+&lt;li&gt;For all arrows \(f: a \to b\) in \(\mathcal{C}\), there is an arrow \(f^{\text{op}}: b \to a\)&lt;&#x2F;li&gt;
+&lt;li&gt;The composition of \(f^{\text{op}} : a \to b\) and \(g^{\text{op}}: b \to c\) is given by:
+\(g^{\text{op}} \circ f^{\text{op}} = (f \circ g)^{\text{op}}\)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The opposite category is very useful, because many concepts defined in the original category have &#x27;dual notions&#x27; in the opposite category. Clearly, for example, an &lt;em&gt;initial object in \(\mathcal{C}\) is a terminal object in \(\mathcal{C}^{\text{op}}\)&lt;&#x2F;em&gt;. Similarly, an arrow that is &lt;em&gt;mono in \(\mathcal{C}\) is epi in \(\mathcal{C}^{\text{op}}\)&lt;&#x2F;em&gt;. This is called &lt;strong&gt;duality&lt;&#x2F;strong&gt;, and provides so-called &#x27;co-&#x27; notions of constructs, as well as co- versions of theorems.&lt;&#x2F;p&gt;
+&lt;p&gt;Whenever defining something it always make sense to see what this means in the opposite category, giving you a lot of free information. For example, we showed that faithful functors reflects monos. Looking at the dual category, we immediately have that it also reflects epis!&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;coproducts&quot;&gt;Coproducts&lt;&#x2F;h3&gt;
+&lt;p&gt;Let us apply the idea of &lt;em&gt;duality&lt;&#x2F;em&gt;. What would be the dual notion of the product? Let us take the product diagram, and reverse the arrows:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; ┌─────► c ◄─────┐
+&lt;&#x2F;span&gt;&lt;span&gt; │       ▲       │ 
+&lt;&#x2F;span&gt;&lt;span&gt;f|       |q      |g
+&lt;&#x2F;span&gt;&lt;span&gt; |       |       |
+&lt;&#x2F;span&gt;&lt;span&gt; a ──► a + b ◄── b
+&lt;&#x2F;span&gt;&lt;span&gt;    p1       p2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We have arrows going from objects \(a, b\) into the coproduct (written \( a + b \), we will see why soon), and from this coproduct arrows going to arbitrary target objects \(c\). The arrows \(a \to a + b\) and \(b \to a + b\) already look kind of like an inclusion. Let us see what happens when we apply duality to the product definition, and change some names.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Let \(\mathcal{C}\) be a category, and let \(a, b \in \mathcal{C}\) be objects in \(\mathcal{C}\). A &lt;em&gt;coproduct&lt;&#x2F;em&gt; of \(a\) and \(b\) is an object \(a + b \in \mathcal{C}\) along with two arrows \(i_1: a + b \leftarrow a\) and \(i_2: a + b \leftarrow b\) (the &lt;em&gt;inclusions&lt;&#x2F;em&gt;) so that for all objects \(c \in \mathcal{C}\) and arrows \(f: c \leftarrow a\) and \(g: c \leftarrow b\) there exists a unique morphism \(q: c \leftarrow a + b\) that makes the following diagram commute:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; ┌─────► c ◄─────┐
+&lt;&#x2F;span&gt;&lt;span&gt; │       ▲       │ 
+&lt;&#x2F;span&gt;&lt;span&gt;f|       |q      |g
+&lt;&#x2F;span&gt;&lt;span&gt; |       |       |
+&lt;&#x2F;span&gt;&lt;span&gt; a ──► a + b ◄── b
+&lt;&#x2F;span&gt;&lt;span&gt;    i1       i2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that this is precisely the definition of the product, with all arrows reversed and the projections renamed to \(i_1\) and \(i_2\).&lt;&#x2F;p&gt;
+&lt;p&gt;Because of the properties that we will soon discover, the coproduct is also called the &lt;em&gt;sum&lt;&#x2F;em&gt;. While it may seem like a similar construction, this dual notion turns out to be fundamentally different. To show this, let us explore what it means in the category &lt;strong&gt;Set&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Example.&lt;&#x2F;strong&gt; Consider two sets \(A, B\). When looking at the diagram for the coproduct, we see that we need to find some kind of set in which elements of \(A\) and \(B\) are represented but completely independent; since \(c\) is now the target of the function $q$ we have to factor through \(a + b\): it needs to be able to reflect the full image under \( f \), as well as the full image under \( g \).&lt;&#x2F;p&gt;
+&lt;p&gt;This means that \( A + B \) has to be the &lt;em&gt;disjoint union&lt;&#x2F;em&gt; of \(A\) and \(B\). The ordinary union of two non-disjoint sets would not be enough, as in the intersection of \(A\) and \(B\) we would not know whether \(q\) should represent \(f\) or \(g\). We represent the disjoint union as:&lt;&#x2F;p&gt;
+&lt;p&gt;\(A + B \equiv { (a, 0)~|~a \in A } \cup { (b, 1)~|~b \in B }.\)&lt;&#x2F;p&gt;
+&lt;p&gt;It is clear what \(i_1\) and \(i_2\) should be: they add the relevant tag \( 0 \) or \( 1 \) as the second component of the pair.&lt;&#x2F;p&gt;
+&lt;p&gt;Let \(V\) be any set, and assume we are given arrows (functions) \(f: A \to V\) and \(g: B \to V\).&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; ┌─────► V ◄─────┐
+&lt;&#x2F;span&gt;&lt;span&gt; │       ▲       │ 
+&lt;&#x2F;span&gt;&lt;span&gt;f|       |q      |g
+&lt;&#x2F;span&gt;&lt;span&gt; |       |       |
+&lt;&#x2F;span&gt;&lt;span&gt; A ──► A + B ◄── B
+&lt;&#x2F;span&gt;&lt;span&gt;    i1       i2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Consider any element \(a \in A\). It gets mapped to \(f(a) \in V\), and to \(i_1(a) = (a, 0)\) in \(A + B\). Then we should set \(q(a, 0) \equiv f(a)\), and similarly we set \(q(b, 1) \equiv g(b)\). This already defines \(q\) uniquely and completely, so we conclude that the disjoint union is indeed the coproduct in the category &lt;strong&gt;Set&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;We note there that the coproduct (and product) of two objects, generalizes also to products of more than 2 objects (by simply adding more maps \(i_1, i_2, i_3 \ldots\)).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;algebraic-data-types&quot;&gt;Algebraic data types&lt;&#x2F;h2&gt;
+&lt;p&gt;Let us apply the product (and coproduct) concepts to the category of types. Since we already saw what these constructs mean for sets, namely the cartesian product and the disjoint union respectively, it should be clear what this means for types.&lt;&#x2F;p&gt;
+&lt;p&gt;Given a type \(A\) and a type \(B\), the product corresponds to a &lt;em&gt;pair&lt;&#x2F;em&gt; (or more generally, a &lt;em&gt;tuple&lt;&#x2F;em&gt;), written &lt;code&gt;(A, B)&lt;&#x2F;code&gt; in Scala. For example:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;Int&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;String&lt;&#x2F;span&gt;&lt;span&gt;) = (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To allow us to experiment a bit more freely, let us define our own version of a pair.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Pair[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Pair(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, we give the unique value constructor the same name as its type constructor. The coproduct (or &lt;em&gt;sum type&lt;&#x2F;em&gt;) corresponds to a value that has either type &lt;code&gt;A&lt;&#x2F;code&gt;, or type &lt;code&gt;B&lt;&#x2F;code&gt;. This is implemented as the &lt;code&gt;Either&lt;&#x2F;code&gt; data type we already saw in a &lt;a href=&quot;https:&#x2F;&#x2F;jwbuurlage.github.io&#x2F;blog&#x2F;ctp-products-adt&#x2F;.&#x2F;blog&#x2F;ctp-programmer-category&quot;&gt;previous post&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Either[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Left(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Right(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, the two value constructors take an element of type &lt;code&gt;A&lt;&#x2F;code&gt;, or an element of type &lt;code&gt;B&lt;&#x2F;code&gt; respectively.&lt;&#x2F;p&gt;
+&lt;p&gt;A sum type means choosing an alternative between types, while the product type is a combination of the types. A simple example of a sum type has only three 0-ary value constructors.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Enum:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;One
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Two
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Three
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We can also combine sum and product types. A node of a binary tree of type &lt;code&gt;A&lt;&#x2F;code&gt; has a sum type: it is either a &lt;code&gt;Leaf&lt;&#x2F;code&gt;, or it is the product type of:
+- Tree on the left
+- value of type &lt;code&gt;A&lt;&#x2F;code&gt; for the value of the node
+- Tree on the right&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Tree[+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Node (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;left&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Tree&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;right&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Tree&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Leaf
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;adts-in-c&quot;&gt;ADTs in C++&lt;&#x2F;h2&gt;
+&lt;p&gt;In C++, using ADTs requires a variety of different language and library features.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;We can use &lt;code&gt;std::pair&lt;&#x2F;code&gt; (or a &lt;code&gt;std::tuple&lt;&#x2F;code&gt; for n-ary products) to mimic a type as &lt;code&gt;Pair&lt;&#x2F;code&gt;. However, its using it is arguably a bit awkward and convoluted.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;You could also use a &lt;code&gt;struct&lt;&#x2F;code&gt; (of one or more elements) to implement product types.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;A sum type corresponds roughly to a &lt;code&gt;union&lt;&#x2F;code&gt;. In C++17 a standardized &#x27;tagged union&#x27; &lt;code&gt;std::variant&lt;&#x2F;code&gt; was added that more accurately models the coproduct.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;An &lt;code&gt;enum&lt;&#x2F;code&gt; represents a fixed number of alternative constants. This correponds to the sum type of multiple 0-ary value constructors (implicitly the finite sum type of the type &lt;code&gt;()&lt;&#x2F;code&gt; with itself).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;adts-as-a-semi-ring&quot;&gt;ADTs as a semi-ring&lt;&#x2F;h2&gt;
+&lt;p&gt;Using the product and sum types, we can turn the type system into a semi-ring, where we define:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;\(0\) = &lt;code&gt;Void&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;\(1\) = &lt;code&gt;()&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;\(A + B\) = &lt;code&gt;Either[A, B]&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;\(A \times B\) = &lt;code&gt;(A, B)&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Let us check that \(0\) really works as \(0\). If we add &lt;code&gt;Void&lt;&#x2F;code&gt; to a type &lt;code&gt;A&lt;&#x2F;code&gt;, we get &lt;code&gt;Either[A, Void]&lt;&#x2F;code&gt;. Since there can never be a value of type &lt;code&gt;Void&lt;&#x2F;code&gt;, we are guaranteed to get a &lt;code&gt;Left a&lt;&#x2F;code&gt; when we see a value of type &lt;code&gt;Either[A, Void]&lt;&#x2F;code&gt;, which means the type is isomorphic to &lt;code&gt;A&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;In other words:&lt;&#x2F;p&gt;
+&lt;p&gt;\(A + 0 = a.\)&lt;&#x2F;p&gt;
+&lt;p&gt;Similarly, if we have a product with &lt;code&gt;Void&lt;&#x2F;code&gt;, we can never instantiate a pair (because there is no value for &lt;code&gt;Void&lt;&#x2F;code&gt;), so the corresponding product type is again &lt;code&gt;Void&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;\(A \times 0 = 0.\)&lt;&#x2F;p&gt;
+&lt;p&gt;Although this is all a bit of a stretch, this analogy has some interesting properties, and we can do some real algebra with our types and try to interpret the results. Consider the &lt;code&gt;Word&lt;&#x2F;code&gt; type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;&lt;span&gt;enum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Cons&lt;&#x2F;span&gt;&lt;span&gt;(x: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, xs: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Empty
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In our &#x27;semi-ring&#x27;, writing \(x\) for &lt;code&gt;Word[A]&lt;&#x2F;code&gt;, this would look like the expression:
+\(x = 1 + a \times x\)
+This is unsolvable, but we can try to iteratively substitute \(x\) into the right hand side:&lt;&#x2F;p&gt;
+&lt;p&gt;\begin{align*}
+x &amp;amp;= 1 + a \times (1 + a x)\\
+&amp;amp;= 1 + a + a^2 x\\
+&amp;amp;= 1 + a + a^2 (1 + a x)\\
+&amp;amp;= 1 + a + a^2 + a^3 (1 + ax) \\
+&amp;amp;= \ldots
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;Which can be read as &#x27;a list is either empty, or it has one element of type &lt;code&gt;a&lt;&#x2F;code&gt;, or it has two elements of type &lt;code&gt;a&lt;&#x2F;code&gt;, etc.&lt;&#x2F;p&gt;
+&lt;p&gt;Although this is mostly an entertaining (and, depending on your view, an overly complicated) way of looking at types, a similar correspondence from types to logical operations forms the basis of the Curry-Howard isomorphism that connects type theory to logic in a very fundamental way.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;bi-functors&quot;&gt;Bi-functors&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Given two categories \(\mathcal{C}, \mathcal{D}\) their product category \(\mathcal{C} \times \mathcal{D}\) is given by:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The objects are pairs \((c, d)\) where \(c \in \mathcal{C}\) and \(d \in \mathcal{D}\).&lt;&#x2F;li&gt;
+&lt;li&gt;The arrows are pairs of arrows, \((f, g): (c, d) \to (c&#x27;, d&#x27;)\) for \(f: c \to c&#x27;\) in \(\mathcal{C}\) and \(g: d \to d&#x27;\) in \(\mathcal{D}\).&lt;&#x2F;li&gt;
+&lt;li&gt;The identity arrow for \((c, d)\) is the pair \((\text{id}_c, \text{id}_d)\).&lt;&#x2F;li&gt;
+&lt;li&gt;Composition of arrows happens per component, i.e.\ when \(f, g \in \mathcal{C}\) and \(h, k \in \mathcal{D}\):
+\((f, h) \circ (g, k) \equiv (f \circ g, h \circ k)\)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Note that alternatively we could define this as the product of objects in the category &lt;strong&gt;Cat&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This brings us to the concept of a bifunctor, which can be seen as a &#x27;functor of two arguments&#x27;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. Let \(\mathcal{C}, \mathcal{D}, \mathcal{E}\) be categories. A bifunctor is a functor:
+\(F: \mathcal{C} \times \mathcal{D} \to \mathcal{E}.\)&lt;&#x2F;p&gt;
+&lt;p&gt;In Scala the bifunctor can be implemented as a &lt;code&gt;trait&lt;&#x2F;code&gt; as follows:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;trait&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt; Bifunctor&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;]]:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;bimap&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    first(f, second(g, x)) 
+&lt;&#x2F;span&gt;&lt;span&gt;  
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;first&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    bimap(f, (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; y, x)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;second&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    bimap((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; y, g, x)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here you see a circular definition. This means it is enough to &lt;em&gt;either&lt;&#x2F;em&gt; provide the &lt;code&gt;bimap&lt;&#x2F;code&gt;, or the &lt;code&gt;first&lt;&#x2F;code&gt; and &lt;code&gt;second&lt;&#x2F;code&gt; functions.&lt;&#x2F;p&gt;
+&lt;p&gt;We can prove why this is enough mathematically, as shown in the following proposition. We denote pairs as \(\langle c, d \rangle \in \mathcal{C} \times \mathcal{D}\):&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Proposition&lt;&#x2F;strong&gt;. Let \(F: \mathcal{C} \times \mathcal{D} \to \mathcal{E}\) be a bifunctor. Then:&lt;&#x2F;p&gt;
+&lt;p&gt;\(
+F \langle c, - \rangle \equiv G_c: \mathcal{D} \to \mathcal{E}, d \mapsto F \langle c, d \rangle, (g: d \to d&#x27;) \mapsto F \langle \text{id}_c, g \rangle
+\)
+\(
+F \langle -, d \rangle \equiv H_d: \mathcal{C} \to \mathcal{E}, c \mapsto F \langle c, d \rangle, (f: c \to c&#x27;) \mapsto F \langle f, \text{id}_d \rangle
+\)&lt;&#x2F;p&gt;
+&lt;p&gt;are functors for all \(c \in \mathcal{C}\) and \(d \in \mathcal{D}\) respectively, and furthermore they satisfy:&lt;&#x2F;p&gt;
+&lt;p&gt;\(G_c d = H_d c\)&lt;&#x2F;p&gt;
+&lt;p&gt;\(G_{c&#x27;} g \circ H_d f = H_{d&#x27;} f \circ G_c g\)&lt;&#x2F;p&gt;
+&lt;p&gt;for all \(c, c&#x27; \in \mathcal{C}\) and \(d, d&#x27; \in \mathcal{D}\).&lt;&#x2F;p&gt;
+&lt;p&gt;Conversely, let \(G_c, H_d\) be family of functors so that the above two equalities hold, then:&lt;&#x2F;p&gt;
+&lt;p&gt;\(\tilde{F}: \mathcal{C} \times \mathcal{D} \to \mathcal{E}, \langle c, d \rangle \mapsto G_c d, \langle f, g \rangle \mapsto H_{d&#x27;} f \circ G_c g\)&lt;&#x2F;p&gt;
+&lt;p&gt;is a bifunctor, and satisfies \(\tilde{F} \langle c, - \rangle = G_c\) and \(\tilde{F} \langle -, d \rangle = H_d\).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. Let us first show that we can construct the functors \(G_c\) and \(H_d\) from a bifunctor \(F\). We show that \(G_c\) is a functor, \(H_d\) follows similarly.&lt;&#x2F;p&gt;
+&lt;p&gt;\( G_c(\text{id}_d) = F \langle \text{id}_c, \text{id}_d \rangle = \text{id}_{F \langle c, d \rangle} \)&lt;&#x2F;p&gt;
+&lt;p&gt;\(G_c(g \circ g&#x27;) = F \langle \text{id}_c, g \circ g&#x27; \rangle = F (\langle \text{id}_c, g \rangle \circ \langle \text{id}_c, g&#x27; \rangle) \)&lt;&#x2F;p&gt;
+&lt;p&gt;\( F \langle \text{id}_c, g \rangle \circ F \langle \text{id}_c, g&#x27; \rangle = G_c g \circ G_c g&#x27; \)&lt;&#x2F;p&gt;
+&lt;p&gt;The mapped arrows have the correct (co)domains, hence \(G_c\) is a functor for all \(c\). We immediately have \( G_c d = H_d c \), as by definition both sides are equal to \(F \langle c, d \rangle\). To show \( G_{c&#x27;} g \circ H_d f = H_{d&#x27;} f \circ G_c g \) we compute:&lt;&#x2F;p&gt;
+&lt;p&gt;\begin{align*}
+G_{c&#x27;} g \circ H_d f &amp;amp;= F \langle \text{id}_{c&#x27;}, g \rangle \circ F \langle f, \text{id}_d \rangle \\
+&amp;amp;= F(\langle \text{id}_c, g \rangle \circ \langle f, \text{id}_d \rangle) = F(\langle f, g \rangle) = F(\langle f, \text{id}_{d&#x27;} \rangle \circ \langle \text{id}_c, g \rangle) \\
+&amp;amp;= F\langle f, \text{id}_{d&#x27;} \rangle \circ F\langle \text{id}_c, g \rangle = H_{d&#x27;} f \circ G_c g
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;To show the converse statement, we compute:&lt;&#x2F;p&gt;
+&lt;p&gt;\begin{align*}
+F \langle \text{id}_c, \text{id}_d \rangle &amp;amp;= G_c \text{id}_d \circ H_d \text{id}_c = \text{id}_{G_c d} \circ \text{id}_{H_d c} = \text{id}_{F \langle c, d \rangle} \circ \text{id}_{F \langle c, d \rangle} = \text{id}_{F \langle c, d \rangle} \\
+F(\langle f, g \rangle \circ \langle f&#x27;, g&#x27; \rangle) &amp;amp;= F\langle f \circ f&#x27;, g \circ g&#x27; \rangle = G_{c&#x27;} g \circ G_{c&#x27;} g&#x27; \circ H_d f \circ H_d f&#x27; \\
+&amp;amp;= G_{c&#x27;} g \circ H_{d&#x27;} f \circ G_{c} g&#x27; \circ H_d f&#x27; = F \langle f, g \rangle \circ F \langle f&#x27;, g&#x27; \rangle
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;Which concludes the proof.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Example&lt;&#x2F;strong&gt;. Whenever you have a category \(\mathcal{C}\) where the product of two objects exists for all pairs of objects, then this gives rise to a bifunctor:&lt;&#x2F;p&gt;
+&lt;p&gt;\begin{align*}
+\times&amp;amp;: \mathcal{C} \times \mathcal{C} \to \mathcal{C}\\
+&amp;amp;: (a, b) \mapsto a \times b\\
+&amp;amp;: (f: a \to a&#x27;, g: b \to b&#x27;) \mapsto (f \times g: a \times b \to a&#x27; \times b&#x27;)
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;where we find \(f \times g\) by looking at the diagram:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;     p1       p2
+&lt;&#x2F;span&gt;&lt;span&gt;  a ◄── a x b ──► b
+&lt;&#x2F;span&gt;&lt;span&gt;  │       │       │ 
+&lt;&#x2F;span&gt;&lt;span&gt; f│       │ f x g │g
+&lt;&#x2F;span&gt;&lt;span&gt;  ▼       ▼       ▼
+&lt;&#x2F;span&gt;&lt;span&gt;  a&amp;#39;◄── a&amp;#39;x b&amp;#39;──► b&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;     p1&amp;#39;      p2&amp;#39;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;By definition of the product \(a&#x27; \times b&#x27;\), we have that for any object \(c\) that has arrows to \(a&#x27;\) and \(b&#x27;\), there should be a &lt;em&gt;unique&lt;&#x2F;em&gt; arrow \(c \to a&#x27; \times b&#x27;\). Note that \(f \circ p_1\) and \(g \circ p_2\) are arrows from \(a \times b\) to \(a&#x27;\) and \(b&#x27;\) respectively. Taking \( c \equiv a \times b \), this means that we can set \(f \times g\) to the unique arrow going between \(a \times b\) and \(a&#x27; \times b&#x27;\).&lt;&#x2F;p&gt;
+&lt;p&gt;By duality, there is also a bifunctor corresponding to the coproduct if it is defined everywhere.&lt;&#x2F;p&gt;
+&lt;p&gt;What would these two examples mean in Scala? The product is the &#x27;pair functor&#x27; &lt;code&gt;Pair&lt;&#x2F;code&gt;, and the coproduct is the sum type &lt;code&gt;Either&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;given Bifunctor[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Either&lt;&#x2F;span&gt;&lt;span&gt;] with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;override def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;bimap&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Either&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Either&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Either.Left(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Either.Left(f(x))
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Either.Right(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Either.Right(g(y))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;given Bifunctor[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Pair&lt;&#x2F;span&gt;&lt;span&gt;] with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;override def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;bimap&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Pair&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Pair&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;C&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;D&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Pair.Pair(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Pair.Pair(f(x), g(y))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These are examples of type constructors (or algebraic data types, as we have seen). Since functors compose, we could ask ourselves: &amp;quot;Are all algebraic data types functors?&amp;quot;. The answer is positive; functor implementations can be automatically derived for all ADTs! &lt;&#x2F;p&gt;
+</content>
+    </entry>
+    <entry xml:lang="en">
+        <title>A category of types and functions</title>
+        <published>2022-07-23T00:00:00+00:00</published>
+        <updated>2022-07-23T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jwbuurlage.github.io/blog/ctp-programmer-category/" type="text/html"/>
+        <id>https://jwbuurlage.github.io/blog/ctp-programmer-category/</id>
+        <content type="html">&lt;blockquote&gt;
+&lt;p&gt;In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jwbuurlage&#x2F;category-theory-programmers&quot;&gt;the notes I wrote back then&lt;&#x2F;a&gt;, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;Categories, functors, and natural transformations&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-programmer-category&#x2F;&quot;&gt;A category of types and functions&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-products-adt&quot;&gt;Products, coproducts, and algebraic data types&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-yoneda&quot;&gt;The Yoneda Lemma&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;sets-and-types&quot;&gt;Sets and types&lt;&#x2F;h2&gt;
+&lt;p&gt;To apply ideas from category theory to functional programming, we first need to figure out what the relevant category is. One observation is that a &lt;em&gt;type&lt;&#x2F;em&gt; in a programming language, is much like a &lt;em&gt;set&lt;&#x2F;em&gt; in mathematics. For example, the type &lt;code&gt;int&lt;&#x2F;code&gt; in C based languages, corresponds to some finite set of numbers. The type &lt;code&gt;char&lt;&#x2F;code&gt; to a set of letters &lt;code&gt;&#x27;a&#x27;&lt;&#x2F;code&gt;, &lt;code&gt;&#x27;z&#x27;&lt;&#x2F;code&gt; and &lt;code&gt;&#x27;$&#x27;&lt;&#x2F;code&gt;. And the type &lt;code&gt;bool&lt;&#x2F;code&gt; is a set of two elements: &lt;code&gt;true&lt;&#x2F;code&gt; and &lt;code&gt;false&lt;&#x2F;code&gt;. This category, the &lt;em&gt;category of types&lt;&#x2F;em&gt;, allows us to look at programming through the lens of category theory.&lt;&#x2F;p&gt;
+&lt;p&gt;In this post we will give an idea of how category theory applies to programming. In upcoming posts, we will dig deeper into the introduced concepts (and beyond).&lt;&#x2F;p&gt;
+&lt;p&gt;We can take as our model for the category of types the category &lt;strong&gt;Set&lt;&#x2F;strong&gt;. Recall that the elements of &lt;strong&gt;Set&lt;&#x2F;strong&gt; are sets, and the arrows correspond to maps. We will glance over a lot of technicalities. Mathematical maps and functions in a computer program are not identical, for example we are missing the bottom value \( \perp \), for example, which indicates a program that did not terminate with a value. &lt;&#x2F;p&gt;
+&lt;p&gt;To be able to fully apply the ideas from category theory, we will need a language with higher-kinded types later on. This includes languages like Scala and Haskell. Here, we will use the Scala programming language for the examples given, but the focus will be on the mathematics and general theory.&lt;&#x2F;p&gt;
+&lt;p&gt;We can express that an object has a certain type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;a: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;Int
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To define a function \( f: A \to B \) from type \( A \) to type \( B \) in Scala:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;B
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To compose two functions:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;g&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;C
+&lt;&#x2F;span&gt;&lt;span&gt;h = g compose f
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This means that &lt;code&gt;h&lt;&#x2F;code&gt; is a function &lt;code&gt;h: A =&amp;gt; C&lt;&#x2F;code&gt;. Note how easy it is to compose functions in Scala.&lt;&#x2F;p&gt;
+&lt;p&gt;We need some additional operations to truly turn it into a category. Scala has &lt;code&gt;identity&lt;&#x2F;code&gt; built in:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;identity: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Any &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Any
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We can also define it ourselves as a generic lambda expression&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;id &lt;&#x2F;span&gt;&lt;span&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;] =&amp;gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; x
+&lt;&#x2F;span&gt;&lt;span&gt;assert(id(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;) == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;assert(id(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;) == &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;foo&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In mathematics all functions are &lt;em&gt;pure&lt;&#x2F;em&gt;: they will always give the same output for the same input. This is not always the case for computer programs. Operations such as performing I&#x2F;O, returning the current date, or using a global variable are all examples of impure operations that are common in programming. We will focus on &amp;quot;pure&amp;quot; functions here, and try to avoid any side effects.&lt;&#x2F;p&gt;
+&lt;p&gt;As our model category is &lt;strong&gt;Set&lt;&#x2F;strong&gt;, there should be a type that corresponds to the empty set \( \emptyset \). In C &#x2F; C++, the obvious candidate would be &lt;code&gt;void&lt;&#x2F;code&gt; for this set, but consider a function definition:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;void &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;() { ... };
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This can be seen as a function from &lt;code&gt;void -&amp;gt; void&lt;&#x2F;code&gt;. We can call this function using &lt;code&gt;f()&lt;&#x2F;code&gt;, but what does it mean to call a function? We always invoke a function for an argument, so &lt;code&gt;void&lt;&#x2F;code&gt; actually corresponds to the set with a single element! Note that C functions that return void either do nothing useful (i.e. discard their arguments), or are impure. Indeed, even using a pointer argument to return a value indirectly modifies a &#x27;global state&#x27;.&lt;&#x2F;p&gt;
+&lt;p&gt;In Scala, the type corresponding to the &lt;em&gt;singleton set&lt;&#x2F;em&gt; is &lt;code&gt;()&lt;&#x2F;code&gt;and its single value is also denoted with &lt;code&gt;()&lt;&#x2F;code&gt;. Meaning that if we have a function:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f &lt;&#x2F;span&gt;&lt;span&gt;= () &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;we can invoke it as &lt;code&gt;f()&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Instead, the type &lt;code&gt;Nothing&lt;&#x2F;code&gt; corresponds to the empty set, and there can never be a value of this type. We can imagine the (unique) polymorphic (in the return type!) function that takes &lt;code&gt;Nothing&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;absurd&lt;&#x2F;span&gt;&lt;span&gt;: [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;] =&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;Nothing &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;null
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that you can never call this function, as &lt;code&gt;Nothing&lt;&#x2F;code&gt; is uninhibited: there are no values that have that type.&lt;&#x2F;p&gt;
+&lt;p&gt;You may be tempted to discard the type &lt;code&gt;Nothing&lt;&#x2F;code&gt; as something that is only used by academics to make the type system &#x27;complete&#x27;, but there are a number of legitimate uses for &lt;code&gt;Nothing&lt;&#x2F;code&gt;. An example is &lt;em&gt;continuation passing style&lt;&#x2F;em&gt;, or CPS, where functions do not return a value, but pass control over to another function:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span&gt;Continuation[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;] =&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; Nothing
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In other words, a continuation is a function that &lt;em&gt;never returns&lt;&#x2F;em&gt;, which can be used to manipulate control flows (in a type-safe manner).&lt;&#x2F;p&gt;
+&lt;p&gt;Recall that an initial object has exactly one arrow to each other object, and a terminal object has exactly one arrow coming from each other object. These objects are unique up to isomorphism. In a &lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;previous blog post&lt;&#x2F;a&gt; we introduced the concepts of &lt;em&gt;initial&lt;&#x2F;em&gt; and &lt;em&gt;terminal&lt;&#x2F;em&gt; objects. In the category of types &lt;code&gt;Nothing&lt;&#x2F;code&gt; is initial and &lt;code&gt;()&lt;&#x2F;code&gt; is terminal.&lt;&#x2F;p&gt;
+&lt;p&gt;To summarize this introduction, in the category of types, types are objects, and &lt;em&gt;pure&lt;&#x2F;em&gt; functions between these types are arrows. Next, we consider how we can apply some of the concepts we have seen, such as functors and natural transformations, to this (admittedly informally defined) category that we will call &lt;strong&gt;Type&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;containers-as-functors&quot;&gt;Containers as functors&lt;&#x2F;h2&gt;
+&lt;p&gt;When we consider functors in the category of types, the first question is &#x27;to what category?&#x27;. Here, we will almost exclusively talk about functors from &lt;strong&gt;Type&lt;&#x2F;strong&gt; to itself. Functors from a category to itself are called &lt;em&gt;endofunctors&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Endofunctors in &lt;strong&gt;Type&lt;&#x2F;strong&gt; map types to types, and functions to functions. There are many examples of functors in programming. Let us first consider the concept of &lt;em&gt;lists of objects&lt;&#x2F;em&gt;, i.e. arrays or vectors. In C++ a list would be written as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span&gt;std::vector&amp;lt;T&amp;gt; xs;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;or in Python we would have;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span&gt;numpy &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;as &lt;&#x2F;span&gt;&lt;span&gt;np
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; a = np.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;array&lt;&#x2F;span&gt;&lt;span&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dtype&lt;&#x2F;span&gt;&lt;span&gt;=&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;type&lt;&#x2F;span&gt;&lt;span&gt;(a)
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#bf616a;color:#eff1f5;&quot;&gt;class&lt;&#x2F;span&gt;&lt;span&gt; &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;numpy.ndarray&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&amp;gt;&amp;gt; a.dtype
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;dtype&lt;&#x2F;span&gt;&lt;span&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;int64&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that the true type of the &lt;code&gt;np.array&lt;&#x2F;code&gt; is hidden inside the object, meaning it&#x27;s the responsiblity of the program to make sure that the types of operations match! (The reason that we consider NumPy arrays is that normal &#x27;lists&#x27; in Python are actually &lt;em&gt;tuples&lt;&#x2F;em&gt;, which we will discuss when we talk about products and coproducts.)&lt;&#x2F;p&gt;
+&lt;p&gt;Let us consider the mathematical way of expressing arrays of a certain type.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;kleen-closures&quot;&gt;Kleen closures&lt;&#x2F;h3&gt;
+&lt;p&gt;Lists of some fixed type are more generally called &lt;strong&gt;words over some alphabet&lt;&#x2F;strong&gt; (an &lt;em&gt;alphabet&lt;&#x2F;em&gt; here is a set of letters) \( X \), and we denote the set of all finite words of elements in \( X \) as \( X^* \). This is also called the &lt;em&gt;Kleene closure&lt;&#x2F;em&gt; of \( X \).&lt;&#x2F;p&gt;
+&lt;p&gt;Elements in \( X^* \) look like:
+$$(x_1, x_2, x_3)$$
+$$(x_1)$$
+$$()$$
+These are all examples of &lt;em&gt;words&lt;&#x2F;em&gt; in \( X \) (where the last example corresponds to the empty word). If we want to construct a &lt;em&gt;word functor&lt;&#x2F;em&gt; \( T \), then \( T \) would then have the signature:&lt;&#x2F;p&gt;
+&lt;p&gt;\begin{align*}
+T&amp;amp;: X \to X^* \\
+&amp;amp;: (f: X \to Y) \mapsto (Tf: X^* \to Y^*)
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;For this second option, we have an obvious candidate for the precise function. Let \( f: X \to Y \) be some map, then \( Tf \) maps a word in \( X \) to a word in \( Y \) in the following way:
+$$Tf(x_1, x_2, x_3, ... x_n) = (f(x_1), f(x_2), f(x_3), \ldots, f(x_n)).$$&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Type classes and type constructors&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;We will express this idea in Scala, but before we can do this we first have to consider type classes and type constructors. A &lt;em&gt;type constructor&lt;&#x2F;em&gt; is a &#x27;function&#x27; that given a type, creates another type. A &lt;em&gt;type constructor&lt;&#x2F;em&gt; can have multiple &lt;em&gt;value constructors&lt;&#x2F;em&gt;, and these constructors can be differentiated between using something called &lt;em&gt;pattern matching&lt;&#x2F;em&gt; which we will see later.&lt;&#x2F;p&gt;
+&lt;p&gt;Let us defined our own &lt;code&gt;Boolean&lt;&#x2F;code&gt; type.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Bool:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;False
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;True
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, we define the type constructor &lt;code&gt;Bool&lt;&#x2F;code&gt; as the resulting type corresponding to the &lt;em&gt;value&lt;&#x2F;em&gt; given by the value constructors &lt;code&gt;True&lt;&#x2F;code&gt; and &lt;code&gt;False&lt;&#x2F;code&gt;, which both are nullary constructors (that take no argument as types!). However, type constructors can take one or multiple types for their value constructors:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Either[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Left(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Right(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, the type constructor either hold either a value of type &lt;code&gt;A&lt;&#x2F;code&gt; or of type &lt;code&gt;B&lt;&#x2F;code&gt;, corresponding to the value constructors &lt;code&gt;Left&lt;&#x2F;code&gt; and &lt;code&gt;Right&lt;&#x2F;code&gt;. We will revisit this idea (and &lt;code&gt;Either&lt;&#x2F;code&gt;) when talk about products and coproducts.&lt;&#x2F;p&gt;
+&lt;p&gt;A type class (implemented in Scala as a &lt;em&gt;trait&lt;&#x2F;em&gt;) is a &lt;em&gt;common interface for types&lt;&#x2F;em&gt;. It defines a family of types that support the same operations. For example, a trait for objects that support equality could be defined as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;trait&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt; Eq&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;isEqual&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;T&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;Boolean
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#343d46;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If we want to express the concept of a &lt;em&gt;functor&lt;&#x2F;em&gt; using a type class, we have to state that it can send types to types, and that it sends functions between two types to functions with the appropriate signature, i.e.:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;trait&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt; Functor&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;]]:
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This says that &lt;code&gt;F&lt;&#x2F;code&gt; is a functor, if there is a function &lt;code&gt;map&lt;&#x2F;code&gt; that takes a value of type &lt;code&gt;F[A]&lt;&#x2F;code&gt;, a function &lt;code&gt;f: A =&amp;gt; B&lt;&#x2F;code&gt; and returns a value of type &lt;code&gt;F[B]&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-word-functor&quot;&gt;The Word functor&lt;&#x2F;h2&gt;
+&lt;p&gt;Let us build the &#x27;Word&#x27; functor from the ground up. We use a concept called a &#x27;cons-list&#x27;, with which we define a word over an alphabet recursively as being either&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;a letter followed by a word&lt;&#x2F;li&gt;
+&lt;li&gt;empty&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Word[+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Cons(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xs&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;])
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Nil
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(The syntax &lt;code&gt;+A&lt;&#x2F;code&gt; indicates a &#x27;contravariant type&#x27;, which we will not discuss here yet)&lt;&#x2F;p&gt;
+&lt;p&gt;We have two possible ways of constructing a word (partitioning the possible values of the type):  a word of &lt;code&gt;A&lt;&#x2F;code&gt;s is either empty (corresponding to the &lt;em&gt;constructor&lt;&#x2F;em&gt; &lt;code&gt;Nil&lt;&#x2F;code&gt;), or that it is the concatenation (corresponding to the &lt;em&gt;constructor&lt;&#x2F;em&gt; &lt;code&gt;Cons&lt;&#x2F;code&gt;) of an object of type &lt;code&gt;A&lt;&#x2F;code&gt; with another word of &lt;code&gt;A&lt;&#x2F;code&gt;s. Note the recursive definition.&lt;&#x2F;p&gt;
+&lt;p&gt;Next we define the &lt;code&gt;map&lt;&#x2F;code&gt; for our &lt;code&gt;Word&lt;&#x2F;code&gt; functor. The corresponding definition to the map described for the &lt;em&gt;word functor&lt;&#x2F;em&gt; is:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;given Functor[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;] with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xs&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    xs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Word.Cons(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;ys&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Word.Cons(f(y), map(ys, f))
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Word.Nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Word.Nil
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If a word is empty, then we get an empty word back. Otherwise, we map the individual letters in the list recursively using the given &lt;code&gt;f&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In &lt;code&gt;C++&lt;&#x2F;code&gt; this &lt;code&gt;map&lt;&#x2F;code&gt; functor roughly corresponds to &lt;code&gt;std::transform&lt;&#x2F;code&gt;, while for Python the closest thing would be the &lt;code&gt;map&lt;&#x2F;code&gt; function.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;With these two definitions, we have turned &lt;code&gt;Word&lt;&#x2F;code&gt; into a functor.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Word&lt;&#x2F;code&gt; is implemented as &lt;code&gt;List&lt;&#x2F;code&gt; in the standard library of Scala, and &lt;code&gt;a :: b&lt;&#x2F;code&gt; is the syntactic sugar replacing &lt;code&gt;Word.Cons(a, b)&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; :: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; :: Nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a7adba;&quot;&gt;&#x2F;&#x2F; List(1, 2)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;the-maybe-functor&quot;&gt;The Maybe functor&lt;&#x2F;h2&gt;
+&lt;p&gt;As a simpler example, consider a type that either has no value or it has a value corresponding to some type &lt;code&gt;A&lt;&#x2F;code&gt;. In Haskell, this is called &lt;code&gt;Maybe&lt;&#x2F;code&gt;, while in C++ this is called &lt;code&gt;std::optional&lt;&#x2F;code&gt;, in Python the same idea could be achieved using:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;python&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;):
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(a &amp;gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;sqrt&lt;&#x2F;span&gt;&lt;span&gt;(a)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;None
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This function returns &lt;code&gt;None&lt;&#x2F;code&gt; (corresponding to &#x27;no value&#x27;) if we provide &#x27;invalid input&#x27;.&lt;&#x2F;p&gt;
+&lt;p&gt;In Scala, this type can be implemented as:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;enum Maybe[+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]:
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Some(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;None
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And to turn it into a functor, we define &lt;code&gt;map&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;given Functor[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Maybe&lt;&#x2F;span&gt;&lt;span&gt;] with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xs&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Maybe&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A &lt;&#x2F;span&gt;&lt;span&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Maybe&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;B&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;    xs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match 
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Maybe.Some(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Maybe.Some(f(y))
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Maybe.None &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Maybe.None
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;Maybe&lt;&#x2F;code&gt; is implemented in the Scala standard library as &lt;code&gt;Option&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;polymorphic-functions-as-natural-transformations&quot;&gt;Polymorphic functions as natural transformations&lt;&#x2F;h2&gt;
+&lt;p&gt;In a &lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;previous blog post&lt;&#x2F;a&gt; we introduced natural transformations as a family of functions between two functors \( F \) and \( G \).&lt;&#x2F;p&gt;
+&lt;p&gt;Now that we view type constructors as functors, we can consider natural transformations between type constructors. If we let &lt;code&gt;A&lt;&#x2F;code&gt; be a type, then a natural transformation &lt;code&gt;alpha&lt;&#x2F;code&gt; would be something that maps between &lt;code&gt;F[A]&lt;&#x2F;code&gt; and &lt;code&gt;G[A]&lt;&#x2F;code&gt;, where &lt;code&gt;F&lt;&#x2F;code&gt; and &lt;code&gt;G&lt;&#x2F;code&gt; are type constructors:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;alpha&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;G[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that implicitly we talk about the component of &lt;code&gt;alpha&lt;&#x2F;code&gt; at &lt;code&gt;A&lt;&#x2F;code&gt;. This function is &lt;em&gt;polymorphic&lt;&#x2F;em&gt; the right component gets picked by the compiler. For example, say we have a word &lt;code&gt;Word[A]&lt;&#x2F;code&gt;, and we want to obtain the first element of this list. If the list is empty, then there is no such element, otherwise we obtain an &lt;code&gt;A&lt;&#x2F;code&gt;; i.e. the result is a &lt;code&gt;Maybe[A]&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;head&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;](&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;xs&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Word&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;]): &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;Maybe&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;A&lt;&#x2F;span&gt;&lt;span&gt;] =
+&lt;&#x2F;span&gt;&lt;span&gt;  xs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Word.Nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Maybe.None
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;case &lt;&#x2F;span&gt;&lt;span&gt;Word.Cons(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Maybe.Some(x)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, we have a natural transformation between the &lt;code&gt;Word&lt;&#x2F;code&gt; and the &lt;code&gt;Maybe&lt;&#x2F;code&gt; functor!&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;parametric-polymorphism-and-ad-hoc-polymorphism&quot;&gt;Parametric polymorphism and ad-hoc polymorphism&lt;&#x2F;h2&gt;
+&lt;p&gt;In C++, a template does not have to be defined for all types, i.e. we can write:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;cpp&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-cpp &quot;&gt;&lt;code class=&quot;language-cpp&quot; data-lang=&quot;cpp&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;template &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;typename&lt;&#x2F;span&gt;&lt;span&gt; T&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;(T &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;template &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;int &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;) { &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2 &lt;&#x2F;span&gt;&lt;span&gt;* a; }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;template &lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;double &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;f&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;double &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;) { &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2.0 &lt;&#x2F;span&gt;&lt;span&gt;* a; }
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, e.g. &lt;code&gt;f&amp;lt;int&amp;gt;(1)&lt;&#x2F;code&gt; would yield &lt;code&gt;2&lt;&#x2F;code&gt;, while &lt;code&gt;f&amp;lt;char&amp;gt;(&#x27;a&#x27;)&lt;&#x2F;code&gt; would result in a compilation error.&lt;&#x2F;p&gt;
+&lt;p&gt;What we are talking about here is &lt;em&gt;parametric polymorphism&lt;&#x2F;em&gt;: polymorphic functions must work for &lt;em&gt;all types&lt;&#x2F;em&gt;. Specializing function definitions is done using traits. This has an important consequence (or perhaps, it is the underlying reason): a parametric polymorphic function satisfies automatically the naturality conditions.&lt;&#x2F;p&gt;
+&lt;p&gt;The corresponding naturality square in this context is:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;             alpha
+&lt;&#x2F;span&gt;&lt;span&gt;         F[A]────► G[A]
+&lt;&#x2F;span&gt;&lt;span&gt;          │          │
+&lt;&#x2F;span&gt;&lt;span&gt;map(_, f) │          │ map(_, f)
+&lt;&#x2F;span&gt;&lt;span&gt;          │          │
+&lt;&#x2F;span&gt;&lt;span&gt;          ▼          ▼
+&lt;&#x2F;span&gt;&lt;span&gt;         F[B]────► G[B]
+&lt;&#x2F;span&gt;&lt;span&gt;             alpha
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, the left &lt;code&gt;map&lt;&#x2F;code&gt; corresponds to &lt;code&gt;F&lt;&#x2F;code&gt;, while the right &lt;code&gt;map&lt;&#x2F;code&gt; corresponds to &lt;code&gt;G&lt;&#x2F;code&gt;, and the top &lt;code&gt;alpha&lt;&#x2F;code&gt; is implicitely the component at &lt;code&gt;A&lt;&#x2F;code&gt;, while the bottom one is the component at &lt;code&gt;B&lt;&#x2F;code&gt;. What we would have to show, is that:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;map(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, f) compose alpha = alpha compose map(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, f)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It turns out that this can be shown in a very general context, and it has to do with the fact that the &#x27;bodies&#x27; for &lt;code&gt;f&lt;&#x2F;code&gt;, &lt;code&gt;map&lt;&#x2F;code&gt; and &lt;code&gt;alpha&lt;&#x2F;code&gt; are the same for all types. This is related to &lt;em&gt;free theorems&lt;&#x2F;em&gt;, which we will not go into in this series.&lt;&#x2F;p&gt;
+&lt;p&gt;Let us revisit our &lt;code&gt;head&lt;&#x2F;code&gt; example, and consider the naturality condition here. It says that:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;scala&quot; style=&quot;background-color:#eff1f5;color:#4f5b66;&quot; class=&quot;language-scala &quot;&gt;&lt;code class=&quot;language-scala&quot; data-lang=&quot;scala&quot;&gt;&lt;span&gt;map(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, f) compose head = head compose map(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, f)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, the map on the left-hand side corresonds to the &lt;code&gt;Maybe&lt;&#x2F;code&gt; functor, while on the right-hand side it corresponds to the &lt;code&gt;Word&lt;&#x2F;code&gt; functor.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;The left-hand side can be read as: &amp;quot;take the first element of the list, then apply &lt;code&gt;f&lt;&#x2F;code&gt; to it&amp;quot;.&lt;&#x2F;li&gt;
+&lt;li&gt;The right-hand side can be read as: &amp;quot;apply the function &lt;code&gt;f&lt;&#x2F;code&gt; to the entire list, then take the first element&amp;quot;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The result is the same, but obviously the left-hand side is more efficient in that it only has to apply &lt;code&gt;f&lt;&#x2F;code&gt; once. Because of the constraint on polymorphic functions, the compiler knows that the result is equal and can choose to use the most efficient one!&lt;&#x2F;p&gt;
+</content>
+    </entry>
+    <entry xml:lang="en">
+        <title>Categories, functors, and natural transformations</title>
+        <published>2022-07-06T00:00:00+00:00</published>
+        <updated>2022-07-06T00:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://jwbuurlage.github.io/blog/ctp-categories/" type="text/html"/>
+        <id>https://jwbuurlage.github.io/blog/ctp-categories/</id>
+        <content type="html">&lt;blockquote&gt;
+&lt;p&gt;In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jwbuurlage&#x2F;category-theory-programmers&quot;&gt;the notes I wrote back then&lt;&#x2F;a&gt;, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-categories&#x2F;&quot;&gt;Categories, functors, and natural transformations&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-programmer-category&#x2F;&quot;&gt;A category of types and functions&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-products-adt&quot;&gt;Products, coproducts, and algebraic data types&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;ctp-yoneda&quot;&gt;The Yoneda Lemma&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h2 id=&quot;preface&quot;&gt;Preface&lt;&#x2F;h2&gt;
+&lt;p&gt;Mathematical theories seem to have a number of common ingredients: there are &lt;em&gt;objects&lt;&#x2F;em&gt; such as numbers, sets, or shapes, and &lt;em&gt;arrows&lt;&#x2F;em&gt; that somehow relate these objects. For example, a number is related to its divisors, functions can relate sets, and shapes can be transformed into each other. These relations can be &lt;em&gt;composed&lt;&#x2F;em&gt;. In category theory, domain-specific knowledge is not used and only &lt;em&gt;objects&lt;&#x2F;em&gt; and &lt;em&gt;arrows&lt;&#x2F;em&gt; are considered. Results about categories only make use of a single operation: composition of arrows. Using &lt;em&gt;only&lt;&#x2F;em&gt; these simple concepts, it is still possible to obtain rich results that automatically apply for all categories.&lt;&#x2F;p&gt;
+&lt;p&gt;A &lt;em&gt;type&lt;&#x2F;em&gt; in a programming language is a set of possible values. We can view a function &lt;code&gt;f&lt;&#x2F;code&gt; that takes &lt;code&gt;a: A&lt;&#x2F;code&gt; (denoting a variable &lt;code&gt;a&lt;&#x2F;code&gt; of type &lt;code&gt;A&lt;&#x2F;code&gt;) and outputs &lt;code&gt;b: B&lt;&#x2F;code&gt; as an arrow between objects &lt;code&gt;A&lt;&#x2F;code&gt; and &lt;code&gt;B&lt;&#x2F;code&gt;. This means that also results from category theory can be applied to programming.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;definition-of-categories&quot;&gt;Definition of categories&lt;&#x2F;h2&gt;
+&lt;p&gt;We start with giving the definition of a category:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. A &lt;em&gt;category&lt;&#x2F;em&gt; \( C = (O, A, \circ) \) consists of:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;a collection \( O \) of &lt;em&gt;objects&lt;&#x2F;em&gt;, written \( a,b,\ldots \in O \).&lt;&#x2F;li&gt;
+&lt;li&gt;a collection \( A \) of &lt;em&gt;arrows&lt;&#x2F;em&gt; written \( f,g,\ldots \in A \) between these objects, e.g. \( f: a \to b \).&lt;&#x2F;li&gt;
+&lt;li&gt;a notion of &lt;em&gt;composition&lt;&#x2F;em&gt; \( f \circ g \) of arrows.&lt;&#x2F;li&gt;
+&lt;li&gt;an identity arrow \( \text{id}_a \) for each object \( a \in O \).
+The composition operation and identity arrow should satisfy the following laws:&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;em&gt;Composition&lt;&#x2F;em&gt;: If \( f: a \to b \) and \( g: b \to c \) then \( g \circ f: a \to c \).&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;   f      g
+&lt;&#x2F;span&gt;&lt;span&gt;a ───► b ───► c
+&lt;&#x2F;span&gt;&lt;span&gt;│             ▲
+&lt;&#x2F;span&gt;&lt;span&gt;└─────────────┘
+&lt;&#x2F;span&gt;&lt;span&gt;      g.f
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;em&gt;Composition with identity arrows&lt;&#x2F;em&gt;:  If \( f: x \to a \) and \( g: a \to x \) where \( x \) is arbitrary, then:
+$$\text{id}_a \circ f = f,~g \circ \text{id}_a = g.$$&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; id
+&lt;&#x2F;span&gt;&lt;span&gt;┌───┐
+&lt;&#x2F;span&gt;&lt;span&gt;└─► a ───► x
+&lt;&#x2F;span&gt;&lt;span&gt;       g
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;em&gt;Associativity&lt;&#x2F;em&gt;: If \( f: a \to b \), \( g: b \to c \) and \( h: c \to d \) then:
+$$(h \circ g) \circ f = h \circ (g \circ f).$$
+This is the same as saying that the following diagram commutes:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;      g.f
+&lt;&#x2F;span&gt;&lt;span&gt;┌─────────────┐
+&lt;&#x2F;span&gt;&lt;span&gt;│  f      g   ▼  h
+&lt;&#x2F;span&gt;&lt;span&gt;a ───► b ───► c ───► d
+&lt;&#x2F;span&gt;&lt;span&gt;       │             ▲
+&lt;&#x2F;span&gt;&lt;span&gt;       └─────────────┘
+&lt;&#x2F;span&gt;&lt;span&gt;             h.g
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Saying a diagram commutes means that for all pairs of vertices \( a&#x27; \) and \( b&#x27; \) all paths from between them are equivalent (i.e. correspond to the same arrow of the category).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;If \( f: a \to b \), then we say that \( a \) is the &lt;em&gt;domain&lt;&#x2F;em&gt; and \( b \) is the &lt;em&gt;codomain&lt;&#x2F;em&gt; of \( f \). It is also written as:
+$$\text{dom}(f) = a,~\text{cod}(f) = b.$$
+The composition \( g \circ f \) is only defined on arrows \( f \) and \( g \) if the domain of \( g \) is equal to the codomain of \( f \).&lt;&#x2F;p&gt;
+&lt;p&gt;We will write for objects and arrows respectively simply \( a \in C \) and \( f \in C \), instead of \( a \in O \) and \( f \in A \).&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;examples-of-categories&quot;&gt;Examples of categories&lt;&#x2F;h3&gt;
+&lt;p&gt;A number of simple examples of categories:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;0&lt;&#x2F;strong&gt;, the empty category \( O = A \equiv \emptyset \).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;1&lt;&#x2F;strong&gt;, the category with a single element and (identity) arrow:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; id
+&lt;&#x2F;span&gt;&lt;span&gt;┌───┐
+&lt;&#x2F;span&gt;&lt;span&gt;└─► a 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;2&lt;&#x2F;strong&gt;, the category with a two elements and a single arrow between these elements&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; id          id
+&lt;&#x2F;span&gt;&lt;span&gt;┌───┐      ┌───┐
+&lt;&#x2F;span&gt;&lt;span&gt;└─► a ───► b ◄─┘
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;\( \rightrightarrows \): the category with two elements and two parallel arrows between these elements:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt; id          id
+&lt;&#x2F;span&gt;&lt;span&gt;┌───┐ ───► ┌───┐
+&lt;&#x2F;span&gt;&lt;span&gt;└─► a ───► b ◄─┘
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;From now on we will sometimes omit the identity arrows when drawing categories.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Another example of a category is a &lt;em&gt;monoid category&lt;&#x2F;em&gt;, which is a specific kind of category with a single object.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;.
+A &lt;em&gt;monoid&lt;&#x2F;em&gt; \( (M, \cdot, e) \) consists of:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;a set \( M \)&lt;&#x2F;li&gt;
+&lt;li&gt;an associative binary operation \( (\cdot): M \times M \to M \)&lt;&#x2F;li&gt;
+&lt;li&gt;a unit element w.r.t. \( (\cdot) \), i.e. \( \forall_m~e \cdot m = m \)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;For those familiar with group theory, it is a group structure without requirement of inverse elements. It is also called a &lt;em&gt;semi-group with unit&lt;&#x2F;em&gt;)&lt;&#x2F;p&gt;
+&lt;p&gt;This corresponds to a category \( C(M) \) where:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;There is a single object (for which we simply write \( M \))&lt;&#x2F;li&gt;
+&lt;li&gt;There are arrows \( m: M \to M \) for each element \( m \in M \).&lt;&#x2F;li&gt;
+&lt;li&gt;Composition is given by the binary operation of the monoid: \( m_1 \circ m_2 \equiv m_1 \cdot m_2 \).&lt;&#x2F;li&gt;
+&lt;li&gt;The identity arrow \( \text{id}_M \) is equal to \( e \), the unit of the monoid.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;We can also consider natural numbers \( \mathbb{N}_{&amp;gt; 0} \), with arrows going from each number to its multiples.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;┌───┬───┬───┬───┬───┐
+&lt;&#x2F;span&gt;&lt;span&gt;1   2   3   4   5   6
+&lt;&#x2F;span&gt;&lt;span&gt;    └───┼───┴──────┘│
+&lt;&#x2F;span&gt;&lt;span&gt;        └───────────┘
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;A partially ordered set (poset): a binary relation \( \leq \) over a set \( S \) s.t. for \( a,b,c \in S \):&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;\( a \leq a \)&lt;&#x2F;li&gt;
+&lt;li&gt;\( a \leq b,~b \leq a \implies a = b \)&lt;&#x2F;li&gt;
+&lt;li&gt;\( a \leq b,~b \leq c \implies a \leq c \)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;also corresponds to a category.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Some examples of categories from mathematics:&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Name&lt;&#x2F;th&gt;&lt;th&gt;Objects&lt;&#x2F;th&gt;&lt;th&gt;Arrows&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;Set&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;sets&lt;&#x2F;td&gt;&lt;td&gt;maps&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;Top&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;topological spaces&lt;&#x2F;td&gt;&lt;td&gt;continuous functions&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;Vect&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;vector spaces&lt;&#x2F;td&gt;&lt;td&gt;linear transformations&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;Grp&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;groups&lt;&#x2F;td&gt;&lt;td&gt;group homomorphisms&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;In all these cases, arrows correspond to functions, although this is by no means required. All these categories correspond to objects from mathematics, along with &lt;em&gt;structure preserving maps&lt;&#x2F;em&gt;. &lt;strong&gt;Set&lt;&#x2F;strong&gt; will be of primary interest when we start talking about concrete applications to programming.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;functors&quot;&gt;Functors&lt;&#x2F;h2&gt;
+&lt;p&gt;A functor is a map between categories. This means it sends objects to objects, and arrows to arrows.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;: A &lt;em&gt;functor&lt;&#x2F;em&gt; \( T \) between categories \( C \) and \( D \) consists of two functions (both denoted simply by \( T \)):&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;An &lt;em&gt;object function&lt;&#x2F;em&gt; that maps objects \( a \in C \): \( a \mapsto Ta \in D \)&lt;&#x2F;li&gt;
+&lt;li&gt;An &lt;em&gt;arrow function&lt;&#x2F;em&gt; that assigns to each arrow \( f: a \to b \) in \( C \) an arrow \( Tf: Ta \to Tb \) in \( D \), such that:&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;$$T(\text{id}_a) = \text{id}_{Ta},~T(g \circ f) = Tg \circ Tf.$$&lt;&#x2F;p&gt;
+&lt;p&gt;A functor is a very powerful concept, since it allows you to translate between different branches of mathematics! They also play an important role in functional programming where among many other things, they are useful for defining &lt;em&gt;container types&lt;&#x2F;em&gt; or more generally &lt;em&gt;type constructors&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Functors can be composed, and this allows one to define a category of categories &lt;strong&gt;Cat&lt;&#x2F;strong&gt;, where the arrows are functors.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;examples-of-functors&quot;&gt;Examples of functors&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;The identity functor: \( \text{id}_{C}: C \to C \) is defined as:
+\begin{align*}
+\text{id}_{C}:~&amp;amp;a \mapsto a\
+&amp;amp;f \mapsto f
+\end{align*}&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;The constant functor \( \Delta_d: C \to D \) for fixed \( d \in D \):
+\begin{align*}
+\Delta_{d}:~&amp;amp;a \mapsto d\
+&amp;amp;f \mapsto \text{id}_d
+\end{align*}&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;The &lt;em&gt;power-set functor&lt;&#x2F;em&gt;: \( P: \) &lt;strong&gt;Set&lt;&#x2F;strong&gt; \( \to \) &lt;strong&gt;Set&lt;&#x2F;strong&gt; sends subsets to their image under maps. Let \( A, B \in \) &lt;strong&gt;Set&lt;&#x2F;strong&gt;, \( f: A \to B \) and \( S \subset A \):
+\begin{align*}
+PA &amp;amp;= P(A),\\
+Pf&amp;amp;: P(A) \to P(B),~S \mapsto f(S)
+\end{align*}&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;From many categories representing &#x27;sets with added structure&#x27; (groups, vector spaces, rings, topological spaces, ...) there is a &lt;em&gt;forgetful functor&lt;&#x2F;em&gt; going to &lt;strong&gt;Set&lt;&#x2F;strong&gt;, where objects are sent to their underlying sets.&lt;&#x2F;p&gt;
+&lt;p&gt;As an additional example, there is also a forgetful functor \( F: \mathbf{Cat} \to \mathbf{Graph} \), sending each category to the graph defined by its objects and arrows.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Dual-set functor&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;\begin{align*}
+*&amp;amp;: \textbf{Vect} \to \textbf{Vect}\\
+&amp;amp;: W \mapsto W^*\\
+&amp;amp;: (f: V \to W) \mapsto (f^*: W^* \to V^*)
+\end{align*}&lt;&#x2F;p&gt;
+&lt;p&gt;This is an example of a &lt;em&gt;contravariant functor&lt;&#x2F;em&gt; (a functor from \( \textbf{Vect} \) to \( \textbf{Vect}^{\text{op}} \), the category with reversed arrows and composition rules.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;special-objects-arrows-and-functors&quot;&gt;Special objects, arrows and functors&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;terminal-and-initial-objects&quot;&gt;Terminal and initial objects&lt;&#x2F;h3&gt;
+&lt;p&gt;For objects, we distuinguish two special kinds:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. An object \( x \in C \) is &lt;strong&gt;terminal&lt;&#x2F;strong&gt; if for all \( a \in C \) there is exactly one arrow \( a \to x \). Similarly, it is &lt;strong&gt;initial&lt;&#x2F;strong&gt; if there is exactly one arrow \( x \to a \) to all objects.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;┌─────┐
+&lt;&#x2F;span&gt;&lt;span&gt;│  ┌─►a──┐
+&lt;&#x2F;span&gt;&lt;span&gt;│  │     ▼
+&lt;&#x2F;span&gt;&lt;span&gt;└─►i ──► t─┐
+&lt;&#x2F;span&gt;&lt;span&gt;   │     ▲ │
+&lt;&#x2F;span&gt;&lt;span&gt;   └─►b──┘ │
+&lt;&#x2F;span&gt;&lt;span&gt;      ▲    │
+&lt;&#x2F;span&gt;&lt;span&gt;      └────┘
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here, \( i \) is initial, and \( t \) is terminal. \( a \) and \( b \) are neither initial nor terminal.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;epi-mono-and-iso-arrows&quot;&gt;Epi, mono, and iso arrows&lt;&#x2F;h3&gt;
+&lt;p&gt;There are a number of special kind of arrows:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. An arrow \( f: a \to b \in C \) is a &lt;strong&gt;monomorphism&lt;&#x2F;strong&gt; (or simply mono), if for all objects \( x \) and all arrows \( g, h: x \to a \) and \( g \neq h \) we have:
+$$f \circ g \neq f \circ h.$$&lt;&#x2F;p&gt;
+&lt;p&gt;To put this into perspective, we show that in the category &lt;strong&gt;Set&lt;&#x2F;strong&gt; monomorphisms correspond to injective functions;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Theorem.&lt;&#x2F;strong&gt; In \( \textbf{Set} \) a map \( f \) is mono if and only if it is an injection.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. Let \( f: A \to B \). Suppose \( f \) is injective, and let \( g, h: X \to A \). If \( g \neq h \), then \( g(x) \neq h(x) \) for some \( x \). But since \( f \) is injective, we have \( f(g(x)) \neq f(h(x)) \), and hence \( f \circ g \neq f \circ h \), thus \( f \) is mono.&lt;&#x2F;p&gt;
+&lt;p&gt;For the contrary, suppose \( f \) is mono. Let \( \{ * \} \) be the set with a single element. Then for \( x \in A \) we have an arrow \( \{ * \} \to A \) corresponding to the constant function \( \tilde{x}(*) = x \), then \( f \circ \tilde{x}(*) = f(x) \). Let \( x \neq y \). Since \( f \) is mono, \( (f \circ \tilde{x})(*) \neq (f \circ \tilde{y})(*) \), and hence \( f(x) \neq f(y) \), thus \( f \) is an injection.&lt;&#x2F;p&gt;
+&lt;p&gt;There is also an generalization of the notion of &lt;em&gt;surjections&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;.An arrow \( f: a \to b \in C \) is an &lt;strong&gt;epimorphism&lt;&#x2F;strong&gt; (or simply epi), if for all objects \( x \) and all arrows \( g, h: b \to x \) we have:
+$$g \circ f = h \circ f \implies g = h.$$&lt;&#x2F;p&gt;
+&lt;p&gt;Finally, we introduce the notion of an &#x27;invertible arrow&#x27;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. An arrow \( f: a \to b \in C \) is an &lt;strong&gt;isomorphism&lt;&#x2F;strong&gt; if there exists an arrow \( g: b \to a \) so that:
+$$g \circ f = \text{id}_a~\text{ and }~f \circ g = \text{id}_b.$$&lt;&#x2F;p&gt;
+&lt;p&gt;In set, &lt;strong&gt;epi&lt;&#x2F;strong&gt; and &lt;strong&gt;mono&lt;&#x2F;strong&gt; imply &lt;strong&gt;iso&lt;&#x2F;strong&gt;. This however does not hold for all categories!&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;special-functors&quot;&gt;Special functors&lt;&#x2F;h3&gt;
+&lt;p&gt;Lastly, we turn our attention to special kinds of functors. For this we first introduce the notion of a &lt;em&gt;hom-set&lt;&#x2F;em&gt; of \( a \) and \( b \), the set of all arrows from \( a \) to \( b \):
+$$\text{Hom}_C(a, b) = \{ f \in C~|~f: a \to b \}.$$&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;&#x2F;strong&gt;. A functor \( F: C \to D \) is full if for all pairs \( a, b \in C \) the induced function:
+\begin{align*}
+F:~\text{Hom}_C(a, b) &amp;amp;\to \text{Hom}_D(Fa, Fb),\
+f &amp;amp;\mapsto Ff
+\end{align*}
+is a surjection. It is called &lt;strong&gt;faithful&lt;&#x2F;strong&gt; if it is an injection.&lt;&#x2F;p&gt;
+&lt;p&gt;When after applying \( F \) an arrow \( Ff \) or an object \( Fa \) has a certain property (i.e. being initial, terminal or epi, mono), it is implied that \( f \) (or \( a \)) had this property, then we say the \( F \) &lt;em&gt;reflects&lt;&#x2F;em&gt; the property.&lt;&#x2F;p&gt;
+&lt;p&gt;This allows for statements such as this:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Theorem&lt;&#x2F;strong&gt;. A faithful functor reflects epis and monos.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;proof&lt;&#x2F;em&gt;. As an example we will prove it for an \( Ff \) that is mono. Let \( f: a \to b \) such that \( Ff \) is mono, and let \( h,g: x \to a \) such that \( h \neq g \).&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;    g
+&lt;&#x2F;span&gt;&lt;span&gt;   ──►    f
+&lt;&#x2F;span&gt;&lt;span&gt; x ──► a ──► b
+&lt;&#x2F;span&gt;&lt;span&gt; │  h  │     │
+&lt;&#x2F;span&gt;&lt;span&gt;F│    F│    F│
+&lt;&#x2F;span&gt;&lt;span&gt; ▼ Fg  ▼     ▼
+&lt;&#x2F;span&gt;&lt;span&gt;Fx ──► Fa ──►Fb
+&lt;&#x2F;span&gt;&lt;span&gt;   ──►    Ff
+&lt;&#x2F;span&gt;&lt;span&gt;   Fh
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Since \( g \neq h \) and \( F \) is faithful, we have \( Fg \neq Fh \). This implies, because \( Ff \) is mono, that \( Ff \circ Fg \neq Ff \circ Fh \), and since \( F \) is a functor we have \( F(f \circ g) \neq F(f \circ h) \), implying \( f \circ g \neq f \circ h \), and hence \( f \) is mono.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;natural-transformations&quot;&gt;Natural transformations&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Definition.&lt;&#x2F;strong&gt; A &lt;strong&gt;natural transformation&lt;&#x2F;strong&gt; \( \mu \) between two functors \( F, G: C \to D \) is a family of morphisms:
+$$\mu = \{ \mu_a: Fa \to Ga~|~a \in C \},$$
+indexed by objects in \( C \), so that for all morphisms \( f: a \to b \) the diagram&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#eff1f5;color:#4f5b66;&quot;&gt;&lt;code&gt;&lt;span&gt;    ua
+&lt;&#x2F;span&gt;&lt;span&gt; Fa ──► Ga
+&lt;&#x2F;span&gt;&lt;span&gt;  │     │
+&lt;&#x2F;span&gt;&lt;span&gt;Ff│     │Gf
+&lt;&#x2F;span&gt;&lt;span&gt;  ▼     ▼
+&lt;&#x2F;span&gt;&lt;span&gt; Fb ──► Gb
+&lt;&#x2F;span&gt;&lt;span&gt;    ub
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;commutes. This diagram is called the &lt;em&gt;naturality square&lt;&#x2F;em&gt;.  We write \( \mu: F \Rightarrow G \), and call \( \mu_a \) &lt;em&gt;the component of \( \mu \) at \( a \)&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;We can &lt;em&gt;compose&lt;&#x2F;em&gt; natural transformations, turning the set of functors from \( C \to D \) into a category. Let \( \mu: F \Rightarrow G \) and \( \nu: G \Rightarrow H \), then we have \( \nu \circ \mu: F \Rightarrow H \) defined by (in components):
+$$(\nu \circ \mu)_a = \nu_a \circ \mu_a.$$
+Where the composition of the rhs is simply composition in \( D \).&lt;&#x2F;p&gt;
+</content>
+    </entry>
+</feed>

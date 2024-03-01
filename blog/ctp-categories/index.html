@@ -1,0 +1,323 @@
+<!DOCTYPE html <html lang="en">
+
+<head>
+  <title>Personal webpage and blog of Jan-Willem Buurlage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/custom.css">
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      
+      <a href="/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="/academic/">Academic</a>
+      
+    </nav>
+  </header>
+
+  <div class="container">
+    
+<article>
+    <div>
+        <div>
+            <h1>
+                Categories, functors, and natural transformations
+            </h1>
+            <h3>
+                <small class="text-muted">2022-07-06</small> <br />
+            </h3>
+            
+            <ul class="tag-list">
+                
+                <li>
+                   mathematics
+                </li>
+                
+                <li>
+                   scala
+                </li>
+                
+                <li>
+                   functional-programming
+                </li>
+                
+            </ul>
+            
+        </div>
+
+        <hr />
+
+        <section class="post">
+            <article>
+                <blockquote>
+<p>In 2018, I hosted a weekly meetup on functional programming with a focus on category theory. In this blog post series I revisit <a href="https://github.com/jwbuurlage/category-theory-programmers">the notes I wrote back then</a>, aiming to simplify where possible, and to extend and fix where needed. I also implement some of the examples in Scala rather than Haskell.</p>
+<ol>
+<li><a href="/blog/ctp-categories/">Categories, functors, and natural transformations</a></li>
+<li><a href="/blog/ctp-programmer-category/">A category of types and functions</a></li>
+<li><a href="/blog/ctp-products-adt">Products, coproducts, and algebraic data types</a></li>
+<li><a href="/blog/ctp-yoneda">The Yoneda Lemma</a></li>
+</ol>
+</blockquote>
+<h2 id="preface">Preface</h2>
+<p>Mathematical theories seem to have a number of common ingredients: there are <em>objects</em> such as numbers, sets, or shapes, and <em>arrows</em> that somehow relate these objects. For example, a number is related to its divisors, functions can relate sets, and shapes can be transformed into each other. These relations can be <em>composed</em>. In category theory, domain-specific knowledge is not used and only <em>objects</em> and <em>arrows</em> are considered. Results about categories only make use of a single operation: composition of arrows. Using <em>only</em> these simple concepts, it is still possible to obtain rich results that automatically apply for all categories.</p>
+<p>A <em>type</em> in a programming language is a set of possible values. We can view a function <code>f</code> that takes <code>a: A</code> (denoting a variable <code>a</code> of type <code>A</code>) and outputs <code>b: B</code> as an arrow between objects <code>A</code> and <code>B</code>. This means that also results from category theory can be applied to programming.</p>
+<h2 id="definition-of-categories">Definition of categories</h2>
+<p>We start with giving the definition of a category:</p>
+<p><strong>Definition</strong>. A <em>category</em> \( C = (O, A, \circ) \) consists of:</p>
+<ul>
+<li>a collection \( O \) of <em>objects</em>, written \( a,b,\ldots \in O \).</li>
+<li>a collection \( A \) of <em>arrows</em> written \( f,g,\ldots \in A \) between these objects, e.g. \( f: a \to b \).</li>
+<li>a notion of <em>composition</em> \( f \circ g \) of arrows.</li>
+<li>an identity arrow \( \text{id}_a \) for each object \( a \in O \).
+The composition operation and identity arrow should satisfy the following laws:</li>
+</ul>
+<ol>
+<li>
+<p><em>Composition</em>: If \( f: a \to b \) and \( g: b \to c \) then \( g \circ f: a \to c \).</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>   f      g
+</span><span>a ───► b ───► c
+</span><span>│             ▲
+</span><span>└─────────────┘
+</span><span>      g.f
+</span></code></pre>
+</li>
+<li>
+<p><em>Composition with identity arrows</em>:  If \( f: x \to a \) and \( g: a \to x \) where \( x \) is arbitrary, then:
+$$\text{id}_a \circ f = f,~g \circ \text{id}_a = g.$$</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> id
+</span><span>┌───┐
+</span><span>└─► a ───► x
+</span><span>       g
+</span></code></pre>
+</li>
+<li>
+<p><em>Associativity</em>: If \( f: a \to b \), \( g: b \to c \) and \( h: c \to d \) then:
+$$(h \circ g) \circ f = h \circ (g \circ f).$$
+This is the same as saying that the following diagram commutes:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>      g.f
+</span><span>┌─────────────┐
+</span><span>│  f      g   ▼  h
+</span><span>a ───► b ───► c ───► d
+</span><span>       │             ▲
+</span><span>       └─────────────┘
+</span><span>             h.g
+</span></code></pre>
+<p>Saying a diagram commutes means that for all pairs of vertices \( a' \) and \( b' \) all paths from between them are equivalent (i.e. correspond to the same arrow of the category).</p>
+</li>
+</ol>
+<hr />
+<p>If \( f: a \to b \), then we say that \( a \) is the <em>domain</em> and \( b \) is the <em>codomain</em> of \( f \). It is also written as:
+$$\text{dom}(f) = a,~\text{cod}(f) = b.$$
+The composition \( g \circ f \) is only defined on arrows \( f \) and \( g \) if the domain of \( g \) is equal to the codomain of \( f \).</p>
+<p>We will write for objects and arrows respectively simply \( a \in C \) and \( f \in C \), instead of \( a \in O \) and \( f \in A \).</p>
+<h3 id="examples-of-categories">Examples of categories</h3>
+<p>A number of simple examples of categories:</p>
+<ul>
+<li>
+<p><strong>0</strong>, the empty category \( O = A \equiv \emptyset \).</p>
+</li>
+<li>
+<p><strong>1</strong>, the category with a single element and (identity) arrow:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> id
+</span><span>┌───┐
+</span><span>└─► a 
+</span></code></pre>
+</li>
+<li>
+<p><strong>2</strong>, the category with a two elements and a single arrow between these elements</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> id          id
+</span><span>┌───┐      ┌───┐
+</span><span>└─► a ───► b ◄─┘
+</span></code></pre>
+</li>
+<li>
+<p>\( \rightrightarrows \): the category with two elements and two parallel arrows between these elements:</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span> id          id
+</span><span>┌───┐ ───► ┌───┐
+</span><span>└─► a ───► b ◄─┘
+</span></code></pre>
+</li>
+</ul>
+<p>From now on we will sometimes omit the identity arrows when drawing categories.</p>
+<ul>
+<li>
+<p>Another example of a category is a <em>monoid category</em>, which is a specific kind of category with a single object.</p>
+<p><strong>Definition</strong>.
+A <em>monoid</em> \( (M, \cdot, e) \) consists of:</p>
+<ul>
+<li>a set \( M \)</li>
+<li>an associative binary operation \( (\cdot): M \times M \to M \)</li>
+<li>a unit element w.r.t. \( (\cdot) \), i.e. \( \forall_m~e \cdot m = m \)</li>
+</ul>
+<p>For those familiar with group theory, it is a group structure without requirement of inverse elements. It is also called a <em>semi-group with unit</em>)</p>
+<p>This corresponds to a category \( C(M) \) where:</p>
+<ul>
+<li>There is a single object (for which we simply write \( M \))</li>
+<li>There are arrows \( m: M \to M \) for each element \( m \in M \).</li>
+<li>Composition is given by the binary operation of the monoid: \( m_1 \circ m_2 \equiv m_1 \cdot m_2 \).</li>
+<li>The identity arrow \( \text{id}_M \) is equal to \( e \), the unit of the monoid.</li>
+</ul>
+</li>
+<li>
+<p>We can also consider natural numbers \( \mathbb{N}_{&gt; 0} \), with arrows going from each number to its multiples.</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>┌───┬───┬───┬───┬───┐
+</span><span>1   2   3   4   5   6
+</span><span>    └───┼───┴──────┘│
+</span><span>        └───────────┘
+</span></code></pre>
+</li>
+<li>
+<p>A partially ordered set (poset): a binary relation \( \leq \) over a set \( S \) s.t. for \( a,b,c \in S \):</p>
+<ul>
+<li>\( a \leq a \)</li>
+<li>\( a \leq b,~b \leq a \implies a = b \)</li>
+<li>\( a \leq b,~b \leq c \implies a \leq c \)</li>
+</ul>
+<p>also corresponds to a category.</p>
+</li>
+</ul>
+<p>Some examples of categories from mathematics:</p>
+<table><thead><tr><th>Name</th><th>Objects</th><th>Arrows</th></tr></thead><tbody>
+<tr><td><strong>Set</strong></td><td>sets</td><td>maps</td></tr>
+<tr><td><strong>Top</strong></td><td>topological spaces</td><td>continuous functions</td></tr>
+<tr><td><strong>Vect</strong></td><td>vector spaces</td><td>linear transformations</td></tr>
+<tr><td><strong>Grp</strong></td><td>groups</td><td>group homomorphisms</td></tr>
+</tbody></table>
+<p>In all these cases, arrows correspond to functions, although this is by no means required. All these categories correspond to objects from mathematics, along with <em>structure preserving maps</em>. <strong>Set</strong> will be of primary interest when we start talking about concrete applications to programming.</p>
+<h2 id="functors">Functors</h2>
+<p>A functor is a map between categories. This means it sends objects to objects, and arrows to arrows.</p>
+<p><strong>Definition</strong>: A <em>functor</em> \( T \) between categories \( C \) and \( D \) consists of two functions (both denoted simply by \( T \)):</p>
+<ul>
+<li>An <em>object function</em> that maps objects \( a \in C \): \( a \mapsto Ta \in D \)</li>
+<li>An <em>arrow function</em> that assigns to each arrow \( f: a \to b \) in \( C \) an arrow \( Tf: Ta \to Tb \) in \( D \), such that:</li>
+</ul>
+<p>$$T(\text{id}_a) = \text{id}_{Ta},~T(g \circ f) = Tg \circ Tf.$$</p>
+<p>A functor is a very powerful concept, since it allows you to translate between different branches of mathematics! They also play an important role in functional programming where among many other things, they are useful for defining <em>container types</em> or more generally <em>type constructors</em>.</p>
+<p>Functors can be composed, and this allows one to define a category of categories <strong>Cat</strong>, where the arrows are functors.</p>
+<h3 id="examples-of-functors">Examples of functors</h3>
+<ul>
+<li>
+<p>The identity functor: \( \text{id}_{C}: C \to C \) is defined as:
+\begin{align*}
+\text{id}_{C}:~&amp;a \mapsto a\
+&amp;f \mapsto f
+\end{align*}</p>
+</li>
+<li>
+<p>The constant functor \( \Delta_d: C \to D \) for fixed \( d \in D \):
+\begin{align*}
+\Delta_{d}:~&amp;a \mapsto d\
+&amp;f \mapsto \text{id}_d
+\end{align*}</p>
+</li>
+<li>
+<p>The <em>power-set functor</em>: \( P: \) <strong>Set</strong> \( \to \) <strong>Set</strong> sends subsets to their image under maps. Let \( A, B \in \) <strong>Set</strong>, \( f: A \to B \) and \( S \subset A \):
+\begin{align*}
+PA &amp;= P(A),\\
+Pf&amp;: P(A) \to P(B),~S \mapsto f(S)
+\end{align*}</p>
+</li>
+<li>
+<p>From many categories representing 'sets with added structure' (groups, vector spaces, rings, topological spaces, ...) there is a <em>forgetful functor</em> going to <strong>Set</strong>, where objects are sent to their underlying sets.</p>
+<p>As an additional example, there is also a forgetful functor \( F: \mathbf{Cat} \to \mathbf{Graph} \), sending each category to the graph defined by its objects and arrows.</p>
+</li>
+<li>
+<p>Dual-set functor</p>
+</li>
+</ul>
+<p>\begin{align*}
+*&amp;: \textbf{Vect} \to \textbf{Vect}\\
+&amp;: W \mapsto W^*\\
+&amp;: (f: V \to W) \mapsto (f^*: W^* \to V^*)
+\end{align*}</p>
+<p>This is an example of a <em>contravariant functor</em> (a functor from \( \textbf{Vect} \) to \( \textbf{Vect}^{\text{op}} \), the category with reversed arrows and composition rules.</p>
+<h2 id="special-objects-arrows-and-functors">Special objects, arrows and functors</h2>
+<h3 id="terminal-and-initial-objects">Terminal and initial objects</h3>
+<p>For objects, we distuinguish two special kinds:</p>
+<p><strong>Definition</strong>. An object \( x \in C \) is <strong>terminal</strong> if for all \( a \in C \) there is exactly one arrow \( a \to x \). Similarly, it is <strong>initial</strong> if there is exactly one arrow \( x \to a \) to all objects.</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>┌─────┐
+</span><span>│  ┌─►a──┐
+</span><span>│  │     ▼
+</span><span>└─►i ──► t─┐
+</span><span>   │     ▲ │
+</span><span>   └─►b──┘ │
+</span><span>      ▲    │
+</span><span>      └────┘
+</span></code></pre>
+<p>Here, \( i \) is initial, and \( t \) is terminal. \( a \) and \( b \) are neither initial nor terminal.</p>
+<h3 id="epi-mono-and-iso-arrows">Epi, mono, and iso arrows</h3>
+<p>There are a number of special kind of arrows:</p>
+<p><strong>Definition</strong>. An arrow \( f: a \to b \in C \) is a <strong>monomorphism</strong> (or simply mono), if for all objects \( x \) and all arrows \( g, h: x \to a \) and \( g \neq h \) we have:
+$$f \circ g \neq f \circ h.$$</p>
+<p>To put this into perspective, we show that in the category <strong>Set</strong> monomorphisms correspond to injective functions;</p>
+<p><strong>Theorem.</strong> In \( \textbf{Set} \) a map \( f \) is mono if and only if it is an injection.</p>
+<p><em>proof</em>. Let \( f: A \to B \). Suppose \( f \) is injective, and let \( g, h: X \to A \). If \( g \neq h \), then \( g(x) \neq h(x) \) for some \( x \). But since \( f \) is injective, we have \( f(g(x)) \neq f(h(x)) \), and hence \( f \circ g \neq f \circ h \), thus \( f \) is mono.</p>
+<p>For the contrary, suppose \( f \) is mono. Let \( \{ * \} \) be the set with a single element. Then for \( x \in A \) we have an arrow \( \{ * \} \to A \) corresponding to the constant function \( \tilde{x}(*) = x \), then \( f \circ \tilde{x}(*) = f(x) \). Let \( x \neq y \). Since \( f \) is mono, \( (f \circ \tilde{x})(*) \neq (f \circ \tilde{y})(*) \), and hence \( f(x) \neq f(y) \), thus \( f \) is an injection.</p>
+<p>There is also an generalization of the notion of <em>surjections</em>.</p>
+<p><strong>Definition</strong>.An arrow \( f: a \to b \in C \) is an <strong>epimorphism</strong> (or simply epi), if for all objects \( x \) and all arrows \( g, h: b \to x \) we have:
+$$g \circ f = h \circ f \implies g = h.$$</p>
+<p>Finally, we introduce the notion of an 'invertible arrow'.</p>
+<p><strong>Definition</strong>. An arrow \( f: a \to b \in C \) is an <strong>isomorphism</strong> if there exists an arrow \( g: b \to a \) so that:
+$$g \circ f = \text{id}_a~\text{ and }~f \circ g = \text{id}_b.$$</p>
+<p>In set, <strong>epi</strong> and <strong>mono</strong> imply <strong>iso</strong>. This however does not hold for all categories!</p>
+<h3 id="special-functors">Special functors</h3>
+<p>Lastly, we turn our attention to special kinds of functors. For this we first introduce the notion of a <em>hom-set</em> of \( a \) and \( b \), the set of all arrows from \( a \) to \( b \):
+$$\text{Hom}_C(a, b) = \{ f \in C~|~f: a \to b \}.$$</p>
+<p><strong>Definition</strong>. A functor \( F: C \to D \) is full if for all pairs \( a, b \in C \) the induced function:
+\begin{align*}
+F:~\text{Hom}_C(a, b) &amp;\to \text{Hom}_D(Fa, Fb),\
+f &amp;\mapsto Ff
+\end{align*}
+is a surjection. It is called <strong>faithful</strong> if it is an injection.</p>
+<p>When after applying \( F \) an arrow \( Ff \) or an object \( Fa \) has a certain property (i.e. being initial, terminal or epi, mono), it is implied that \( f \) (or \( a \)) had this property, then we say the \( F \) <em>reflects</em> the property.</p>
+<p>This allows for statements such as this:</p>
+<p><strong>Theorem</strong>. A faithful functor reflects epis and monos.</p>
+<p><em>proof</em>. As an example we will prove it for an \( Ff \) that is mono. Let \( f: a \to b \) such that \( Ff \) is mono, and let \( h,g: x \to a \) such that \( h \neq g \).</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>    g
+</span><span>   ──►    f
+</span><span> x ──► a ──► b
+</span><span> │  h  │     │
+</span><span>F│    F│    F│
+</span><span> ▼ Fg  ▼     ▼
+</span><span>Fx ──► Fa ──►Fb
+</span><span>   ──►    Ff
+</span><span>   Fh
+</span></code></pre>
+<p>Since \( g \neq h \) and \( F \) is faithful, we have \( Fg \neq Fh \). This implies, because \( Ff \) is mono, that \( Ff \circ Fg \neq Ff \circ Fh \), and since \( F \) is a functor we have \( F(f \circ g) \neq F(f \circ h) \), implying \( f \circ g \neq f \circ h \), and hence \( f \) is mono.</p>
+<h2 id="natural-transformations">Natural transformations</h2>
+<p><strong>Definition.</strong> A <strong>natural transformation</strong> \( \mu \) between two functors \( F, G: C \to D \) is a family of morphisms:
+$$\mu = \{ \mu_a: Fa \to Ga~|~a \in C \},$$
+indexed by objects in \( C \), so that for all morphisms \( f: a \to b \) the diagram</p>
+<pre style="background-color:#eff1f5;color:#4f5b66;"><code><span>    ua
+</span><span> Fa ──► Ga
+</span><span>  │     │
+</span><span>Ff│     │Gf
+</span><span>  ▼     ▼
+</span><span> Fb ──► Gb
+</span><span>    ub
+</span></code></pre>
+<p>commutes. This diagram is called the <em>naturality square</em>.  We write \( \mu: F \Rightarrow G \), and call \( \mu_a \) <em>the component of \( \mu \) at \( a \)</em>.</p>
+<p>We can <em>compose</em> natural transformations, turning the set of functors from \( C \to D \) into a category. Let \( \mu: F \Rightarrow G \) and \( \nu: G \Rightarrow H \), then we have \( \nu \circ \mu: F \Rightarrow H \) defined by (in components):
+$$(\nu \circ \mu)_a = \nu_a \circ \mu_a.$$
+Where the composition of the rhs is simply composition in \( D \).</p>
+
+            </article>
+        </section>
+
+    </div>
+</article>
+
+<footer>
+        <hr />
+</footer>
+
+  </div>
+
+</body>
+</html>

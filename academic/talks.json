@@ -1,0 +1,95 @@
+{
+    "talks": [
+        {
+            "location": "Seattle, WA, US",
+            "venue": "SIAM Conference on Parallel Processing for Scientific Computing (PP20)",
+            "url": "20200213-siampp20.pdf",
+            "title": "A projection-based partitioning method for distributed tomographic reconstruction",
+            "date": "2020-02-13"
+        },
+        {
+            "location": "Grenoble, France",
+            "venue": "Applied Inverse Problems",
+            "url": "#",
+            "title": "Partitioning strategies for large-scale tomographic inversion",
+            "date": "2019-07-12"
+        },
+        {
+            "location": "Leiden University, The Netherlands",
+            "venue": "This week's discoveries",
+            "url": "20190122-this-weeks-discoveries.pdf",
+            "title": "Data partitioning strategies for 3D tomographic imaging",
+            "date": "2019-01-22"
+        },
+        {
+            "location": "UU, Utrecht, The Netherlands",
+            "venue": "Guest lecture in the course Parallel Algorithms",
+            "url": "2018-10-31-guest-lecture-parco.pdf",
+            "title": "SpMV, Tomography and Bulk",
+            "date": "2018-10-31"
+        },
+        {
+            "location": "2018. Turin, Italy",
+            "venue": "Euro-Par",
+            "url": "2018-08-29-euro-par-bulk.pdf",
+            "title": "Bulk: a Modern C++ Interface for Bulk-Synchronous Parallel Programs",
+            "date": "2018-08-29"
+        },
+        {
+            "location": "Bologna, Italy",
+            "venue": "SIAM Conference on Imaging Science (IS18)",
+            "url": "2018-06-08-siam-is-presentation.pdf",
+            "title": "Quasi-3D  iterative reconstruction",
+            "date": "2018-06-08"
+        },
+        {
+            "location": "Waseda University, Tokyo, Japan",
+            "venue": "SIAM Conference on Parallel Processing for Scientific Computing (PP18)",
+            "url": "2018-03-09-siam-pp.pdf",
+            "title": "Geometric Partitioning for Tomography",
+            "date": "2018-03-09"
+        },
+        {
+            "location": "DTU, Kongens Lyngby, Denmark",
+            "venue": "Tomography seminar",
+            "url": "2017-11-07-spp.pdf",
+            "title": "Sparse matrix partitioning",
+            "date": "2017-11-07"
+        },
+        {
+            "location": "UU, Utrecht, The Netherlands",
+            "venue": "Guest lecture in the course Parallel Algorithms",
+            "url": "2017-09-25-modern-bsp.pdf",
+            "title": "Modern BSP using Bulk",
+            "date": "2017-09-25"
+        },
+        {
+            "location": "VORtech, Delft, The Netherlands",
+            "venue": "Lunch talk",
+            "url": "2017-05-08-rt-tomography-vortech.pdf",
+            "title": "Algorithms and methods for real-time tomography",
+            "date": "2017-05-08"
+        },
+        {
+            "location": "CWI, Amsterdam, The Netherlands",
+            "venue": "Focused Mini-Workshop on Real-Time Tomography",
+            "url": "2017-04-11-slicer-presentation.pdf",
+            "title": "Sofware tools for on demand slice reconstruction",
+            "date": "2017-04-11"
+        },
+        {
+            "location": "UU, Utrecht, The Netherlands",
+            "venue": "Guest lecture in the course Parallel algorithms",
+            "url": "2016-10-05-modern-bsp.pdf",
+            "title": "Modern BSP: Scientific computing, HPC and Big Data",
+            "date": "2016-10-05"
+        },
+        {
+            "location": "Muenster, Germany",
+            "venue": "HLPP 2016 International Symposium on High-Level Parallel Programming and Applications",
+            "url": "2016-07-05-bsps-presentation-hlpp.pdf",
+            "title": "Bulk-synchronous pseudo-streaming for many-core accelerators",
+            "date": "2016-07-05"
+        }
+    ]
+}
